@@ -621,6 +621,8 @@ private: System::Windows::Forms::TextBox^  fcgTXBatBeforePath;
 private: System::Windows::Forms::Label^  fcgLBBatBeforePath;
 private: System::Windows::Forms::CheckBox^  fcgCBWaitForBatBefore;
 private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
+private: System::Windows::Forms::ComboBox^  fcgCXAudioDelayCut;
+private: System::Windows::Forms::Label^  fcgLBAudioDelayCut;
 
 
 
@@ -793,13 +795,15 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgOpenFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->fcgTTEx = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->fcgCSReplaceStrings = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->fcgCXAudioDelayCut = (gcnew System::Windows::Forms::ComboBox());
+			this->fcgLBAudioDelayCut = (gcnew System::Windows::Forms::Label());
 			this->fcgtabControlVideo->SuspendLayout();
 			this->fcgtabPageExSettings->SuspendLayout();
 			this->fcggroupBoxCmdEx->SuspendLayout();
 			this->fcgCSExeFiles->SuspendLayout();
 			this->fcgtoolStripSettings->SuspendLayout();
 			this->fcggroupBoxAudio->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fcgNUAudioBitrate))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->fcgNUAudioBitrate))->BeginInit();
 			this->fcgtabControlMux->SuspendLayout();
 			this->fcgtabPageMP4->SuspendLayout();
 			this->fcgtabPageMKV->SuspendLayout();
@@ -811,7 +815,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgtabControlVideo
 			// 
 			this->fcgtabControlVideo->Controls->Add(this->fcgtabPageExSettings);
-			this->fcgtabControlVideo->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgtabControlVideo->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgtabControlVideo->Location = System::Drawing::Point(0, 25);
 			this->fcgtabControlVideo->Name = L"fcgtabControlVideo";
@@ -997,7 +1001,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgTXCmdEx
 			// 
 			this->fcgTXCmdEx->AllowDrop = true;
-			this->fcgTXCmdEx->Font = (gcnew System::Drawing::Font(L"ＭＳ ゴシック", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgTXCmdEx->Font = (gcnew System::Drawing::Font(L"ＭＳ ゴシック", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgTXCmdEx->Location = System::Drawing::Point(6, 20);
 			this->fcgTXCmdEx->Multiline = true;
@@ -1049,25 +1053,27 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcgCSExeFiles
 			// 
-			this->fcgCSExeFiles->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {this->fcgTSExeFileshelp});
+			this->fcgCSExeFiles->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fcgTSExeFileshelp });
 			this->fcgCSExeFiles->Name = L"fcgCSx264";
-			this->fcgCSExeFiles->Size = System::Drawing::Size(137, 26);
+			this->fcgCSExeFiles->Size = System::Drawing::Size(132, 26);
 			// 
 			// fcgTSExeFileshelp
 			// 
 			this->fcgTSExeFileshelp->Name = L"fcgTSExeFileshelp";
-			this->fcgTSExeFileshelp->Size = System::Drawing::Size(136, 22);
+			this->fcgTSExeFileshelp->Size = System::Drawing::Size(131, 22);
 			this->fcgTSExeFileshelp->Text = L"helpを表示";
 			this->fcgTSExeFileshelp->Click += gcnew System::EventHandler(this, &frmConfig::fcgTSExeFileshelp_Click);
 			// 
 			// fcgtoolStripSettings
 			// 
-			this->fcgtoolStripSettings->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgtoolStripSettings->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
-			this->fcgtoolStripSettings->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(13) {this->fcgTSBSave, 
-				this->fcgTSBSaveNew, this->fcgTSBDelete, this->fcgtoolStripSeparator1, this->fcgTSSettings, this->fcgTSBCMDOnly, this->toolStripSeparator3, 
-				this->fcgTSBBitrateCalc, this->toolStripSeparator2, this->fcgTSBOtherSettings, this->fcgTSLSettingsNotes, this->fcgTSTSettingsNotes, 
-				this->toolStripSeparator4});
+			this->fcgtoolStripSettings->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(13) {
+				this->fcgTSBSave,
+					this->fcgTSBSaveNew, this->fcgTSBDelete, this->fcgtoolStripSeparator1, this->fcgTSSettings, this->fcgTSBCMDOnly, this->toolStripSeparator3,
+					this->fcgTSBBitrateCalc, this->toolStripSeparator2, this->fcgTSBOtherSettings, this->fcgTSLSettingsNotes, this->fcgTSTSettingsNotes,
+					this->toolStripSeparator4
+			});
 			this->fcgtoolStripSettings->Location = System::Drawing::Point(0, 0);
 			this->fcgtoolStripSettings->Name = L"fcgtoolStripSettings";
 			this->fcgtoolStripSettings->Padding = System::Windows::Forms::Padding(0);
@@ -1077,7 +1083,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcgTSBSave
 			// 
-			this->fcgTSBSave->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBSave.Image")));
+			this->fcgTSBSave->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBSave.Image")));
 			this->fcgTSBSave->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSBSave->Name = L"fcgTSBSave";
 			this->fcgTSBSave->Size = System::Drawing::Size(84, 22);
@@ -1086,7 +1092,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcgTSBSaveNew
 			// 
-			this->fcgTSBSaveNew->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBSaveNew.Image")));
+			this->fcgTSBSaveNew->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBSaveNew.Image")));
 			this->fcgTSBSaveNew->ImageTransparentColor = System::Drawing::Color::Black;
 			this->fcgTSBSaveNew->Name = L"fcgTSBSaveNew";
 			this->fcgTSBSaveNew->Size = System::Drawing::Size(75, 22);
@@ -1095,7 +1101,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcgTSBDelete
 			// 
-			this->fcgTSBDelete->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBDelete.Image")));
+			this->fcgTSBDelete->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBDelete.Image")));
 			this->fcgTSBDelete->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSBDelete->Name = L"fcgTSBDelete";
 			this->fcgTSBDelete->Size = System::Drawing::Size(51, 22);
@@ -1109,7 +1115,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcgTSSettings
 			// 
-			this->fcgTSSettings->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSSettings.Image")));
+			this->fcgTSSettings->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSSettings.Image")));
 			this->fcgTSSettings->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSSettings->Name = L"fcgTSSettings";
 			this->fcgTSSettings->Size = System::Drawing::Size(77, 22);
@@ -1122,7 +1128,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgTSBCMDOnly->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
 			this->fcgTSBCMDOnly->CheckOnClick = true;
 			this->fcgTSBCMDOnly->Enabled = false;
-			this->fcgTSBCMDOnly->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBCMDOnly.Image")));
+			this->fcgTSBCMDOnly->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBCMDOnly.Image")));
 			this->fcgTSBCMDOnly->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSBCMDOnly->Name = L"fcgTSBCMDOnly";
 			this->fcgTSBCMDOnly->Size = System::Drawing::Size(74, 22);
@@ -1141,7 +1147,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgTSBBitrateCalc->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
 			this->fcgTSBBitrateCalc->CheckOnClick = true;
 			this->fcgTSBBitrateCalc->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->fcgTSBBitrateCalc->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBBitrateCalc.Image")));
+			this->fcgTSBBitrateCalc->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBBitrateCalc.Image")));
 			this->fcgTSBBitrateCalc->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSBBitrateCalc->Name = L"fcgTSBBitrateCalc";
 			this->fcgTSBBitrateCalc->Size = System::Drawing::Size(97, 22);
@@ -1158,7 +1164,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			this->fcgTSBOtherSettings->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
 			this->fcgTSBOtherSettings->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-			this->fcgTSBOtherSettings->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"fcgTSBOtherSettings.Image")));
+			this->fcgTSBOtherSettings->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSBOtherSettings.Image")));
 			this->fcgTSBOtherSettings->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->fcgTSBOtherSettings->Name = L"fcgTSBOtherSettings";
 			this->fcgTSBOtherSettings->Size = System::Drawing::Size(76, 22);
@@ -1168,7 +1174,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgTSLSettingsNotes
 			// 
 			this->fcgTSLSettingsNotes->DoubleClickEnabled = true;
-			this->fcgTSLSettingsNotes->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgTSLSettingsNotes->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgTSLSettingsNotes->Margin = System::Windows::Forms::Padding(3, 1, 0, 2);
 			this->fcgTSLSettingsNotes->Name = L"fcgTSLSettingsNotes";
@@ -1180,7 +1186,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgTSTSettingsNotes
 			// 
 			this->fcgTSTSettingsNotes->BackColor = System::Drawing::SystemColors::Window;
-			this->fcgTSTSettingsNotes->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgTSTSettingsNotes->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgTSTSettingsNotes->Margin = System::Windows::Forms::Padding(3, 0, 1, 0);
 			this->fcgTSTSettingsNotes->Name = L"fcgTSTSettingsNotes";
@@ -1199,6 +1205,8 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			// fcggroupBoxAudio
 			// 
+			this->fcggroupBoxAudio->Controls->Add(this->fcgCXAudioDelayCut);
+			this->fcggroupBoxAudio->Controls->Add(this->fcgLBAudioDelayCut);
 			this->fcggroupBoxAudio->Controls->Add(this->fcgCBAudioEncTiming);
 			this->fcggroupBoxAudio->Controls->Add(this->fcgCXAudioEncTiming);
 			this->fcggroupBoxAudio->Controls->Add(this->fcgCXAudioTempDir);
@@ -1220,7 +1228,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcggroupBoxAudio->Controls->Add(this->fcgCXAudioEncoder);
 			this->fcggroupBoxAudio->Controls->Add(this->fcgLBAudioEncoder);
 			this->fcggroupBoxAudio->Controls->Add(this->fcgLBAudioTemp);
-			this->fcggroupBoxAudio->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcggroupBoxAudio->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcggroupBoxAudio->Location = System::Drawing::Point(622, 25);
 			this->fcggroupBoxAudio->Name = L"fcggroupBoxAudio";
@@ -1232,7 +1240,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgCBAudioEncTiming
 			// 
 			this->fcgCBAudioEncTiming->AutoSize = true;
-			this->fcgCBAudioEncTiming->Location = System::Drawing::Point(247, 70);
+			this->fcgCBAudioEncTiming->Location = System::Drawing::Point(247, 61);
 			this->fcgCBAudioEncTiming->Name = L"fcgCBAudioEncTiming";
 			this->fcgCBAudioEncTiming->Size = System::Drawing::Size(40, 14);
 			this->fcgCBAudioEncTiming->TabIndex = 28;
@@ -1243,7 +1251,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			this->fcgCXAudioEncTiming->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->fcgCXAudioEncTiming->FormattingEnabled = true;
-			this->fcgCXAudioEncTiming->Location = System::Drawing::Point(292, 67);
+			this->fcgCXAudioEncTiming->Location = System::Drawing::Point(292, 58);
 			this->fcgCXAudioEncTiming->Name = L"fcgCXAudioEncTiming";
 			this->fcgCXAudioEncTiming->Size = System::Drawing::Size(68, 22);
 			this->fcgCXAudioEncTiming->TabIndex = 27;
@@ -1281,7 +1289,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgCBAudioUsePipe
 			// 
 			this->fcgCBAudioUsePipe->AutoSize = true;
-			this->fcgCBAudioUsePipe->Location = System::Drawing::Point(218, 145);
+			this->fcgCBAudioUsePipe->Location = System::Drawing::Point(138, 145);
 			this->fcgCBAudioUsePipe->Name = L"fcgCBAudioUsePipe";
 			this->fcgCBAudioUsePipe->Size = System::Drawing::Size(73, 18);
 			this->fcgCBAudioUsePipe->TabIndex = 10;
@@ -1301,7 +1309,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgNUAudioBitrate
 			// 
 			this->fcgNUAudioBitrate->Location = System::Drawing::Point(218, 169);
-			this->fcgNUAudioBitrate->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1536, 0, 0, 0});
+			this->fcgNUAudioBitrate->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1536, 0, 0, 0 });
 			this->fcgNUAudioBitrate->Name = L"fcgNUAudioBitrate";
 			this->fcgNUAudioBitrate->Size = System::Drawing::Size(65, 21);
 			this->fcgNUAudioBitrate->TabIndex = 8;
@@ -1311,7 +1319,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgCBAudio2pass
 			// 
 			this->fcgCBAudio2pass->AutoSize = true;
-			this->fcgCBAudio2pass->Location = System::Drawing::Point(130, 144);
+			this->fcgCBAudio2pass->Location = System::Drawing::Point(68, 144);
 			this->fcgCBAudio2pass->Name = L"fcgCBAudio2pass";
 			this->fcgCBAudio2pass->Size = System::Drawing::Size(56, 18);
 			this->fcgCBAudio2pass->TabIndex = 9;
@@ -1336,13 +1344,13 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgLBAudioEncMode->AutoSize = true;
 			this->fcgLBAudioEncMode->Location = System::Drawing::Point(10, 148);
 			this->fcgLBAudioEncMode->Name = L"fcgLBAudioEncMode";
-			this->fcgLBAudioEncMode->Size = System::Drawing::Size(73, 14);
+			this->fcgLBAudioEncMode->Size = System::Drawing::Size(32, 14);
 			this->fcgLBAudioEncMode->TabIndex = 15;
-			this->fcgLBAudioEncMode->Text = L"エンコードモード";
+			this->fcgLBAudioEncMode->Text = L"モード";
 			// 
 			// fcgBTAudioEncoderPath
 			// 
-			this->fcgBTAudioEncoderPath->Location = System::Drawing::Point(330, 108);
+			this->fcgBTAudioEncoderPath->Location = System::Drawing::Point(330, 97);
 			this->fcgBTAudioEncoderPath->Name = L"fcgBTAudioEncoderPath";
 			this->fcgBTAudioEncoderPath->Size = System::Drawing::Size(30, 23);
 			this->fcgBTAudioEncoderPath->TabIndex = 6;
@@ -1353,7 +1361,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgTXAudioEncoderPath
 			// 
 			this->fcgTXAudioEncoderPath->AllowDrop = true;
-			this->fcgTXAudioEncoderPath->Location = System::Drawing::Point(21, 110);
+			this->fcgTXAudioEncoderPath->Location = System::Drawing::Point(21, 99);
 			this->fcgTXAudioEncoderPath->Name = L"fcgTXAudioEncoderPath";
 			this->fcgTXAudioEncoderPath->Size = System::Drawing::Size(303, 21);
 			this->fcgTXAudioEncoderPath->TabIndex = 5;
@@ -1364,7 +1372,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgLBAudioEncoderPath
 			// 
 			this->fcgLBAudioEncoderPath->AutoSize = true;
-			this->fcgLBAudioEncoderPath->Location = System::Drawing::Point(18, 93);
+			this->fcgLBAudioEncoderPath->Location = System::Drawing::Point(18, 82);
 			this->fcgLBAudioEncoderPath->Name = L"fcgLBAudioEncoderPath";
 			this->fcgLBAudioEncoderPath->Size = System::Drawing::Size(49, 14);
 			this->fcgLBAudioEncoderPath->TabIndex = 12;
@@ -1416,7 +1424,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			this->fcgCXAudioEncoder->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->fcgCXAudioEncoder->FormattingEnabled = true;
-			this->fcgCXAudioEncoder->Location = System::Drawing::Point(39, 47);
+			this->fcgCXAudioEncoder->Location = System::Drawing::Point(23, 44);
 			this->fcgCXAudioEncoder->Name = L"fcgCXAudioEncoder";
 			this->fcgCXAudioEncoder->Size = System::Drawing::Size(172, 22);
 			this->fcgCXAudioEncoder->TabIndex = 0;
@@ -1428,9 +1436,9 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgLBAudioEncoder->AutoSize = true;
 			this->fcgLBAudioEncoder->Location = System::Drawing::Point(11, 23);
 			this->fcgLBAudioEncoder->Name = L"fcgLBAudioEncoder";
-			this->fcgLBAudioEncoder->Size = System::Drawing::Size(70, 14);
+			this->fcgLBAudioEncoder->Size = System::Drawing::Size(48, 14);
 			this->fcgLBAudioEncoder->TabIndex = 0;
-			this->fcgLBAudioEncoder->Text = L"音声エンコーダ";
+			this->fcgLBAudioEncoder->Text = L"エンコーダ";
 			// 
 			// fcgLBAudioTemp
 			// 
@@ -1448,7 +1456,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgtabControlMux->Controls->Add(this->fcgtabPageMPG);
 			this->fcgtabControlMux->Controls->Add(this->fcgtabPageMux);
 			this->fcgtabControlMux->Controls->Add(this->fcgtabPageBat);
-			this->fcgtabControlMux->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->fcgtabControlMux->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgtabControlMux->Location = System::Drawing::Point(622, 331);
 			this->fcgtabControlMux->Name = L"fcgtabControlMux";
@@ -1869,7 +1877,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgLBBatAfterString
 			// 
 			this->fcgLBBatAfterString->AutoSize = true;
-			this->fcgLBBatAfterString->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, static_cast<System::Drawing::FontStyle>((System::Drawing::FontStyle::Italic | System::Drawing::FontStyle::Underline)), 
+			this->fcgLBBatAfterString->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, static_cast<System::Drawing::FontStyle>((System::Drawing::FontStyle::Italic | System::Drawing::FontStyle::Underline)),
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(128)));
 			this->fcgLBBatAfterString->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->fcgLBBatAfterString->Location = System::Drawing::Point(303, 112);
@@ -1882,7 +1890,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// fcgLBBatBeforeString
 			// 
 			this->fcgLBBatBeforeString->AutoSize = true;
-			this->fcgLBBatBeforeString->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, static_cast<System::Drawing::FontStyle>((System::Drawing::FontStyle::Italic | System::Drawing::FontStyle::Underline)), 
+			this->fcgLBBatBeforeString->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, static_cast<System::Drawing::FontStyle>((System::Drawing::FontStyle::Italic | System::Drawing::FontStyle::Underline)),
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(128)));
 			this->fcgLBBatBeforeString->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->fcgLBBatBeforeString->Location = System::Drawing::Point(303, 19);
@@ -2037,7 +2045,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			this->fcgLBVersionDate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->fcgLBVersionDate->AutoSize = true;
-			this->fcgLBVersionDate->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point, 
+			this->fcgLBVersionDate->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgLBVersionDate->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->fcgLBVersionDate->Location = System::Drawing::Point(478, 447);
@@ -2050,7 +2058,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			// 
 			this->fcgLBVersion->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->fcgLBVersion->AutoSize = true;
-			this->fcgLBVersion->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point, 
+			this->fcgLBVersion->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->fcgLBVersion->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->fcgLBVersion->Location = System::Drawing::Point(204, 447);
@@ -2079,6 +2087,25 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgCSReplaceStrings->Name = L"fcgCSReplaceStrings";
 			this->fcgCSReplaceStrings->Size = System::Drawing::Size(61, 4);
 			// 
+			// fcgCXAudioDelayCut
+			// 
+			this->fcgCXAudioDelayCut->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->fcgCXAudioDelayCut->FormattingEnabled = true;
+			this->fcgCXAudioDelayCut->Location = System::Drawing::Point(294, 143);
+			this->fcgCXAudioDelayCut->Name = L"fcgCXAudioDelayCut";
+			this->fcgCXAudioDelayCut->Size = System::Drawing::Size(70, 22);
+			this->fcgCXAudioDelayCut->TabIndex = 32;
+			this->fcgCXAudioDelayCut->Tag = L"chValue";
+			// 
+			// fcgLBAudioDelayCut
+			// 
+			this->fcgLBAudioDelayCut->AutoSize = true;
+			this->fcgLBAudioDelayCut->Location = System::Drawing::Point(227, 146);
+			this->fcgLBAudioDelayCut->Name = L"fcgLBAudioDelayCut";
+			this->fcgLBAudioDelayCut->Size = System::Drawing::Size(60, 14);
+			this->fcgLBAudioDelayCut->TabIndex = 33;
+			this->fcgLBAudioDelayCut->Text = L"ディレイカット";
+			// 
 			// frmConfig
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
@@ -2093,7 +2120,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->Controls->Add(this->fcggroupBoxAudio);
 			this->Controls->Add(this->fcgtoolStripSettings);
 			this->Controls->Add(this->fcgtabControlVideo);
-			this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(128)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedDialog;
 			this->MaximizeBox = false;
@@ -2111,7 +2138,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			this->fcgtoolStripSettings->PerformLayout();
 			this->fcggroupBoxAudio->ResumeLayout(false);
 			this->fcggroupBoxAudio->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fcgNUAudioBitrate))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->fcgNUAudioBitrate))->EndInit();
 			this->fcgtabControlMux->ResumeLayout(false);
 			this->fcgtabPageMP4->ResumeLayout(false);
 			this->fcgtabPageMP4->PerformLayout();
@@ -2221,6 +2248,14 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 			CX->Items->Clear();
 			for (int i = 0; list[i].desc; i++)
 				CX->Items->Add(String(list[i].desc).ToString());
+			CX->EndUpdate();
+		}
+	private:
+		System::Void setComboBox(ComboBox^ CX, const char * const * list) {
+			CX->BeginUpdate();
+			CX->Items->Clear();
+			for (int i = 0; list[i]; i++)
+				CX->Items->Add(String(list[i]).ToString());
 			CX->EndUpdate();
 		}
 	private:

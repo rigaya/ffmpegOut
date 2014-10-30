@@ -48,6 +48,21 @@ enum {
 	AMPLIMIT_BITRATE   = 0x02, //自動マルチパス時、ビットレートのチェックを行う
 };
 
+enum {
+	AUDIO_DELAY_CUT_NONE         = 0, //音声エンコード遅延の削除を行わない
+	AUDIO_DELAY_CUT_DELETE_AUDIO = 1, //音声エンコード遅延の削除を音声の先頭を削除することで行う
+	AUDIO_DELAY_CUT_ADD_VIDEO    = 2, //音声エンコード遅延の削除を映像を先頭に追加することで行う
+	AUDIO_DELAY_CUT_EDTS         = 3, //音声エンコード遅延の削除をedtsを用いて行う
+};
+
+static const char *const AUDIO_DELAY_CUT_MODE[] = {
+	"補正なし",
+	"音声カット",
+	"映像追加",
+	"edts",
+	NULL
+};
+
 typedef struct {
 	BOOL    use_highbit_depth;
 	int     output_csp;
@@ -87,6 +102,7 @@ typedef struct {
 	BOOL minimized;           //音声エンコーダを最小化で実行
 	int  aud_temp_dir;        //音声専用一時フォルダ
 	int  audio_encode_timing; //音声を先にエンコード
+	int  delay_cut;           //エンコード遅延の削除
 } CONF_AUDIO; //音声用設定
 
 typedef struct {
@@ -107,8 +123,8 @@ typedef struct {
 	int  temp_dir;               //一時ディレクトリ
 	BOOL out_audio_only;         //音声のみ出力
 	char notes[128];             //メモ
-	DWORD run_bat;               //バッチファイルを実行するかどうか
-	DWORD dont_wait_bat_fin;     //バッチファイルの処理終了待機をするかどうか
+	DWORD run_bat;                //バッチファイルを実行するかどうか (RUN_BAT_xxx)
+	DWORD dont_wait_bat_fin;      //バッチファイルの処理終了待機をするかどうか (RUN_BAT_xxx)
 	char batfile_after[MAX_PATH_LEN];   //エンコ後バッチファイルのパス
 	char batfile_before[MAX_PATH_LEN];  //エンコ前バッチファイルのパス
 } CONF_OTHER;

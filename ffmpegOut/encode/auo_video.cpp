@@ -36,6 +36,18 @@
 #include "auo_video.h"
 #include "auo_audio_parallel.h"
 
+#include "cpu_info.h"
+
+typedef struct video_output_thread_t {
+	CONVERT_CF_DATA *pixel_data;
+	FILE *f_out;
+	BOOL abort;
+	HANDLE thread;
+	HANDLE he_out_start;
+	HANDLE he_out_fin;
+	int repeat;
+} video_output_thread_t;
+
 static const char * specify_input_csp(int output_csp) {
 	return specify_csp[output_csp];
 }
@@ -242,6 +254,51 @@ static AUO_RESULT exit_audio_parallel_control(const OUTPUT_INFO *oip, PRM_ENC *p
 	return vid_ret;
 }
 
+static unsigned __stdcall video_output_thread_func(void *prm) {
+	video_output_thread_t *thread_data = reinterpret_cast<video_output_thread_t *>(prm);
+	CONVERT_CF_DATA *pixel_data = thread_data->pixel_data;
+	WaitForSingleObject(thread_data->he_out_start, INFINITE);
+	while (false == thread_data->abort) {
+		//映像データをパイプに
+		for (int i = 0; i < 1 + thread_data->repeat; i++)
+			for (int j = 0; j < pixel_data->count; j++)
+				_fwrite_nolock((void *)pixel_data->data[j], 1, pixel_data->size[j], thread_data->f_out);
+
+		thread_data->repeat = 0;
+		SetEvent(thread_data->he_out_fin);
+		WaitForSingleObject(thread_data->he_out_start, INFINITE);
+	}
+	return 0;
+}
+
+static int video_output_create_thread(video_output_thread_t *thread_data, CONVERT_CF_DATA *pixel_data, FILE *pipe_stdin) {
+	AUO_RESULT ret = AUO_RESULT_SUCCESS;
+	thread_data->abort = false;
+	thread_data->pixel_data = pixel_data;
+	thread_data->f_out = pipe_stdin;
+	if (   NULL == (thread_data->he_out_start = (HANDLE)CreateEvent(NULL, false, false, NULL))
+		|| NULL == (thread_data->he_out_fin   = (HANDLE)CreateEvent(NULL, false, true,  NULL))
+		|| NULL == (thread_data->thread       = (HANDLE)_beginthreadex(NULL, 0, video_output_thread_func, thread_data, 0, NULL))) {
+		ret = AUO_RESULT_ERROR;
+	}
+	return ret;
+}
+
+static void video_output_close_thread(video_output_thread_t *thread_data, AUO_RESULT ret) {
+	if (thread_data->thread) {
+		if (!ret)
+			while (WAIT_TIMEOUT == WaitForSingleObject(thread_data->he_out_fin, LOG_UPDATE_INTERVAL))
+				log_process_events();
+		thread_data->abort = true;
+		SetEvent(thread_data->he_out_start);
+		WaitForSingleObject(thread_data->thread, INFINITE);
+		CloseHandle(thread_data->thread);
+		CloseHandle(thread_data->he_out_start);
+		CloseHandle(thread_data->he_out_fin);
+	}
+	memset(thread_data, 0, sizeof(thread_data[0]));
+}
+
 static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat) {
 	AUO_RESULT ret = AUO_RESULT_SUCCESS;
 	PIPE_SET pipes = { 0 };
@@ -252,6 +309,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 	char enc_dir[MAX_PATH_LEN] = { 0 };
 	char *enc_path = sys_dat->exstg->s_local.ffmpeg_path;
 	
+	video_output_thread_t thread_data = { 0 };
+	thread_data.repeat = pe->delay_cut_additional_vframe;
 	CONVERT_CF_DATA pixel_data;
 	set_pixel_data(&pixel_data, conf, oip->w, oip->h);
 
@@ -295,11 +354,17 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 	
 	if ((rp_ret = RunProcess(enc_args, enc_dir, &pi_enc, &pipes, (set_priority == AVIUTLSYNC_PRIORITY_CLASS) ? GetPriorityClass(pe->h_p_aviutl) : set_priority, TRUE, FALSE)) != RP_SUCCESS) {
 		ret |= AUO_RESULT_ERROR; error_run_process("ffmpeg/avconv", rp_ret);
+	} else if (video_output_create_thread(&thread_data, &pixel_data, pipes.f_stdin)) {
+		ret |= AUO_RESULT_ERROR; error_video_output_thread_start();
 	} else {
 		//全て正常
 		int i;
 		void *frame = NULL;
 		BOOL enc_pause = FALSE, copy_frame = FALSE;
+
+		//Aviutlの時間を取得
+		PROCESS_TIME time_aviutl;
+		GetProcessTime(pe->h_p_aviutl, &time_aviutl);
 
 		//x264が待機に入るまでこちらも待機
 		while (WaitForInputIdle(pi_enc.hProcess, LOG_UPDATE_INTERVAL) == WAIT_TIMEOUT)
@@ -312,21 +377,13 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 		//------------メインループ------------
 		for (i = 0, pe->drop_count = 0; i < oip->n; i++) {
 			//中断を確認
-			if (FALSE != (pe->aud_parallel.abort = oip->func_is_abort())) {
-				ret |= AUO_RESULT_ABORT;
-				break;
-			}
+			ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
+
 			//x264が実行中なら、メッセージを取得・ログウィンドウに表示
 			if (ReadLogEnc(&pipes, pe->drop_count, i) < 0) {
 				//勝手に死んだ...
 				ret |= AUO_RESULT_ERROR; error_x264_dead();
 				break;
-			}
-
-			//一時停止
-			while (enc_pause) {
-				Sleep(LOG_UPDATE_INTERVAL);
-				log_process_events();
 			}
 
 			if (!(i & 7)) {
@@ -339,6 +396,24 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 				//音声同時処理
 				ret |= aud_parallel_task(oip, pe);
 			}
+
+			//一時停止
+			while (enc_pause & !ret) {
+				Sleep(LOG_UPDATE_INTERVAL);
+				ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
+				log_process_events();
+			}
+
+			//標準入力への書き込み完了をチェック
+			while (WAIT_TIMEOUT == WaitForSingleObject(thread_data.he_out_fin, LOG_UPDATE_INTERVAL)) {
+				ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
+				log_process_events();
+			}
+
+			//中断・エラー等をチェック
+			if (AUO_RESULT_SUCCESS != ret)
+				break;
+
 			//Aviutl(afs)からフレームをもらう
 			if ((frame = oip->func_get_video_ex(i, aviutl_fourcc)) == NULL) {
 				ret |= AUO_RESULT_ERROR; error_afs_get_frame();
@@ -351,9 +426,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 			//コピーフレームの場合は、映像バッファの中身を更新せず、そのままパイプに流す
 			if (!copy_frame)
 				convert_frame(frame, &pixel_data, oip->w, oip->h);  /// YUY2/YC48->NV12/YUV444変換, RGBコピー
-			//映像データをパイプに
-			for (int j = 0; j < pixel_data.count; j++)
-				_fwrite_nolock((void *)pixel_data.data[j], 1, pixel_data.size[j], pipes.f_stdin);
+			//標準入力への書き込みを開始
+			SetEvent(thread_data.he_out_start);
 
 			// 「表示 -> セーブ中もプレビュー表示」がチェックされていると
 			// func_update_preview() の呼び出しによって func_get_video_ex() の
@@ -361,6 +435,9 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 			oip->func_update_preview();
 		}
 		//------------メインループここまで--------------
+
+		//書き込みスレッドを終了
+		video_output_close_thread(&thread_data, ret);
 
 		//ログウィンドウからのx264制御を無効化
 		disable_x264_control();
@@ -383,7 +460,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
 		//最後にメッセージを取得
 		while (ReadLogEnc(&pipes, pe->drop_count, i) > 0);
-
+		
+		write_log_auo_line_fmt(LOG_INFO, "CPU使用率: Aviutl: %.2f%% / ffmpeg: %.2f%%", GetProcessAvgCPUUsage(pe->h_p_aviutl, &time_aviutl), GetProcessAvgCPUUsage(pi_enc.hProcess));
 		write_log_auo_enc_time("動画エンコード時間", tm_vid_enc_fin - tm_vid_enc_start);
 	}
 
@@ -418,7 +496,7 @@ static AUO_RESULT video_output_inside(CONF_GUIEX *conf, const OUTPUT_INFO *oip, 
 
 	for (; !ret && pe->current_x264_pass <= pe->total_x264_pass; pe->current_x264_pass++) {
 		if (pe->current_x264_pass > 1)
-			open_log_window(oip->savefile, pe->current_x264_pass, pe->total_x264_pass);
+			open_log_window(oip->savefile, sys_dat, pe->current_x264_pass, pe->total_x264_pass);
 		set_window_title_ffmpegout(pe);
 		ret |= ffmpeg_out(conf, oip, pe, sys_dat);
 		set_window_title(AUO_FULL_NAME, PROGRESSBAR_DISABLED);

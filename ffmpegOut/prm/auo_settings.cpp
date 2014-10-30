@@ -102,17 +102,21 @@ static inline void WriteFontInfo(const char *section, const char *keyname_base, 
 	const size_t keyname_base_len = strlen(keyname_base);
 	if (keyname_base_len >= INI_KEY_MAX_LEN)
 		return;
+
+	AUO_FONT_INFO current_info = { 0 };
+	GetFontInfo(section, keyname_base, &current_info, ini_file);
+
 	char key[INI_KEY_MAX_LEN];
 	memcpy(key, keyname_base, sizeof(key[0]) * (keyname_base_len + 1));
 	if (str_has_char(font_info->name)) {
 		strcpy_s(key + keyname_base_len, _countof(key) - keyname_base_len, "_name");
 		WritePrivateProfileString(section, key, font_info->name, ini_file);
 	}
-	if (font_info->size > 0.0) {
+	if (font_info->size > 0.0 || font_info->size != current_info.size) {
 		strcpy_s(key + keyname_base_len, _countof(key) - keyname_base_len, "_size");
 		WritePrivateProfileDouble(section, key, font_info->size, ini_file);
 	}
-	if (font_info->style != 0) {
+	if (font_info->style != 0 || font_info->style != current_info.style) {
 		strcpy_s(key + keyname_base_len, _countof(key) - keyname_base_len, "_style");
 		WritePrivateProfileInt(section, key, font_info->style, ini_file);
 	}
@@ -128,13 +132,14 @@ static inline void WriteColorInfo(const char *section, const char *keyname, int 
 	}
 }
 
-
 BOOL    guiEx_settings::init = FALSE;
 char    guiEx_settings::ini_section_main[256] = { 0 };
 char    guiEx_settings::auo_path[MAX_PATH_LEN] = { 0 };
 char    guiEx_settings::ini_fileName[MAX_PATH_LEN] = { 0 };
 char    guiEx_settings::conf_fileName[MAX_PATH_LEN] = { 0 };
 DWORD   guiEx_settings::ini_filesize = 0;
+
+char  guiEx_settings::blog_url[MAX_PATH_LEN] = { 0 };
 
 guiEx_settings::guiEx_settings() {
 	initialize(false);
@@ -170,6 +175,7 @@ void guiEx_settings::initialize(BOOL disable_loading, const char *_auo_path, con
 		apply_appendix(ini_fileName,  _countof(ini_fileName),  auo_path, INI_APPENDIX);
 		apply_appendix(conf_fileName, _countof(conf_fileName), auo_path, CONF_APPENDIX);
 		init = check_inifile() && !disable_loading;
+		GetPrivateProfileString(ini_section_main, "blog_url", "", blog_url, _countof(blog_url), ini_fileName);
 		if (init) {
 			load_encode_stg();
 			load_fn_replace();
@@ -247,10 +253,14 @@ void guiEx_settings::load_aud() {
 		s_aud[i].dispname     = s_aud_mc.SetPrivateProfileString(encoder_section, "dispname",     "", ini_fileName);
 		s_aud[i].filename     = s_aud_mc.SetPrivateProfileString(encoder_section, "filename",     "", ini_fileName);
 		s_aud[i].aud_appendix = s_aud_mc.SetPrivateProfileString(encoder_section, "aud_appendix", "", ini_fileName);
+		s_aud[i].raw_appendix = s_aud_mc.SetPrivateProfileString(encoder_section, "raw_appendix", "", ini_fileName);
 		s_aud[i].cmd_base     = s_aud_mc.SetPrivateProfileString(encoder_section, "base_cmd",     "", ini_fileName);
 		s_aud[i].cmd_2pass    = s_aud_mc.SetPrivateProfileString(encoder_section, "2pass_cmd",    "", ini_fileName);
 		s_aud[i].cmd_help     = s_aud_mc.SetPrivateProfileString(encoder_section, "help_cmd",     "", ini_fileName);
+		s_aud[i].cmd_ver      = s_aud_mc.SetPrivateProfileString(encoder_section, "ver_cmd",      "", ini_fileName);
+		s_aud[i].cmd_raw      = s_aud_mc.SetPrivateProfileString(encoder_section, "raw_cmd",      "", ini_fileName);
 		s_aud[i].pipe_input   = GetPrivateProfileInt(            encoder_section, "pipe_input",    0, ini_fileName);
+		s_aud[i].disable_log  = GetPrivateProfileInt(            encoder_section, "disable_log",   0, ini_fileName);
 
 		sprintf_s(encoder_section, sizeof(encoder_section), "%s%s", INI_SECTION_MODE, s_aud[i].keyName);
 		int tmp_count = GetPrivateProfileInt(encoder_section, "count", 0, ini_fileName);
@@ -268,6 +278,8 @@ void guiEx_settings::load_aud() {
 			tmp_mode[j].enc_2pass = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
 			strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_convert8bit");
 			tmp_mode[j].use_8bit =  GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
+			strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_delay");
+			tmp_mode[j].delay = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
 			strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_bitrate");
 			tmp_mode[j].bitrate = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
 			if (tmp_mode[j].bitrate) {
@@ -360,14 +372,16 @@ void guiEx_settings::load_mux() {
 		s_mux[i].dispname = s_mux_mc.SetPrivateProfileString(muxer_section, "dispname", "", ini_fileName);
 		s_mux[i].filename = s_mux_mc.SetPrivateProfileString(muxer_section, "filename", "", ini_fileName);
 		s_mux[i].base_cmd = s_mux_mc.SetPrivateProfileString(muxer_section, "base_cmd", "", ini_fileName);
-		s_mux[i].out_ext = (char *)s_mux_mc.GetPtr();
+		s_mux[i].out_ext  = (char *)s_mux_mc.GetPtr();
 		strcpy_s(s_mux[i].out_ext, s_mux_mc.GetRemain(), MUXER_OUT_EXT[i]);
 		s_mux_mc.CutString(sizeof(s_mux[i].out_ext[0]));
-		s_mux[i].vid_cmd  = s_mux_mc.SetPrivateProfileString(muxer_section, "vd_cmd",   "", ini_fileName);
-		s_mux[i].aud_cmd  = s_mux_mc.SetPrivateProfileString(muxer_section, "au_cmd",   "", ini_fileName);
-		s_mux[i].tc_cmd   = s_mux_mc.SetPrivateProfileString(muxer_section, "tc_cmd",   "", ini_fileName);
-		s_mux[i].tmp_cmd  = s_mux_mc.SetPrivateProfileString(muxer_section, "tmp_cmd",  "", ini_fileName);
-		s_mux[i].help_cmd = s_mux_mc.SetPrivateProfileString(muxer_section, "help_cmd", "", ini_fileName);
+		s_mux[i].vid_cmd   = s_mux_mc.SetPrivateProfileString(muxer_section, "vd_cmd",    "", ini_fileName);
+		s_mux[i].aud_cmd   = s_mux_mc.SetPrivateProfileString(muxer_section, "au_cmd",    "", ini_fileName);
+		s_mux[i].tc_cmd    = s_mux_mc.SetPrivateProfileString(muxer_section, "tc_cmd",    "", ini_fileName);
+		s_mux[i].delay_cmd = s_mux_mc.SetPrivateProfileString(muxer_section, "delay_cmd", "", ini_fileName);
+		s_mux[i].tmp_cmd   = s_mux_mc.SetPrivateProfileString(muxer_section, "tmp_cmd",   "", ini_fileName);
+		s_mux[i].help_cmd  = s_mux_mc.SetPrivateProfileString(muxer_section, "help_cmd",  "", ini_fileName);
+		s_mux[i].ver_cmd   = s_mux_mc.SetPrivateProfileString(muxer_section, "ver_cmd",   "", ini_fileName);
 		s_mux[i].post_mux = GetPrivateProfileInt(muxer_section, "post_mux", MUXER_DISABLED,  ini_fileName);
 
 		sprintf_s(muxer_section, _countof(muxer_section), "%s%s", INI_SECTION_MODE, s_mux[i].keyName);
@@ -424,14 +438,19 @@ void guiEx_settings::load_local() {
 
 	//s_local.large_cmdbox              = GetPrivateProfileInt(   ini_section_main, "large_cmdbox",             DEFAULT_LARGE_CMD_BOX,         conf_fileName);
 	s_local.auto_afs_disable          = GetPrivateProfileInt(   ini_section_main, "auto_afs_disable",         DEFAULT_AUTO_AFS_DISABLE,      conf_fileName);
-	//s_local.auto_del_stats            = GetPrivateProfileInt(   ini_section_main, "auto_del_stats",           DEFAULT_AUTO_DEL_STATS,        conf_fileName);
-	//s_local.auto_del_chap             = GetPrivateProfileInt(   ini_section_main, "auto_del_chap",            DEFAULT_AUTO_DEL_CHAP,         conf_fileName);
+	//s_local.default_output_ext        = GetPrivateProfileInt(   ini_section_main, "default_output_ext",        DEFAULT_OUTPUT_EXT,            conf_fileName);
+	//s_local.auto_del_stats            = GetPrivateProfileInt(   ini_section_main, "auto_del_stats",            DEFAULT_AUTO_DEL_STATS,        conf_fileName);
+	//s_local.auto_del_chap             = GetPrivateProfileInt(   ini_section_main, "auto_del_chap",             DEFAULT_AUTO_DEL_CHAP,         conf_fileName);
 	s_local.keep_qp_file              = GetPrivateProfileInt(   ini_section_main, "keep_qp_file",             DEFAULT_KEEP_QP_FILE,          conf_fileName);
 	s_local.disable_tooltip_help      = GetPrivateProfileInt(   ini_section_main, "disable_tooltip_help",     DEFAULT_DISABLE_TOOLTIP_HELP,  conf_fileName);
 	s_local.disable_visual_styles     = GetPrivateProfileInt(   ini_section_main, "disable_visual_styles",    DEFAULT_DISABLE_VISUAL_STYLES, conf_fileName);
 	s_local.enable_stg_esc_key        = GetPrivateProfileInt(   ini_section_main, "enable_stg_esc_key",       DEFAULT_ENABLE_STG_ESC_KEY,    conf_fileName);
+	//s_local.chap_nero_convert_to_utf8 = GetPrivateProfileInt(   ini_section_main, "chap_nero_convert_to_utf8", DEFAULT_CHAP_NERO_TO_UTF8,     conf_fileName);
 	s_local.get_relative_path         = GetPrivateProfileInt(   ini_section_main, "get_relative_path",        DEFAULT_SAVE_RELATIVE_PATH,    conf_fileName);
 	s_local.run_bat_minimized         = GetPrivateProfileInt(   ini_section_main, "run_bat_minimized",        DEFAULT_RUN_BAT_MINIMIZED,     conf_fileName);
+	//s_local.set_keyframe_as_afs_24fps = GetPrivateProfileInt(   ini_section_main, "set_keyframe_as_afs_24fps", DEFAULT_SET_KEYFRAME_AFS24FPS, conf_fileName);
+	//s_local.auto_ref_limit_by_level   = GetPrivateProfileInt(   ini_section_main, "auto_ref_limit_by_level",   DEFAULT_AUTO_REFLIMIT_BYLEVEL, conf_fileName);
+	s_local.default_audio_encoder     = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder",     DEFAULT_AUDIO_ENCODER,         conf_fileName);
 
 	//s_local.amp_retry_limit           = GetPrivateProfileInt(   INI_SECTION_AMP,  "amp_retry_limit",          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
 	//s_local.amp_bitrate_margin_multi  = GetPrivateProfileDouble(INI_SECTION_AMP,  "amp_bitrate_margin_multi", DEFAULT_AMP_MARGIN,            conf_fileName);
@@ -465,6 +484,8 @@ void guiEx_settings::load_local() {
 void guiEx_settings::load_log_win() {
 	clear_log_win();
 	s_log.minimized          = GetPrivateProfileInt(   ini_section_main, "log_start_minimized",  DEFAULT_LOG_START_MINIMIZED,  conf_fileName);
+	s_log.wine_compat        = GetPrivateProfileInt(   ini_section_main, "log_wine_compat",      DEFAULT_LOG_WINE_COMPAT,      conf_fileName);
+	s_log.log_level          = GetPrivateProfileInt(   ini_section_main, "log_level",            DEFAULT_LOG_LEVEL,            conf_fileName);
 	s_log.transparent        = GetPrivateProfileInt(   ini_section_main, "log_transparent",      DEFAULT_LOG_TRANSPARENT,      conf_fileName);
 	s_log.transparency       = GetPrivateProfileInt(   ini_section_main, "log_transparency",     DEFAULT_LOG_TRANSPARENCY,     conf_fileName);
 	s_log.auto_save_log      = GetPrivateProfileInt(   ini_section_main, "log_auto_save",        DEFAULT_LOG_AUTO_SAVE,        conf_fileName);
@@ -506,14 +527,19 @@ void guiEx_settings::load_fbc() {
 void guiEx_settings::save_local() {
 	//WritePrivateProfileIntWithDefault(   ini_section_main, "large_cmdbox",              s_local.large_cmdbox,             DEFAULT_LARGE_CMD_BOX,         conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "auto_afs_disable",          s_local.auto_afs_disable,         DEFAULT_AUTO_AFS_DISABLE,      conf_fileName);
-	//WritePrivateProfileIntWithDefault(   ini_section_main, "auto_del_stats",            s_local.auto_del_stats,           DEFAULT_AUTO_DEL_STATS,        conf_fileName);
-	//WritePrivateProfileIntWithDefault(   ini_section_main, "auto_del_chap",             s_local.auto_del_chap,            DEFAULT_AUTO_DEL_CHAP,         conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "default_output_ext",        s_local.default_output_ext,        DEFAULT_OUTPUT_EXT,            conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "auto_del_stats",            s_local.auto_del_stats,            DEFAULT_AUTO_DEL_STATS,        conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "auto_del_chap",             s_local.auto_del_chap,             DEFAULT_AUTO_DEL_CHAP,         conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "keep_qp_file",              s_local.keep_qp_file,             DEFAULT_KEEP_QP_FILE,          conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "disable_tooltip_help",      s_local.disable_tooltip_help,     DEFAULT_DISABLE_TOOLTIP_HELP,  conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "disable_visual_styles",     s_local.disable_visual_styles,    DEFAULT_DISABLE_VISUAL_STYLES, conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "enable_stg_esc_key",        s_local.enable_stg_esc_key,       DEFAULT_ENABLE_STG_ESC_KEY,    conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "chap_nero_convert_to_utf8", s_local.chap_nero_convert_to_utf8, DEFAULT_CHAP_NERO_TO_UTF8,     conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "get_relative_path",         s_local.get_relative_path,        DEFAULT_SAVE_RELATIVE_PATH,    conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "run_bat_minimized",         s_local.run_bat_minimized,        DEFAULT_RUN_BAT_MINIMIZED,     conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "set_keyframe_as_afs_24fps", s_local.set_keyframe_as_afs_24fps, DEFAULT_SET_KEYFRAME_AFS24FPS, conf_fileName);
+	//WritePrivateProfileIntWithDefault(   ini_section_main, "auto_ref_limit_by_level",   s_local.auto_ref_limit_by_level,   DEFAULT_AUTO_REFLIMIT_BYLEVEL, conf_fileName);
+	WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder",     s_local.default_audio_encoder,     DEFAULT_AUDIO_ENCODER,         conf_fileName);
 
 	//WritePrivateProfileIntWithDefault(   INI_SECTION_AMP,  "amp_retry_limit",           s_local.amp_retry_limit,          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
 	//WritePrivateProfileDoubleWithDefault(INI_SECTION_AMP,  "amp_bitrate_margin_multi",  s_local.amp_bitrate_margin_multi, DEFAULT_AMP_MARGIN,            conf_fileName);
@@ -560,6 +586,8 @@ void guiEx_settings::save_local() {
 
 void guiEx_settings::save_log_win() {
 	WritePrivateProfileIntWithDefault(   ini_section_main, "log_start_minimized",   s_log.minimized,          DEFAULT_LOG_START_MINIMIZED,  conf_fileName);
+	WritePrivateProfileIntWithDefault(   ini_section_main, "log_wine_compat",       s_log.wine_compat,        DEFAULT_LOG_WINE_COMPAT,      conf_fileName);
+	WritePrivateProfileIntWithDefault(   ini_section_main, "log_level",             s_log.log_level,          DEFAULT_LOG_LEVEL,            conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "log_transparent",       s_log.transparent,        DEFAULT_LOG_TRANSPARENT,      conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "log_transparency",      s_log.transparency,       DEFAULT_LOG_TRANSPARENCY,     conf_fileName);
 	WritePrivateProfileIntWithDefault(   ini_section_main, "log_auto_save",         s_log.auto_save_log,      DEFAULT_LOG_AUTO_SAVE,        conf_fileName);
@@ -621,6 +649,6 @@ void guiEx_settings::clear_append() {
 }
 
 void guiEx_settings::apply_fn_replace(char *target_filename, DWORD nSize) {
-	foreach(std::vector<FILENAME_REPLACE>, it_rep, &fn_rep)
-		replace(target_filename, nSize, it_rep->from, it_rep->to);
+	for (auto i_rep : fn_rep)
+		replace(target_filename, nSize, i_rep.from, i_rep.to);
 }

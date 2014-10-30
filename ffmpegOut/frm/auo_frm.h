@@ -17,15 +17,11 @@
 const int LOG_UPDATE_INTERVAL = 50;
 
 enum {
+	LOG_MORE    = -1,
 	LOG_INFO    = 0,
 	LOG_WARNING = 1,
 	LOG_ERROR   = 2,
 };
-
-///ログ表示で使う色              R    G    B
-const int LOG_COLOR[3][3] = { { 198, 253, 226 },   //LOG_INFO
-                              { 245, 218,  90 },   //LOG_WARNING
-							  { 253,  83, 121 } }; //LOG_ERROR
 
 enum {
 	PROGRESSBAR_DISABLED   = 0,
@@ -49,8 +45,8 @@ void set_window_title(const char *chr, int progress_mode);
 void set_window_title_enc_mes(const char *chr, int total_drop, int frame_n);
 void set_task_name(const char *chr);
 void set_log_progress(double progress);
-void write_log_auo_line(int log_type_index, const char *chr);
-void write_log_line(int log_type_index, const char *chr);
+void write_log_auo_line(int log_type_index, const char *chr, bool from_utf8 = false);
+void write_log_line(int log_type_index, const char *chr, bool from_utf8 = false);
 void flush_audio_log();
 void enable_x264_control(DWORD *priority, BOOL *enc_pause, BOOL afs, BOOL add_progress, DWORD start_time, int _total_frame);
 void disable_x264_control();

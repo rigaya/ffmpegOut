@@ -18,6 +18,8 @@ void warning_no_aud_temp_root(const char *dir);
 void error_filename_too_long();
 void error_nothing_to_output();
 void error_amp_bitrate_confliction();
+void error_amp_afs_audio_delay_confliction();
+void info_afs_audio_delay_confliction();
 void info_amp_do_aud_enc_first(DWORD target_limit);
 void error_amp_aud_too_big(DWORD target_limit);
 void error_amp_target_bitrate_too_small(DWORD target_limit);
@@ -25,9 +27,12 @@ void warning_amp_change_bitrate(int bitrate_old, int bitrate_new, DWORD target_l
 void error_invalid_resolution(BOOL width, int mul, int w, int h);
 void error_log_line_cache();
 void error_no_exe_file(const char *name, const char *path);
+void error_mp4_muxer_unmatch_of_ini_and_exe(BOOL exe_file_is_lsmash);
 void warning_auto_afs_disable();
 void error_afs_setup(BOOL afs, BOOL auto_afs_disable);
+void warning_x264_mp4_output_not_supported();
 void error_run_process(const char *exe_name, int rp_ret);
+void error_video_output_thread_start();
 void warning_auto_qpfile_failed();
 void warning_auo_tcfile_failed();
 void error_open_wavfile();
@@ -36,8 +41,9 @@ void warning_audio_length();
 void error_malloc_pixel_data();
 void error_malloc_tc();
 void error_malloc_8bit();
+void error_afs_interlace_stg();
 void error_x264_dead();
-void error_x264_version();
+void error_x264_version(const char *required_ver, const char *current_ver);
 void error_afs_get_frame();
 void error_audenc_failed(const char *name, const char *args);
 void error_no_wavefile();
@@ -45,12 +51,14 @@ void error_mux_failed(const char *name, const char *args);
 
 void warning_no_mux_tmp_root(const char *dir);
 void warning_failed_mux_tmp_drive_space();
-void error_failed_muxer_drive_space();
-void error_failed_out_drive_space();
+void warning_failed_muxer_drive_space();
+void warning_failed_out_drive_space();
 void warning_failed_get_aud_size();
 void warning_failed_get_vid_size();
 void error_no_vid_file();
 void error_no_aud_file();
+void error_vid_file_zero_byte();
+void error_aud_file_zero_byte();
 void warning_mux_tmp_not_enough_space();
 void error_muxer_drive_not_enough_space();
 void error_out_drive_not_enough_space();
@@ -59,7 +67,8 @@ void error_check_muxout_exist();
 void error_check_muxout_too_small(int expected_filesize_KB, int muxout_filesize_KB);
 void warning_failed_check_muxout_filesize();
 void warning_amp_failed();
-void info_amp_result(DWORD status, BOOL retry, UINT64 filesize, double file_bitrate, double limit_filesize, double limit_filebitrate, int retry_count, int new_bitrate);
+void warning_amp_filesize_over_limit();
+void info_amp_result(DWORD status, int amp_result, UINT64 filesize, double file_bitrate, double limit_filesize, double limit_filebitrate, int retry_count, int new_bitrate);
 
 void warning_no_auto_save_log_dir();
 
@@ -67,6 +76,7 @@ void info_encoding_aborted();
 
 void warning_mux_no_chapter_file();
 void warning_mux_chapter(int sts);
+void warning_chapter_convert_to_utf8(int sts);
 
 void error_select_convert_func(int width, int height, BOOL use16bit, BOOL interlaced, int output_csp);
 

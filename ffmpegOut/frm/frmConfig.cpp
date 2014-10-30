@@ -475,6 +475,25 @@ System::Void frmConfig::AudioEncodeModeChanged() {
 	fcgCBAudio2pass->Enabled = astg->mode[index].enc_2pass != 0;
 	if (!fcgCBAudio2pass->Enabled) fcgCBAudio2pass->Checked = false;
 	SetfbcBTABEnable(fcgNUAudioBitrate->Visible, (int)fcgNUAudioBitrate->Maximum);
+
+	bool delay_cut_available = astg->mode[index].delay > 0;
+	fcgLBAudioDelayCut->Visible = delay_cut_available;
+	fcgCXAudioDelayCut->Visible = delay_cut_available;
+	if (delay_cut_available) {
+		//edtsによるカットはmuxerを使用しないffmpegOutではサポートされない
+		//const bool delay_cut_edts_available = str_has_char(astg->cmd_raw) && str_has_char(sys_dat->exstg->s_mux[MUXER_MP4_RAW].delay_cmd);
+		const bool delay_cut_edts_available = false;
+		const int current_idx = fcgCXAudioDelayCut->SelectedIndex;
+		const int items_to_set = _countof(AUDIO_DELAY_CUT_MODE) - 1 - ((delay_cut_edts_available) ? 0 : 1);
+		fcgCXAudioDelayCut->BeginUpdate();
+		fcgCXAudioDelayCut->Items->Clear();
+		for (int i = 0; i < items_to_set; i++)
+			fcgCXAudioDelayCut->Items->Add(String(AUDIO_DELAY_CUT_MODE[i]).ToString());
+		fcgCXAudioDelayCut->EndUpdate();
+		fcgCXAudioDelayCut->SelectedIndex = (current_idx >= items_to_set) ? 0 : current_idx;
+	} else {
+		fcgCXAudioDelayCut->SelectedIndex = 0;
+	}
 }
 
 ///////////////   設定ファイル関連   //////////////////////
@@ -658,6 +677,7 @@ System::Void frmConfig::InitComboBox() {
 	setComboBox(fcgCXInterlaced,     interlaced_desc);
 
 	setComboBox(fcgCXAudioEncTiming, audio_enc_timing_desc);
+	setComboBox(fcgCXAudioDelayCut,  AUDIO_DELAY_CUT_MODE);
 
 	setMuxerCmdExNames(fcgCXMP4CmdEx, MUXER_MP4);
 	setMuxerCmdExNames(fcgCXMKVCmdEx, MUXER_MKV);
@@ -825,6 +845,7 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
 	SetCXIndex(fcgCXAudioEncoder,        cnf->aud.encoder);
 	fcgCBAudio2pass->Checked           = cnf->aud.use_2pass != 0;
 	fcgCBAudioUsePipe->Checked = (CurrentPipeEnabled && !cnf->aud.use_wav);
+	SetCXIndex(fcgCXAudioDelayCut,       cnf->aud.delay_cut);
 	SetCXIndex(fcgCXAudioEncMode,        cnf->aud.enc_mode);
 	SetNUValue(fcgNUAudioBitrate,       (cnf->aud.bitrate != 0) ? cnf->aud.bitrate : GetCurrentAudioDefaultBitrate());
 	SetCXIndex(fcgCXAudioPriority,       cnf->aud.priority);
@@ -884,6 +905,7 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
 	cnf->aud.bitrate                = (int)fcgNUAudioBitrate->Value;
 	cnf->aud.use_2pass              = fcgCBAudio2pass->Checked;
 	cnf->aud.use_wav                = !fcgCBAudioUsePipe->Checked;
+	cnf->aud.delay_cut              = fcgCXAudioDelayCut->SelectedIndex;
 	cnf->aud.priority               = fcgCXAudioPriority->SelectedIndex;
 	cnf->aud.audio_encode_timing    = 1;
 	cnf->aud.aud_temp_dir           = fcgCXAudioTempDir->SelectedIndex;

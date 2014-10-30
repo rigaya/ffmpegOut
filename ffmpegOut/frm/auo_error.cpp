@@ -41,6 +41,15 @@ void error_amp_bitrate_confliction() {
 	write_log_auo_line(LOG_ERROR, "ビットレート設定を見なおしてください。");
 }
 
+void error_amp_afs_audio_delay_confliction() {
+	write_log_auo_line(LOG_ERROR, "上限設定付き自動マルチパス、自動フィールドシフト、音声ディレイカット[動画追加]は同時に指定できません。");
+	write_log_auo_line(LOG_ERROR, "エンコードを続行できません。");
+}
+
+void info_afs_audio_delay_confliction() {
+	write_log_auo_line(LOG_INFO, "自動フィールドシフト、音声ディレイカット[動画追加]が同時に指定されている場合には、音声エンコードは後で行います。");
+}
+
 static const char *get_target_limit_name(DWORD target_limit) {
 	const char *str_limit = "";
 	switch (target_limit) {
@@ -70,8 +79,13 @@ void error_amp_target_bitrate_too_small(DWORD target_limit) {
 }
 
 void warning_amp_change_bitrate(int bitrate_old, int bitrate_new, DWORD target_limit) {
-	write_log_auo_line_fmt(LOG_WARNING, "上限%sの設定を守るには、指定された目標ビットレートは大きすぎます。", get_target_limit_name(target_limit));
-	write_log_auo_line_fmt(LOG_WARNING, "目標ビットレートを %d kbps -> %d kbpsに変更します。", bitrate_old, bitrate_new);
+	if (bitrate_old >= 0) {
+		write_log_auo_line_fmt(LOG_WARNING, "上限%sの設定を守るには、指定された目標ビットレートは大きすぎます。", get_target_limit_name(target_limit));
+		write_log_auo_line_fmt(LOG_WARNING, "目標ビットレートを %d kbps -> %d kbpsに変更します。", bitrate_old, bitrate_new);
+	} else {
+		//-1は上限確認付crfで使用する
+		write_log_auo_line_fmt(LOG_WARNING, "目標ビットレートを %d kbpsに設定します。", bitrate_new);
+	}
 }
 
 void error_invalid_resolution(BOOL width, int mul, int w, int h) {
@@ -88,7 +102,20 @@ void error_no_exe_file(const char *name, const char *path) {
 		write_log_auo_line_fmt(LOG_ERROR, "指定された %s が %s にありません。", name, path);
 	else
 		write_log_auo_line_fmt(LOG_ERROR, "%s の場所が指定されていません。", name);
-	write_log_auo_line_fmt(LOG_ERROR, "%s を用意し、その場所を設定画面かから正しく指定してください。", name);
+	write_log_auo_line_fmt(LOG_ERROR, "%s を用意し、その場所を設定画面から正しく指定してください。", name);
+}
+
+void error_mp4_muxer_unmatch_of_ini_and_exe(BOOL exe_file_is_lsmash) {
+	static const char *MUXER_TYPE[] = { "mp4box", "L-SMASH" };
+	static const char *MUXER_STR1[] = { "mp4 muxの実行ファイル", "iniファイル" };
+	static const char *MUXER_STR2[] = { "", "用" };
+	static const char *MUXER_STR3[] = { "に指定しなおしてください。", "で上書きしてください。" };
+	write_log_auo_line_fmt(LOG_ERROR, "指定されたmp4 muxerとini設定ファイルのmuxerの種類が一致していません。ini: %s,  指定されたexe: %s",
+		MUXER_TYPE[!exe_file_is_lsmash], MUXER_TYPE[!!exe_file_is_lsmash]);
+	write_log_auo_line_fmt(LOG_ERROR, "L-SMASH(muxer, remuxer)を使用したい場合には、%sをL-SMASH%s%s",
+		MUXER_STR1[!!exe_file_is_lsmash], MUXER_STR2[!!exe_file_is_lsmash], MUXER_STR3[!!exe_file_is_lsmash]);
+	write_log_auo_line_fmt(LOG_ERROR, "mp4boxを使用したい場合には、%sをmp4box%s%s",
+		MUXER_STR1[!exe_file_is_lsmash], MUXER_STR2[!exe_file_is_lsmash], MUXER_STR3[!exe_file_is_lsmash]);
 }
 
 void warning_auto_afs_disable() {
@@ -137,6 +164,10 @@ void error_run_process(const char *exe_name, int rp_ret) {
 	}
 }
 
+void error_video_output_thread_start() {
+	write_log_auo_line(LOG_ERROR, "パイプ出力用スレッドの生成に失敗しました。");
+}
+
 void warning_auto_qpfile_failed() {
 	write_log_auo_line(LOG_WARNING, "Aviutlのキーフレーム検出用 qpfileの自動作成に失敗しました。");
 }
@@ -157,14 +188,30 @@ void error_malloc_8bit() {
 	write_log_auo_line(LOG_ERROR, "音声16bit→8bit変換用メモリ確保に失敗しました。");
 }
 
+void error_afs_interlace_stg() {
+	write_log_line(LOG_ERROR, 
+		"auo [error]: 自動フィールドシフトとインターレース設定が両方オンになっており、設定が矛盾しています。\n"
+		"             設定を見なおしてください。");
+}
+
+void warning_x264_mp4_output_not_supported() {
+	write_log_line(LOG_WARNING, 
+		"auo [warning]: 指定されたx264.exeはmp4出力に対応していません。\n"
+		"               出力拡張子を\".264\"に変更して出力を行うため、muxが余分に発生し、時間がかかる可能性があります。\n"
+		"               mp4出力に対応したx264.exeを使用することを推奨します。\n");
+}
+
 void error_x264_dead() {
 	write_log_auo_line(LOG_ERROR, "エンコーダが予期せず途中終了しました。エンコーダに不正なパラメータ(オプション)が渡された可能性があります。");
 }
 
-void error_x264_version() {
-	write_log_line(LOG_ERROR, ""
+void error_x264_version(const char *required_ver, const char *current_ver) {
+	write_log_line_fmt(LOG_ERROR, ""
 		"auo [error]: x264のバージョンが古く、エンコードできません。\n"
-		"             最新のx264をダウンロードし、設定画面で最新版に指定しなおしてください。");
+		"             最新の%sをダウンロードし、設定画面で最新版に指定しなおしてください。\n"
+		"             必要なバージョン:         %s\n"
+		"             実行ファイルのバージョン: %s\n",
+		required_ver, current_ver);
 }
 
 void error_afs_get_frame() {
@@ -190,8 +237,10 @@ void warning_audio_length() {
 
 void error_audenc_failed(const char *name, const char *args) {
 	write_log_auo_line_fmt(LOG_ERROR, "出力音声ファイルがみつかりません。%s での音声のエンコードに失敗しました。", name);
-	write_log_auo_line(    LOG_ERROR, "音声エンコードのコマンドラインは…");
-	write_log_auo_line(    LOG_ERROR, args);
+	if (args) {
+		write_log_auo_line(    LOG_ERROR, "音声エンコードのコマンドラインは…");
+		write_log_auo_line(    LOG_ERROR, args);
+	}
 }
 
 void error_mux_failed(const char *name, const char *args) {
@@ -210,12 +259,12 @@ void warning_failed_mux_tmp_drive_space() {
 	write_log_auo_line(LOG_WARNING, "指定されたmux用一時フォルダのあるドライブの空き容量取得に失敗しました。mux用一時フォルダ指定を解除しました。");
 }
 
-void error_failed_muxer_drive_space() {
-	write_log_auo_line(LOG_ERROR, "muxerのあるドライブの空き容量取得に失敗しました。muxを行えません。");
+void warning_failed_muxer_drive_space() {
+	write_log_auo_line(LOG_WARNING, "muxerのあるドライブの空き容量取得に失敗しました。容量不足によりmuxが失敗する可能性があります。");
 }
 
-void error_failed_out_drive_space() {
-	write_log_auo_line(LOG_ERROR, "出力先のあるドライブの空き容量取得に失敗しました。muxを行えません。");
+void warning_failed_out_drive_space() {
+	write_log_auo_line(LOG_WARNING, "出力先のあるドライブの空き容量取得に失敗しました。容量不足によりmuxが失敗する可能性があります。");
 }
 
 void warning_failed_get_aud_size() {
@@ -232,6 +281,14 @@ void error_no_aud_file() {
 
 void error_no_vid_file() {
 	write_log_auo_line(LOG_ERROR, "映像一時ファイルが見つかりません。muxを行えません。");
+}
+
+void error_aud_file_zero_byte() {
+	write_log_auo_line(LOG_ERROR, "音声一時ファイルが 0 byteです。muxを行えません。");
+}
+
+void error_vid_file_zero_byte() {
+	write_log_auo_line(LOG_ERROR, "映像一時ファイルが 0 byteです。muxを行えません。");
 }
 
 void warning_mux_tmp_not_enough_space() {
@@ -269,6 +326,11 @@ void warning_amp_failed() {
 	write_log_auo_line(LOG_WARNING, "自動マルチパスがチェックに失敗しました。指定した上限が守られていない可能性があります。");
 }
 
+void warning_amp_filesize_over_limit() {
+	write_log_auo_line_fmt(LOG_WARNING, "エンコード中にファイルサイズが上限を上回ってしました。");
+	write_log_auo_line_fmt(LOG_WARNING, "エンコードを中断し、設定を調整した後、再エンコードを行います。");
+}
+
 void warning_no_auto_save_log_dir() {
 	write_log_auo_line(LOG_WARNING, "指定した自動ログ保存先が存在しません。動画出力先に保存します。");
 }
@@ -281,24 +343,27 @@ void warning_mux_no_chapter_file() {
 	write_log_auo_line(LOG_WARNING, "指定されたチャプターファイルが存在しません。チャプターはmuxされません。");
 }
 
-void info_amp_result(DWORD status, BOOL retry, UINT64 filesize, double file_bitrate, double limit_filesize, double limit_filebitrate, int retry_count, int new_bitrate) {
-	int log_index = (status) ? ((retry) ? LOG_WARNING : LOG_ERROR) : LOG_INFO;
+void info_amp_result(DWORD status, int amp_result, UINT64 filesize, double file_bitrate, double limit_filesize, double limit_filebitrate, int retry_count, int new_bitrate) {
+	int log_index = (status) ? ((amp_result) ? LOG_WARNING : LOG_ERROR) : LOG_INFO;
 	write_log_auo_line_fmt(    log_index, "出力ファイルサイズ %.2f MB, ファイルビットレート %.2f kbps", filesize / (double)(1024*1024), file_bitrate);
 	if (status & AMPLIMIT_FILE_SIZE)
 		write_log_auo_line_fmt(log_index, "上限ファイルサイズ %.2f MB を上回ってしまいました。", limit_filesize);
 	if (status & AMPLIMIT_BITRATE)
 		write_log_auo_line_fmt(log_index, "上限ファイルビットレート %.2f kbps を上回ってしまいました。", limit_filebitrate);
-	if (status && retry)
-		write_log_auo_line_fmt(log_index, "目標ビットレートを %d kbpsに変更し、再エンコードを行います。", new_bitrate);
+	if (status && amp_result)
+		if (amp_result == 2)
+			write_log_auo_line_fmt(log_index, "音声目標ビットレートを %d kbpsに変更し、再エンコードを行います。", new_bitrate);
+		else if (new_bitrate >= 0) //-1は上限確認付crfで使用する
+			write_log_auo_line_fmt(log_index, "映像目標ビットレートを %d kbpsに変更し、再エンコードを行います。", new_bitrate);
 
 	if (!status)
 		write_log_auo_line_fmt(log_index, "指定された上限を下回っていることを確認しました。");
-	else if (!retry)
+	else if (!amp_result)
 		write_log_auo_line_fmt(log_index, "%d回トライしましたが、いずれも上限を上回ってしまいました。目標ビットレートを見なおしてください。", retry_count);
 }
 
 void warning_mux_chapter(int sts) {
-	switch ((AuoChapStatus)sts) {
+	switch (sts) {
 		case AUO_CHAP_ERR_NONE: break;
 		case AUO_CHAP_ERR_FILE_OPEN:        write_log_auo_line(LOG_WARNING, "チャプターファイルのオープンに失敗しました。"); break;
 		case AUO_CHAP_ERR_FILE_READ:        write_log_auo_line(LOG_WARNING, "チャプターファイルの読み込みに失敗しました。"); break;
@@ -315,6 +380,11 @@ void warning_mux_chapter(int sts) {
 		default:                            write_log_auo_line(LOG_WARNING, "チャプターmux: 不明なエラーが発生しました。"); break;
 	}
 	return;
+}
+
+void warning_chapter_convert_to_utf8(int sts) {
+	write_log_auo_line_fmt(LOG_WARNING, "チャプターファイルのUTF-8への変換に失敗しました。");
+	warning_mux_chapter(sts);
 }
 
 void error_select_convert_func(int width, int height, BOOL use16bit, BOOL interlaced, int output_csp) {

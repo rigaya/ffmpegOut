@@ -43,8 +43,8 @@ void set_window_title_enc_mes(const char *chr, int total_drop, int frame_n) {
 }
 //メッセージをログウィンドウに表示
 [STAThreadAttribute]
-void write_log_auo_line(int log_type_index, const char *chr) {
-	frmLog::Instance::get()->WriteLogAuoLine(String(chr).ToString(), log_type_index);
+void write_log_auo_line(int log_type_index, const char *chr, bool from_utf8) {
+	frmLog::Instance::get()->WriteLogAuoLine((from_utf8) ? Utf8toString(chr) : String(chr).ToString(), log_type_index);
 }
 //現在実行中の内容の設定
 [STAThreadAttribute]
@@ -60,8 +60,8 @@ void set_log_progress(double progress) {
 }
 //メッセージを直接ログウィンドウに表示
 [STAThreadAttribute]
-void write_log_line(int log_type_index, const char *chr) {
-	frmLog::Instance::get()->WriteLogLine(String(chr).ToString(), log_type_index);
+void write_log_line(int log_type_index, const char *chr, bool from_utf8) {
+	frmLog::Instance::get()->WriteLogLine((from_utf8) ? Utf8toString(chr) : String(chr).ToString(), log_type_index);
 }
 //音声を並列に処理する際に、蓄えた音声のログを表示
 //必ず音声処理が動いていないところで呼ぶこと!
@@ -120,11 +120,16 @@ System::Void frmSetTransparency::setTransparency(int value) {
 	}
 }
 
+//以下部分的にwarning C4100を黙らせる
+//C4100 : 引数は関数の本体部で 1 度も参照されません。
+#pragma warning( push )
+#pragma warning( disable: 4100 )
 System::Void frmSetTransparency::frmSetTransparency_FormClosed(System::Object^  sender, System::Windows::Forms::FormClosedEventArgs^  e) {
 	frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
 	if (log != nullptr)
 		log->EnableToolStripMenuItemTransparent();
 }
+#pragma warning( pop )
 
 System::Void frmSetTransparency::fstSetLastTransparency() {
 	frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
@@ -134,9 +139,12 @@ System::Void frmSetTransparency::fstSetLastTransparency() {
 ////////////////////////////////////////////////////
 //       frmSetLogColor 関連
 ////////////////////////////////////////////////////
+#pragma warning( push )
+#pragma warning( disable: 4100 )
 System::Void frmSetLogColor::fscBTOK_Click(System::Object^  sender, System::EventArgs^  e) {
 	frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
 	if (log != nullptr)
 		log->SetNewLogColor();
 	this->Close();
 }
+#pragma warning( pop )

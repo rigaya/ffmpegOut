@@ -108,11 +108,30 @@
     <ClCompile Include="frm\frmLog.cpp">
       <Filter>フォーム</Filter>
     </ClCompile>
+    <ClCompile Include="encode\convert_avx2.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\convert_sse2.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\convert_sse41.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\convert_ssse3.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\exe_version.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="prm\cpu_info.cpp">
+      <Filter>ソース ファイル\prm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ffmpegOut.def">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="ffmpegOut.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auo.h">
@@ -231,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="frm\frmSetLogColor.h">
       <Filter>フォーム</Filter>
+    </ClInclude>
+    <ClInclude Include="encode\convert_simd.h">
+      <Filter>ヘッダー ファイル\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="encode\exe_version.h">
+      <Filter>ヘッダー ファイル\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="prm\cpu_info.h">
+      <Filter>ヘッダー ファイル\prm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

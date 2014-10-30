@@ -217,6 +217,8 @@ namespace ffmpegOut {
 			this->Controls->Add(this->fscBTDefault);
 			this->Controls->Add(this->fscBTCancel);
 			this->Controls->Add(this->fscBTOK);
+			this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedDialog;
 			this->KeyPreview = true;
 			this->MaximizeBox = false;

@@ -123,7 +123,7 @@ int guiEx_config::load_auo_conf(CONF_GUIEX *conf, const char *stg_file) {
 	dst += CONF_HEAD_SIZE;
 
 	//ブロック部分のコピー
-	for (int i = 0; i < ((CONF_GUIEX *)dat)->block_count; ++i) {
+	for (int i = 0; i < ((CONF_GUIEX *)dat)->block_count; i++) {
 		filedat = dat + ((CONF_GUIEX *)dat)->block_head_p[i];
 		dst = (BYTE *)conf + conf_block_pointer[i];
 		memcpy(dst, filedat, min(((CONF_GUIEX *)dat)->block_size[i], conf_block_data[i]));

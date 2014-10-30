@@ -11,7 +11,13 @@
 #define _AUO_UTIL_H_
 
 #include <Windows.h>
+#if (_MSC_VER >= 1800)
+#include <VersionHelpers.h>
+#endif
 #include <string.h>
+#include <vector>
+#include <string>
+#include <cstdarg>
 #include <stddef.h>
 #include <stdio.h>
 #include <algorithm>
@@ -22,22 +28,21 @@
 #include "auo.h"
 #include "auo_version.h"
 
-#if (_MSC_VER >= 1600)
-#include <immintrin.h>
-#endif
-
 //日本語環境の一般的なコードページ一覧
-#define CODE_PAGE_SJIS        932 //Shift-JIS
-#define CODE_PAGE_JIS         50220
-#define CODE_PAGE_EUC_JP      51932
-#define CODE_PAGE_UTF8        CP_UTF8
-#define CODE_PAGE_UTF16_LE    CP_WINUNICODE //WindowsのUnicode WCHAR のコードページ
-#define CODE_PAGE_UTF16_BE    1201
-#define CODE_PAGE_US_ASCII    20127
-#define CODE_PAGE_WEST_EUROPE 1252  //厄介な西ヨーロッパ言語
-#define CODE_PAGE_UNSET       0xffffffff
+enum : DWORD {
+	CODE_PAGE_SJIS        = 932, //Shift-JIS
+	CODE_PAGE_JIS         = 50220,
+	CODE_PAGE_EUC_JP      = 51932,
+	CODE_PAGE_UTF8        = CP_UTF8,
+	CODE_PAGE_UTF16_LE    = CP_WINUNICODE, //WindowsのUnicode WCHAR のコードページ
+	CODE_PAGE_UTF16_BE    = 1201,
+	CODE_PAGE_US_ASCII    = 20127,
+	CODE_PAGE_WEST_EUROPE = 1252,  //厄介な西ヨーロッパ言語
+	CODE_PAGE_UNSET       = 0xffffffff,
+};
 
 //BOM文字リスト
+static const int MAX_UTF8_CHAR_LENGTH = 6;
 static const BYTE UTF8_BOM[]     = { 0xEF, 0xBB, 0xBF };
 static const BYTE UTF16_LE_BOM[] = { 0xFF, 0xFE };
 static const BYTE UTF16_BE_BOM[] = { 0xFE, 0xFF };
@@ -56,10 +61,55 @@ enum {
 
 //関数マクロ
 #define clamp(x, low, high) (((x) <= (high)) ? (((x) >= (low)) ? (x) : (low)) : (high))
-#define foreach(type,it,a) \
-    for (type::iterator (it)=(a)->begin();(it)!=(a)->end();(it)++)
-#define const_foreach(type,it,a) \
-    for (type::const_iterator (it)=(a)->begin();(it)!=(a)->end();(it)++)
+#define foreach(it,a) \
+    for (auto (it)=(a).begin();(it)!=(a).end();(it)++)
+
+static std::string strprintf(const char* format, ...) {
+	std::va_list arg;
+	va_start(arg, format);
+
+	std::string ret;
+	ret.resize(_vscprintf(format, arg) + 1);
+	int n = vsprintf_s(&ret[0], ret.size(), format, arg);
+	ret.resize(n);
+	va_end(arg);
+	return ret;
+}
+
+static std::wstring strprintf(const wchar_t* format, ...) {
+	std::va_list arg;
+	va_start(arg, format);
+
+	std::wstring ret;
+	ret.resize(_vscwprintf(format, arg) + 1);
+	int n = vswprintf_s(&ret[0], ret.size(), format, arg);
+	ret.resize(n);
+	va_end(arg);
+	return ret;
+}
+
+template<typename T>
+static std::basic_string<T> replace(std::basic_string<T> targetString, std::basic_string<T> oldStr, std::basic_string<T> newStr) {
+	for (std::basic_string<T>::size_type pos(targetString.find(oldStr)); std::basic_string<T>::npos != pos;
+		pos = targetString.find(oldStr, pos + newStr.length()) ) {
+        targetString.replace(pos, oldStr.length(), newStr);
+    }
+    return targetString;
+}
+
+template<typename T>
+static std::vector<std::basic_string<T>> split(const std::basic_string<T> &str, T delim) {
+	std::vector<std::basic_string<T>> res;
+	string::size_type current = 0, found;
+	for (; std::basic_string<T>::npos != (found = str.find_first_of(delim, current)); current = found + 1) {
+		res.push_back(std::basic_string<T>(str, current, found - current));
+		current = found + 1;
+	}
+	std::basic_string<T> last_line = std::basic_string<T>(str, current, str.length() - current);
+	if (std::wcslen(last_line.c_str()))
+		res.push_back(last_line);
+	return res;
+}
 
 //基本的な関数
 static inline double pow2(double a) {
@@ -295,7 +345,6 @@ static BOOL check_sse4_1() {
 	__cpuid(CPUInfo, 1);
 	return (CPUInfo[2] & 0x00080000) != 0;
 }
-#if (_MSC_VER >= 1600)
 static BOOL check_avx() {
 	int CPUInfo[4];
 	__cpuid(CPUInfo, 1);
@@ -306,8 +355,6 @@ static BOOL check_avx() {
 	}
 	return FALSE;
 }
-#endif
-#if (_MSC_VER >= 1700)
 static BOOL check_avx2() {
 	int CPUInfo[4];
 	__cpuid(CPUInfo, 1);
@@ -321,7 +368,6 @@ static BOOL check_avx2() {
 	}
 	return FALSE;
 }
-#endif
 
 static DWORD get_availableSIMD() {
 	int CPUInfo[4];
@@ -337,7 +383,6 @@ static DWORD get_availableSIMD() {
 		simd |= AUO_SIMD_SSE41;
 	if  (CPUInfo[2] & 0x00100000)
 		simd |= AUO_SIMD_SSE42;
-#if (_MSC_VER >= 1600)
 	UINT64 XGETBV = 0;
 	if ((CPUInfo[2] & 0x18000000) == 0x18000000) {
 		XGETBV = _xgetbv(0);
@@ -347,15 +392,18 @@ static DWORD get_availableSIMD() {
 	__cpuid(CPUInfo, 7);
 	if ((simd & AUO_SIMD_AVX) && (CPUInfo[1] & 0x00000020))
 		simd |= AUO_SIMD_AVX2;
-#endif
 	return simd;
 }
 
 static BOOL check_OS_Win7orLater() {
+#if (_MSC_VER >= 1800)
+	return IsWindowsVersionOrGreater(6, 1, 0);
+#else
 	OSVERSIONINFO osvi = { 0 };
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osvi);
 	return ((osvi.dwPlatformId == VER_PLATFORM_WIN32_NT) && ((osvi.dwMajorVersion == 6 && osvi.dwMinorVersion >= 1) || osvi.dwMajorVersion > 6));
+#endif
 }
 
 static inline const char *GetFullPath(const char *path, char *buffer, size_t nSize) {
@@ -489,7 +537,6 @@ static inline void insert_before_ext(WCHAR *filename, size_t nSize, int insert_n
 	swprintf_s(tmp, _countof(tmp), L"%d", insert_num);
 	insert_before_ext(filename, nSize, tmp);
 }
-
 
 //拡張子が一致するか確認する
 static inline BOOL check_ext(const char *filename, const char *ext) {
@@ -931,6 +978,9 @@ DWORD check_bom(const void* chr);
 //与えられた文字列から主に日本語について文字コード判定を行う
 DWORD get_code_page(const void *str, DWORD size_in_byte);
 
+//CODE_PAGE_SJIS / CODE_PAGE_UTF8 / CODE_PAGE_EUC_JP についてのみ判定を行う
+DWORD jpn_check(const void *str, DWORD size_in_byte);
+
 //IMultipleLanguge2 の DetectInoutCodePageがたまに的外れな「西ヨーロッパ言語」を返すので
 //西ヨーロッパ言語 なら Shift-JIS にしてしまう
 BOOL fix_ImulL_WesternEurope(UINT *code_page);
@@ -947,8 +997,6 @@ BOOL del_arg(char *cmd, char *target_arg, int del_arg_delta);
 BOOL SetThreadPriorityForModule(DWORD TargetProcessId, const char *TargetModule, int ThreadPriority);
 BOOL SetThreadAffinityForModule(DWORD TargetProcessId, const char *TargetModule, DWORD_PTR ThreadAffinityMask);
 
-BOOL getProcessorCount(DWORD *physical_processor_core, DWORD *logical_processor_core);
-
-int getCPUName(char *buf, size_t nSize);
+const TCHAR *getOSVersion();
 
 #endif //_AUO_UTIL_H_

@@ -18,18 +18,27 @@
 
 static const BOOL   DEFAULT_LARGE_CMD_BOX         = 0;
 static const BOOL   DEFAULT_AUTO_AFS_DISABLE      = 0;
-static const BOOL   DEFAULT_AUTO_DEL_STATS        = 0;
+static const int    DEFAULT_OUTPUT_EXT            = 0;
+static const BOOL   DEFAULT_AUTO_DEL_STATS        = 1;
 static const BOOL   DEFAULT_AUTO_DEL_CHAP         = 1;
 static const BOOL   DEFAULT_KEEP_QP_FILE          = 0;
+static const BOOL   DEFAULT_AUD_DELAY_CUT_MODE    = 0;
 static const BOOL   DEFAULT_DISABLE_TOOLTIP_HELP  = 0;
 static const BOOL   DEFAULT_DISABLE_VISUAL_STYLES = 0;
 static const BOOL   DEFAULT_ENABLE_STG_ESC_KEY    = 0;
 static const BOOL   DEFAULT_SAVE_RELATIVE_PATH    = 0;
+static const BOOL   DEFAULT_CHAP_NERO_TO_UTF8     = 0;
+static const BOOL   DEFAULT_AUDIO_ENCODER         = 0;
 static const int    DEFAULT_AMP_RETRY_LIMIT       = 3;
-static const double DEFAULT_AMP_MARGIN            = 0.100;
+static const double DEFAULT_AMP_MARGIN            = 0.05;
+static const double DEFAULT_AMP_REENC_AUDIO_MULTI = 0.10;
 static const BOOL   DEFAULT_AMP_KEEP_OLD_FILE     = 0;
 static const BOOL   DEFAULT_RUN_BAT_MINIMIZED     = 0;
+static const BOOL   DEFAULT_SET_KEYFRAME_AFS24FPS = 0;
+static const BOOL   DEFAULT_AUTO_REFLIMIT_BYLEVEL = 0;
 
+static const int    DEFAULT_LOG_LEVEL            = 0;
+static const BOOL   DEFAULT_LOG_WINE_COMPAT      = 0;
 static const BOOL   DEFAULT_LOG_START_MINIMIZED  = 0;
 static const BOOL   DEFAULT_LOG_TRANSPARENT      = 1;
 static const BOOL   DEFAULT_LOG_AUTO_SAVE        = 0;
@@ -64,6 +73,12 @@ const int FAW_INDEX_ERROR = -1;
 
 const int AUTO_SAVE_LOG_OUTPUT_DIR = 0;
 const int AUTO_SAVE_LOG_CUSTOM = 1;
+
+enum {
+	DISABLE_LOG_PIPE_INPUT = 0x01,
+	DISABLE_LOG_NORMAL     = 0x02,
+	DISABLE_LOG_ALL        = DISABLE_LOG_PIPE_INPUT | DISABLE_LOG_NORMAL,
+};
 
 //メモリーを切り刻みます。
 class mem_cutter {
@@ -133,6 +148,7 @@ typedef struct {
 	int bitrate_max;     //ビットレートの最大値
 	int bitrate_default; //ビットレートのデフォルト値
 	int bitrate_step;    //クリックでの変化幅
+	int delay;           //エンコード遅延 (音声が映像に対し遅れるsample数)
 	int enc_2pass;       //2passエンコを行う
 	int use_8bit;        //8bitwavを入力する
 	char *disp_list;     //表示名のリスト
@@ -145,10 +161,14 @@ typedef struct {
 	char *filename;              //拡張子付き名前
 	char fullpath[MAX_PATH_LEN]; //エンコーダの場所(フルパス)
 	char *aud_appendix;          //作成する音声ファイル名に追加する文字列
+	char *raw_appendix;          //作成する音声ファイル名に追加する文字列 (raw出力時)
 	int pipe_input;              //パイプ入力が可能
+	DWORD disable_log;           //ログ表示を禁止 (DISABLE_LOG_xxx)
 	char *cmd_base;              //1st pass用コマンドライン
 	char *cmd_2pass;             //2nd pass用コマンドライン
+	char *cmd_raw;               //raw出力用コマンドライン
 	char *cmd_help;              //ヘルプ表示用コマンドライン
+	char *cmd_ver;               //バージョン表示用のコマンドライン
 	int mode_count;              //エンコードモードの数
 	AUDIO_ENC_MODE *mode;        //エンコードモードの設定
 } AUDIO_SETTINGS;
@@ -171,7 +191,9 @@ typedef struct {
 	char *aud_cmd;                //音声mux用のコマンドライン
 	char *tc_cmd;                 //タイムコードmux用のコマンドライン
 	char *tmp_cmd;                //一時フォルダ指定用コマンドライン
+	char *delay_cmd;              //音声エンコーダディレイ指定用のコマンドライン
 	char *help_cmd;               //ヘルプ表示用コマンドライン
+	char *ver_cmd;                //バージョン表示用のコマンドライン
 	int ex_count;                 //拡張オプションの数
 	MUXER_CMD_EX *ex_cmd;         //拡張オプション
 	int post_mux;                 //muxerを実行したあとに別のmuxerを実行する
@@ -184,6 +206,8 @@ typedef struct {
 
 typedef struct {
 	BOOL minimized;                        //最小化で起動
+	BOOL wine_compat;                      //wine互換モード
+	int  log_level;                        //ログ出力のレベル
 	BOOL transparent;                      //半透明で表示
 	int  transparency;                     //透過度
 	BOOL auto_save_log;                    //ログ自動保存を行うかどうか
@@ -216,6 +240,7 @@ typedef struct {
 	//BOOL   large_cmdbox;                        //拡大サイズでコマンドラインプレビューを行う
 	DWORD  audio_buffer_size;                   //音声用バッファサイズ
 	BOOL   auto_afs_disable;                    //自動的にafsを無効化
+	//int    default_output_ext;                  //デフォルトで使用する拡張子
 	//BOOL   auto_del_stats;                      //自動マルチパス時、ステータスファイルを自動的に削除
 	//BOOL   auto_del_chap;                       //チャプターファイルの自動削除
 	BOOL   keep_qp_file;                        //キーフレーム検出で作成したqpファイルを削除しない
@@ -223,11 +248,16 @@ typedef struct {
 	BOOL   disable_visual_styles;               //視覚効果をオフにする
 	BOOL   enable_stg_esc_key;                  //設定画面でEscキーを有効化する
 	AUO_FONT_INFO conf_font;                    //設定画面のフォント
+	int    default_audio_encoder;               //デフォルトの音声エンコーダ
 	//int    amp_retry_limit;                     //自動マルチパス試行回数制限
 	//double amp_bitrate_margin_multi;            //自動マルチパスで、上限ファイルサイズからビットレートを再計算するときの倍率
+	//double amp_reenc_audio_multi;               //自動マルチパスで、音声側を再エンコしてビットレート調整をする上限倍率
 	//BOOL   amp_keep_old_file;                   //自動マルチパスで、上限を超えてしまったファイルを削除しない
+	//BOOL   chap_nero_convert_to_utf8;           //nero形式のチャプターをUTF-8に変換する
 	BOOL   get_relative_path;                  //相対パスで保存する
 	BOOL   run_bat_minimized;                   //エンコ前後バッチ処理を最小化で実行
+	//BOOL   set_keyframe_as_afs_24fps;           //自動フィールドシフト使用時にも24fps化としてキーフレーム設定を強制的に行う
+	//BOOL   auto_ref_limit_by_level;             //参照フレーム数をLevelにより自動的に制限する
 	char   custom_tmp_dir[MAX_PATH_LEN];        //一時フォルダ
 	char   custom_audio_tmp_dir[MAX_PATH_LEN];  //音声用一時フォルダ
 	char   custom_mp4box_tmp_dir[MAX_PATH_LEN]; //mp4box用一時フォルダ
@@ -237,7 +267,7 @@ typedef struct {
 } LOCAL_SETTINGS;
 
 typedef struct {
-	char aud[2][MAX_APPENDIX_LEN];     //音声ファイル名に追加する文字列
+	char aud[2][MAX_APPENDIX_LEN];     //音声ファイル名に追加する文字列...音声エンコード段階で設定する
 	char tc[MAX_APPENDIX_LEN];         //タイムコードファイル名に追加する文字列
 	char qp[MAX_APPENDIX_LEN];         //qpファイル名に追加する文字列
 	char chap[MAX_APPENDIX_LEN];       //チャプターファイル名に追加する文字列
@@ -269,6 +299,7 @@ private:
 	BOOL check_inifile();            //iniファイルが読めるかテスト
 
 public:
+	static char blog_url[MAX_PATH_LEN];      //ブログページのurl
 	int s_aud_count;                 //音声エンコーダの数
 	int s_mux_count;                 //muxerの数 (基本3固定)
 	AUDIO_SETTINGS *s_aud;           //音声エンコーダの設定
