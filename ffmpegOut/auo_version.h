@@ -16,8 +16,8 @@
 #define AUO_NAME             "ffmpegOut.auo"
 #define AUO_NAME_W          L"ffmpegOut.auo"
 #define AUO_FULL_NAME        "ffmpeg / avconv 出力 "
-#define AUO_VERSION_NAME     "ffmpeg / avconv 出力 "AUO_VERSION_STR
-#define AUO_VERSION_INFO     "ffmpeg / avconv 出力 "AUO_VERSION_STR" by rigaya"
+#define AUO_VERSION_NAME     "ffmpeg / avconv 出力 " AUO_VERSION_STR
+#define AUO_VERSION_INFO     "ffmpeg / avconv 出力 " AUO_VERSION_STR " by rigaya"
 #define AUO_EXT_FILTER       "All Support Formats (*.*)\0*\0"
 
 #ifdef DEBUG
@@ -35,7 +35,7 @@
 #define VER_STR_FILEVERSION      AUO_VERSION_STR
 #define VER_STR_INTERNALNAME     AUO_FULL_NAME
 #define VER_STR_ORIGINALFILENAME AUO_NAME
-#define VER_STR_LEGALCOPYRIGHT   AUO_FULL_NAME" by rigaya"
+#define VER_STR_LEGALCOPYRIGHT   AUO_FULL_NAME " by rigaya"
 #define VER_STR_PRODUCTNAME      AUO_NAME_WITHOUT_EXT
 #define VER_PRODUCTVERSION       VER_FILEVERSION
 #define VER_STR_PRODUCTVERSION   VER_STR_FILEVERSION
