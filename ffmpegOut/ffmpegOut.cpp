@@ -30,7 +30,7 @@
 #include "auo_encode.h"
 #include "auo_runbat.h"
 
-static void make_outfilename_and_set_to_oipsavefile(OUTPUT_INFO *oip, char *outfilename, DWORD nSize);
+static void make_outfilename_and_set_to_oipsavefile(OUTPUT_INFO *oip, char *outfilename, DWORD nSize, const CONF_GUIEX *conf_out);
 
 //---------------------------------------------------------------------
 //        出力プラグイン構造体定義
@@ -62,7 +62,7 @@ EXTERN_C OUTPUT_PLUGIN_TABLE __declspec(dllexport) * __stdcall GetOutputPluginTa
 //        出力プラグイン内部変数
 //---------------------------------------------------------------------
 
-static CONF_GUIEX conf = { 0 };
+static CONF_GUIEX g_conf = { 0 };
 static SYSTEM_DATA sys_dat = { 0 };
 
 
@@ -137,7 +137,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     AUO_RESULT ret = AUO_RESULT_SUCCESS;
     static const encode_task task[3][2] = { { video_output, audio_output }, { audio_output, video_output }, { audio_output_parallel, video_output }  };
     PRM_ENC pe = { 0 };
-    CONF_GUIEX conf_out = conf;
+    CONF_GUIEX conf_out = g_conf;
     const DWORD tm_start_enc = timeGetTime();
 
     //データの初期化
@@ -147,7 +147,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     //出力拡張子の設定
     char *orig_savfile = oip->savefile;
     char outfilename[MAX_PATH_LEN];
-    make_outfilename_and_set_to_oipsavefile(oip, outfilename, _countof(outfilename));
+    make_outfilename_and_set_to_oipsavefile(oip, outfilename, _countof(outfilename), &conf_out);
 
     //ログウィンドウを開く
     open_log_window(oip->savefile, &sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
@@ -200,7 +200,7 @@ BOOL func_config(HWND hwnd, HINSTANCE dll_hinst)
 {
     init_SYSTEM_DATA(&sys_dat);
     if (sys_dat.exstg->get_init_success())
-        ShowfrmConfig(&conf, &sys_dat);
+        ShowfrmConfig(&g_conf, &sys_dat);
     return TRUE;
 }
 #pragma warning( pop )
@@ -208,8 +208,8 @@ BOOL func_config(HWND hwnd, HINSTANCE dll_hinst)
 int func_config_get( void *data, int size )
 {
     if (data && size == sizeof(CONF_GUIEX))
-        memcpy(data, &conf, sizeof(conf));
-    return sizeof(conf);
+        memcpy(data, &g_conf, sizeof(g_conf));
+    return sizeof(g_conf);
 }
 
 int func_config_set( void *data,int size )
@@ -217,8 +217,8 @@ int func_config_set( void *data,int size )
     init_SYSTEM_DATA(&sys_dat);
     if (!sys_dat.exstg->get_init_success(TRUE))
         return NULL;
-    init_CONF_GUIEX(&conf, FALSE);
-    return (guiEx_config::adjust_conf_size(&conf, data, size)) ? size : NULL;
+    init_CONF_GUIEX(&g_conf, FALSE);
+    return (guiEx_config::adjust_conf_size(&g_conf, data, size)) ? size : NULL;
 }
 
 
@@ -270,12 +270,12 @@ void write_log_line_fmt(int log_type_index, const char *format, ...) {
     free(buffer);
 }
 #pragma warning( pop )
-static void make_outfilename_and_set_to_oipsavefile(OUTPUT_INFO *oip, char *outfilename, DWORD nSize) {
+static void make_outfilename_and_set_to_oipsavefile(OUTPUT_INFO *oip, char *outfilename, DWORD nSize, const CONF_GUIEX *conf_out) {
     strcpy_s(outfilename, nSize, oip->savefile);
-    if (str_has_char(conf.vid.outext)) {
+    if (str_has_char(conf_out->vid.outext)) {
         char *ptr_ext = PathFindExtension(outfilename);
-        if (ptr_ext == NULL) ptr_ext = outfilename + strlen(outfilename);
-        strcpy_s(ptr_ext, nSize - (ptr_ext - outfilename), conf.vid.outext);
+        if (ptr_ext == NULL || _stricmp(ptr_ext, conf_out->vid.outext) != 0) ptr_ext = outfilename + strlen(outfilename);
+        strcpy_s(ptr_ext, nSize - (ptr_ext - outfilename), conf_out->vid.outext);
     }
     oip->savefile = outfilename;
 }
