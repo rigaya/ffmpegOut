@@ -49,7 +49,7 @@ int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
     for (data = audio_dat; data < fin; data += step) {
         short check[3] = { *data, (BYTE)((*data >> 8) + 128), (BYTE)((*data & 0xff) + 128) };
 
-        for (int i = 0; i < 3; i++) {
+        for (i = 0; i < 3; i++) {
             if (check[i] == 0) {
                 current_zero_blocks[i]++;
             } else {

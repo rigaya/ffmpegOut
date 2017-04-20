@@ -41,7 +41,6 @@ void taskbar_progress_paused(HWND hWnd) {
 
 void taskbar_setprogress(HWND hWnd, double progress) {
     if (g_pTaskbarList) {
-        const int MAX_PROGRESS = 1000;
         g_pTaskbarList->SetProgressValue(hWnd, (enabled) ? (int)(MAX_PROGRESS * progress + 0.5) : 0, MAX_PROGRESS);
         g_pTaskbarList->SetProgressState(hWnd, (enabled) ? TBPF_NORMAL : TBPF_NOPROGRESS);
     }
