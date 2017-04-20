@@ -19,30 +19,30 @@ static BOOL enabled = false;
 static const int MAX_PROGRESS = 1000;
 
 void taskbar_progress_enable(BOOL _enable) {
-	enabled = _enable;
+    enabled = _enable;
 }
 
 void taskbar_progress_init() {
-	if (!check_OS_Win7orLater() || CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&g_pTaskbarList)) != S_OK)
-		g_pTaskbarList = NULL;
+    if (!check_OS_Win7orLater() || CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&g_pTaskbarList)) != S_OK)
+        g_pTaskbarList = NULL;
 }
 
 void taskbar_progress_start(HWND hWnd, int mode) {
-	if (g_pTaskbarList) {
-		g_pTaskbarList->SetProgressValue(hWnd, 0, MAX_PROGRESS);
-		g_pTaskbarList->SetProgressState(hWnd, (!enabled || mode == PROGRESSBAR_DISABLED) ? TBPF_NOPROGRESS : ((mode == PROGRESSBAR_MARQUEE) ? TBPF_INDETERMINATE : TBPF_NORMAL));
-	}
+    if (g_pTaskbarList) {
+        g_pTaskbarList->SetProgressValue(hWnd, 0, MAX_PROGRESS);
+        g_pTaskbarList->SetProgressState(hWnd, (!enabled || mode == PROGRESSBAR_DISABLED) ? TBPF_NOPROGRESS : ((mode == PROGRESSBAR_MARQUEE) ? TBPF_INDETERMINATE : TBPF_NORMAL));
+    }
 }
 
 void taskbar_progress_paused(HWND hWnd) {
-	if (g_pTaskbarList && enabled)
-		g_pTaskbarList->SetProgressState(hWnd, TBPF_PAUSED);
+    if (g_pTaskbarList && enabled)
+        g_pTaskbarList->SetProgressState(hWnd, TBPF_PAUSED);
 }
 
 void taskbar_setprogress(HWND hWnd, double progress) {
-	if (g_pTaskbarList) {
-		const int MAX_PROGRESS = 1000;
-		g_pTaskbarList->SetProgressValue(hWnd, (enabled) ? (int)(MAX_PROGRESS * progress + 0.5) : 0, MAX_PROGRESS);
-		g_pTaskbarList->SetProgressState(hWnd, (enabled) ? TBPF_NORMAL : TBPF_NOPROGRESS);
-	}
+    if (g_pTaskbarList) {
+        const int MAX_PROGRESS = 1000;
+        g_pTaskbarList->SetProgressValue(hWnd, (enabled) ? (int)(MAX_PROGRESS * progress + 0.5) : 0, MAX_PROGRESS);
+        g_pTaskbarList->SetProgressState(hWnd, (enabled) ? TBPF_NORMAL : TBPF_NOPROGRESS);
+    }
 }
