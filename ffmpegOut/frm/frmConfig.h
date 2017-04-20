@@ -2320,7 +2320,7 @@ private: System::Windows::Forms::Label^  fcgLBAudioDelayCut;
                 ofd.InitialDirectory = Path::GetFullPath(Path::GetDirectoryName(TX->Text));
             else
                 ofd.InitialDirectory = String(sys_dat->aviutl_dir).ToString();
-            bool ret = (ofd.ShowDialog() == Windows::Forms::DialogResult::OK);
+            bool ret = (ofd.ShowDialog() == System::Windows::Forms::DialogResult::OK);
             if (ret) {
                 if (sys_dat->exstg->s_local.get_relative_path)
                     ofd.FileName = GetRelativePath(ofd.FileName, CurrentDir);
@@ -2365,7 +2365,7 @@ private: System::Windows::Forms::Label^  fcgLBAudioDelayCut;
             FolderBrowserDialog^ fbd = fcgfolderBrowserTemp;
             if (Directory::Exists(TX->Text))
                 fbd->SelectedPath = TX->Text;
-            if (fbd->ShowDialog() == Windows::Forms::DialogResult::OK) {
+            if (fbd->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
                 if (sys_dat->exstg->s_local.get_relative_path)
                     fbd->SelectedPath = GetRelativePath(fbd->SelectedPath);
                 TX->Text = fbd->SelectedPath;
@@ -2416,7 +2416,7 @@ private: System::Windows::Forms::Label^  fcgLBAudioDelayCut;
             }
             ofd->Multiselect = false;
             ofd->Filter = fileTypeName + L"(*" + ext + L")|*" + ext;
-            bool ret = (ofd->ShowDialog() == Windows::Forms::DialogResult::OK);
+            bool ret = (ofd->ShowDialog() == System::Windows::Forms::DialogResult::OK);
             if (ret) {
                 if (sys_dat->exstg->s_local.get_relative_path)
                     ofd->FileName = GetRelativePath(ofd->FileName, CurrentDir);
