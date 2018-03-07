@@ -103,6 +103,7 @@ typedef struct {
     //char   cqmfile[MAX_PATH_LEN];    //x264 cqmfileの場所
     char   cmdex[CMDEX_MAX_LEN];       //追加コマンドライン
     char   outext[MAX_APPENDIX_LEN];   //出力拡張子
+    char   incmd[256];                 //入力オプション
     //int    __yc48_colormatrix_conv;  //YC48の色変換 (使用されていません)
     //DWORD  amp_check;                //自動マルチパス時のチェックの種類(AMPLIMIT_FILE_SIZE/AMPLIMIT_BITRATE)
     //double amp_limit_file_size;      //自動マルチパス時のファイルサイズ制限(MB)

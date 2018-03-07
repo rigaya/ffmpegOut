@@ -28,8 +28,8 @@
 #ifndef _AUO_VERSION_H_
 #define _AUO_VERSION_H_
 
-#define AUO_VERSION          0,0,6,0
-#define AUO_VERSION_STR      "0.06"
+#define AUO_VERSION          0,0,7,0
+#define AUO_VERSION_STR      "0.07"
 #define AUO_NAME_WITHOUT_EXT "ffmpegOut"
 #define AUO_NAME             "ffmpegOut.auo"
 #define AUO_NAME_W          L"ffmpegOut.auo"

@@ -718,6 +718,7 @@ System::Void frmConfig::SetTXMaxLen(TextBox^ TX, int max_len) {
 System::Void frmConfig::SetTXMaxLenAll() {
     //MaxLengthに最大文字数をセットし、それをもとにバイト数計算を行うイベントをセットする。
     SetTXMaxLen(fcgTXCmdEx,                sizeof(conf->vid.cmdex) - 1);
+    SetTXMaxLen(fcgTXInCmd,                sizeof(conf->vid.incmd) - 1);
     SetTXMaxLen(fcgTXffmpegOutPath,        sizeof(sys_dat->exstg->s_local.ffmpeg_path) - 1);
     SetTXMaxLen(fcgTXAudioEncoderPath,     sizeof(sys_dat->exstg->s_aud[0].fullpath) - 1);
     SetTXMaxLen(fcgTXMP4MuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MP4].fullpath) - 1);
@@ -856,6 +857,7 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
 
     fcgTXCmdEx->Text                   = String(cnf->vid.cmdex).ToString();
     fcgTXOutputExt->Text               = String(cnf->vid.outext).ToString();
+    fcgTXInCmd->Text                   = String(cnf->vid.incmd).ToString();
 
     //音声
     fcgCBAudioOnly->Checked            = cnf->oth.out_audio_only != 0;
@@ -914,6 +916,7 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     cnf->vid.priority               = fcgCXffmpegOutPriority->SelectedIndex;
     cnf->oth.temp_dir               = fcgCXTempDir->SelectedIndex;
     GetCHARfromString(cnf->vid.cmdex, sizeof(cnf->vid.cmdex), fcgTXCmdEx->Text);
+    GetCHARfromString(cnf->vid.incmd, sizeof(cnf->vid.incmd), fcgTXInCmd->Text);
 
     //音声部
     cnf->aud.encoder                = fcgCXAudioEncoder->SelectedIndex;
