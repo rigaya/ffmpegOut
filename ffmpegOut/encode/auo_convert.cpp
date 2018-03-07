@@ -196,6 +196,9 @@ static void auo_write_func_info(const COVERT_FUNC_INFO *func_info) {
 func_convert_frame get_convert_func(int width, BOOL use16bit, BOOL interlaced, int output_csp) {
     const DWORD availableSIMD = get_availableSIMD();
 
+    if (output_csp == OUT_CSP_YUV444_16) output_csp = OUT_CSP_YUV444;
+    if (output_csp == OUT_CSP_P010) output_csp = OUT_CSP_NV12;
+
     const COVERT_FUNC_INFO *func_info = NULL;
     for (int i = 0; FUNC_TABLE[i].func; i++) {
         if (FUNC_TABLE[i].output_csp != output_csp)
@@ -243,6 +246,7 @@ BOOL malloc_pixel_data(CONVERT_CF_DATA * const pixel_data, int width, int height
             pixel_data->data[1] = pixel_data->data[0] + frame_size;
             break;
         case OUT_CSP_YUV444:
+        case OUT_CSP_YUV444_16:
             if ((pixel_data->data[0] = (BYTE *)_mm_malloc(frame_size * 3, max(align_size, 16))) == NULL)
                 ret = FALSE;
             pixel_data->data[1] = pixel_data->data[0] + frame_size;
@@ -253,6 +257,7 @@ BOOL malloc_pixel_data(CONVERT_CF_DATA * const pixel_data, int width, int height
                 ret = FALSE;
             break;
         case OUT_CSP_NV12:
+        case OUT_CSP_P010:
         default:
             if ((pixel_data->data[0] = (BYTE *)_mm_malloc(frame_size * 3 / 2, max(align_size, 16))) == NULL)
                 ret = FALSE;

@@ -63,6 +63,8 @@ enum {
     OUT_CSP_NV12,
     OUT_CSP_YUY2,
     OUT_CSP_YUV444,
+    OUT_CSP_P010,
+    OUT_CSP_YUV444_16,
     OUT_CSP_RGB,
     OUT_CSP_NV16,
 };
@@ -79,6 +81,8 @@ static const char * const specify_csp[] = {
     "nv12",    //OUT_CSP_NV12
     "yuyv422", //OUT_CSP_YUY2
     "yuv444p", //OUT_CSP_YUV444
+    "p010le",
+    "yuv444p16le",
     "bgr24"    //OUT_CSP_RGB
 };
 //文字列を引数にとるオプションの引数リスト
@@ -87,9 +91,23 @@ const X264_OPTION_STR list_output_csp[] = {
     { "nv12",    L"yuv420" },
     { "yuyv422", L"yuv422" },
     { "yuv444p", L"yuv444" },
+    { "p010le",      L"yuv420(16bit)" },
+    { "yuv444p16le", L"yuv444(16bit)" },
     { "bgr24",   L"rgb"  },
     { NULL, NULL }
 };
+
+static bool csp_highbit_depth(int output_csp) {
+    static const bool list[] = {
+        false, false, false,
+        true, true,
+        false,
+        false /*dummy*/
+    };
+    static_assert(_countof(list) == _countof(list_output_csp), "list size does not match.");
+    return list[output_csp];
+}
+
 /*
 const X264_OPTION_STR list_aq[] = { 
     { NULL, L"none"    }, 

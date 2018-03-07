@@ -905,6 +905,7 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     //拡張部
     cnf->enc.interlaced             = fcgCXInterlaced->SelectedIndex;
     cnf->enc.output_csp             = fcgCXOutputCsp->SelectedIndex;
+    cnf->enc.use_highbit_depth      = csp_highbit_depth(cnf->enc.output_csp);
     cnf->enc.use_auto_npass         = fcgCB2passEnc->Checked;
     cnf->enc.audio_input            = fcgCBAudioInput->Checked;
     cnf->enc.auto_npass             = 2;

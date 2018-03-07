@@ -73,7 +73,9 @@ static const char * specify_input_csp(int output_csp) {
 int get_aviutl_color_format(int use_highbit, int output_csp) {
     //Aviutlからの入力に使用するフォーマット
     switch (output_csp) {
+        case OUT_CSP_P010:
         case OUT_CSP_YUV444:
+        case OUT_CSP_YUV444_16:
             return CF_YC48;
         case OUT_CSP_RGB:
             return CF_RGB;
@@ -170,6 +172,7 @@ static void set_pixel_data(CONVERT_CF_DATA *pixel_data, const CONF_GUIEX *conf, 
             pixel_data->size[0] = w * h * byte_per_pixel * 2;
             break;
         case OUT_CSP_YUV444: //i444 (YUV444 planar)
+        case OUT_CSP_YUV444_16:
             pixel_data->count = 3;
             pixel_data->size[0] = w * h * byte_per_pixel;
             pixel_data->size[1] = pixel_data->size[0];
@@ -180,6 +183,7 @@ static void set_pixel_data(CONVERT_CF_DATA *pixel_data, const CONF_GUIEX *conf, 
             pixel_data->size[0] = w * h * 3 * sizeof(BYTE); //8bit only
             break;
         case OUT_CSP_NV12: //nv12 (YUV420)
+        case OUT_CSP_P010:
         default:
             pixel_data->count = 2;
             pixel_data->size[0] = w * h * byte_per_pixel;
