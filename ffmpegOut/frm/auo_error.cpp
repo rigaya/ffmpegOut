@@ -430,3 +430,12 @@ void warning_failed_open_bat_orig() {
 void warning_failed_open_bat_new() {
     write_log_auo_line(LOG_WARNING, "一時バッチファイルを作成できませんでした。");
 }
+
+
+void error_get_exedit_file_mapping() {
+    write_log_auo_line_fmt(LOG_ERROR, "拡張編集が見つかりませんでした。");
+}
+
+void error_get_exedit_output_start() {
+    write_log_auo_line_fmt(LOG_ERROR, "拡張編集での出力開始に失敗しました。");
+}

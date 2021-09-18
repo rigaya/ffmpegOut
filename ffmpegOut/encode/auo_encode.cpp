@@ -69,6 +69,7 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, c
     switch (conf->enc.output_csp) {
         case OUT_CSP_YUV444:
         case OUT_CSP_RGB:
+        case OUT_CSP_RGBA:
             w_mul = 1, h_mul = 1; break;
         case OUT_CSP_NV16:
             w_mul = 2, h_mul = 1; break;

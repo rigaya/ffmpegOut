@@ -37,18 +37,41 @@ typedef struct {
     DWORD size;  //1ピクセルあたりバイト数
 } COLORFORMAT_DATA;
 
+typedef struct {
+    unsigned char b, g, r, a;
+} PixelBGRA;
+
+typedef struct {
+    int frame_start;
+    int frame_end;
+    int width;
+    int height;
+    int rate;
+    int scale;
+} ExeditData;
+
+typedef struct {
+    BOOL(*output_start)(ExeditData* data);
+    void(*output_end)();
+    PixelBGRA* (*get_image)(int frame);
+} ExeditFileMapping;
+
 enum {
     CF_YUY2 = 0,
     CF_YC48 = 1,
     CF_RGB  = 2,
+    CF_RGBA = 3,
 };
-static const char * const CF_NAME[] = { "YUY2", "YC48", "RGB" };
+static const char * const CF_NAME[] = { "YUY2", "YC48", "RGB", "RGBA"};
 static const COLORFORMAT_DATA COLORFORMATS[] = {
     { MAKEFOURCC('Y', 'U', 'Y', '2'), 2 }, //YUY2
     { MAKEFOURCC('Y', 'C', '4', '8'), 6 }, //YC48
-    { NULL,                           3 }  //RGB
+    { NULL,                           3 }, //RGB
+    { NULL,                           3 }  //RGBA(Unused)
 };
 
 AUO_RESULT video_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);
+
+static BOOL get_exedit_file_mapping(ExeditFileMapping* efm);
 
 #endif //_AUO_VIDEO_H_
