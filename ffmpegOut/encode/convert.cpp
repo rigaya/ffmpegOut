@@ -236,7 +236,7 @@ void copy_rgba(void* frame, CONVERT_CF_DATA* pixel_data, const int width, const 
     BYTE* ptr = pixel_data->data[0];
     BYTE* dst, * src;
     int y0 = 0, y1 = height - 1;
-    const int step = (width * 4 + 4) & ~4;
+    const int step = width * 4;
     for (; y0 < height; y0++, y1--) {
         dst = ptr + y1 * width * 4;
         src = (BYTE*)frame + y0 * step;
@@ -249,7 +249,7 @@ void copy_rgba_sse2(void* frame, CONVERT_CF_DATA* pixel_data, const int width, c
     BYTE* dst, * src, * src_fin;
     __m128i x0, x1, x2, x3;
     int y0 = 0, y1 = height - 1;
-    const int step = (width * 4 + 4) & ~4;
+    const int step = width * 4;
     const int y_fin = height - 1;
     for (; y0 < y_fin; y0++, y1--) {
         dst = ptr + y0 * width * 4;
