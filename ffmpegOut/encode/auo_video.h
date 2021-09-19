@@ -67,7 +67,7 @@ static const COLORFORMAT_DATA COLORFORMATS[] = {
     { MAKEFOURCC('Y', 'U', 'Y', '2'), 2 }, //YUY2
     { MAKEFOURCC('Y', 'C', '4', '8'), 6 }, //YC48
     { NULL,                           3 }, //RGB
-    { NULL,                           3 }  //RGBA(Unused)
+    { NULL,                           4 }  //RGBA(Unused)
 };
 
 AUO_RESULT video_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);

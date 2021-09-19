@@ -90,7 +90,7 @@ int get_aviutl_color_format(int use_highbit, int output_csp) {
 }
 
 static int calc_input_frame_size(int width, int height, int color_format) {
-    width = (color_format == CF_RGB) ? (width+3) & ~3 : (color_format == CF_RGBA) ? (width+4) & ~4 : (width+1) & ~1;
+    width = (color_format == CF_RGB) ? (width+3) & ~3 : (color_format == CF_RGBA) ? width : (width+1) & ~1;
     return width * height * COLORFORMATS[color_format].size;
 }
 
