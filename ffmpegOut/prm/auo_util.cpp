@@ -331,7 +331,41 @@ BOOL SetThreadAffinityForModule(DWORD TargetProcessId, const char *TargetModule,
     return ret;
 }
 
-const TCHAR *getOSVersion() {
+typedef BOOL(WINAPI *LPFN_GLPI)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+
+static DWORD CountSetBits(ULONG_PTR bitMask) {
+    DWORD LSHIFT = sizeof(ULONG_PTR) * 8 - 1;
+    DWORD bitSetCount = 0;
+    for (ULONG_PTR bitTest = (ULONG_PTR)1 << LSHIFT; bitTest; bitTest >>= 1)
+        bitSetCount += ((bitMask & bitTest) != 0);
+
+    return bitSetCount;
+}
+
+typedef void (WINAPI *RtlGetVersion_FUNC)(OSVERSIONINFOEXW*);
+
+static int getRealWindowsVersion(DWORD *major, DWORD *minor, DWORD *build) {
+    *major = 0;
+    *minor = 0;
+    OSVERSIONINFOEXW osver;
+    HMODULE hModule = NULL;
+    RtlGetVersion_FUNC func = NULL;
+    int ret = 1;
+    if (NULL != (hModule = LoadLibrary(_T("ntdll.dll")))
+        && NULL != (func = (RtlGetVersion_FUNC)GetProcAddress(hModule, "RtlGetVersion"))) {
+        func(&osver);
+        *major = osver.dwMajorVersion;
+        *minor = osver.dwMinorVersion;
+        *build = osver.dwBuildNumber;
+        ret = 0;
+    }
+    if (hModule) {
+        FreeLibrary(hModule);
+    }
+    return ret;
+}
+
+const TCHAR *getOSVersion(DWORD *buildNumber) {
     const TCHAR *ptr = _T("Unknown");
     OSVERSIONINFO info = { 0 };
     info.dwOSVersionInfoSize = sizeof(info);
@@ -348,6 +382,9 @@ const TCHAR *getOSVersion() {
         }
         break;
     case VER_PLATFORM_WIN32_NT:
+        if (info.dwMajorVersion == 6) {
+            getRealWindowsVersion(&info.dwMajorVersion, &info.dwMinorVersion, &info.dwBuildNumber);
+        }
         switch (info.dwMajorVersion) {
         case 3:
             switch (info.dwMinorVersion) {
@@ -374,18 +411,6 @@ const TCHAR *getOSVersion() {
             switch (info.dwMinorVersion) {
             case 0:  ptr = _T("Windows Vista"); break;
             case 1:  ptr = _T("Windows 7"); break;
-#if (_MSC_VER >= 1800)
-            default:
-                if (IsWindowsVersionOrGreater(6, 5, 0)) {
-                    ptr = _T("Later than Windows 10");
-                } else if (IsWindowsVersionOrGreater(6, 4, 0)) {
-                    ptr = _T("Windows 10");
-                } else if (IsWindowsVersionOrGreater(6, 3, 0)) {
-                    ptr = _T("Windows 8.1");
-                } else {
-                    ptr = _T("Windows 8");
-                }
-#else
             case 2:  ptr = _T("Windows 8"); break;
             case 3:  ptr = _T("Windows 8.1"); break;
             case 4:  ptr = _T("Windows 10"); break;
@@ -393,12 +418,14 @@ const TCHAR *getOSVersion() {
                 if (5 <= info.dwMinorVersion) {
                     ptr = _T("Later than Windows 10");
                 }
-#endif
                 break;
             }
             break;
+        case 10:
+            ptr = _T("Windows 10");
+            break;
         default:
-            if (7 <= info.dwPlatformId) {
+            if (10 <= info.dwMajorVersion) {
                 ptr = _T("Later than Windows 10");
             }
             break;
@@ -406,6 +433,9 @@ const TCHAR *getOSVersion() {
         break;
     default:
         break;
+    }
+    if (buildNumber) {
+        *buildNumber = info.dwBuildNumber;
     }
     return ptr;
 }
