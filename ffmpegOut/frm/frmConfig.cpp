@@ -205,10 +205,10 @@ System::Void frmConfig::LoadLocalStg() {
 System::Boolean frmConfig::CheckLocalStg() {
     bool error = false;
     String^ err = "";
-    //ffmpeg / avconvのチェック
+    //ffmpegのチェック
     if (!File::Exists(LocalStg.ffmpegOutPath)) {
         error = true;
-        err += L"指定された ffmpeg / avconv は存在しません。\n [ " + LocalStg.ffmpegOutPath + L" ]\n";
+        err += L"指定された ffmpeg は存在しません。\n [ " + LocalStg.ffmpegOutPath + L" ]\n";
     }
     //音声エンコーダのチェック (実行ファイル名がない場合はチェックしない)
     if (LocalStg.audEncExeName[fcgCXAudioEncoder->SelectedIndex]->Length) {

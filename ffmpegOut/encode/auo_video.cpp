@@ -371,7 +371,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
     //プロセス用情報準備
     if (!PathFileExists(enc_path)) {
-        ret |= AUO_RESULT_ERROR; error_no_exe_file("ffmpeg/avconv", enc_path);
+        ret |= AUO_RESULT_ERROR; error_no_exe_file("ffmpeg", enc_path);
         return ret;
     }
     PathGetDirectory(enc_dir, _countof(enc_dir), enc_path);
@@ -413,12 +413,12 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
     //コマンドライン生成
     build_full_cmd(enc_cmd, _countof(enc_cmd), conf, oip, pe, sys_dat, PIPE_FN);
-    write_log_auo_line(LOG_INFO, "ffmpeg/avconv options...");
+    write_log_auo_line(LOG_INFO, "ffmpeg options...");
     write_args(enc_cmd);
     sprintf_s(enc_args, _countof(enc_args), "\"%s\" %s", enc_path, enc_cmd);
     
     if ((rp_ret = RunProcess(enc_args, enc_dir, &pi_enc, &pipes, (set_priority == AVIUTLSYNC_PRIORITY_CLASS) ? GetPriorityClass(pe->h_p_aviutl) : set_priority, TRUE, FALSE)) != RP_SUCCESS) {
-        ret |= AUO_RESULT_ERROR; error_run_process("ffmpeg/avconv", rp_ret);
+        ret |= AUO_RESULT_ERROR; error_run_process("ffmpeg", rp_ret);
     } else if (video_output_create_thread(&thread_data, &pixel_data, pipes.f_stdin)) {
         ret |= AUO_RESULT_ERROR; error_video_output_thread_start();
     } else {
@@ -558,7 +558,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
 static void set_window_title_ffmpegout(const PRM_ENC *pe) {
     char mes[256];
-    strcpy_s(mes, _countof(mes), "ffmpeg/avconv エンコード");
+    strcpy_s(mes, _countof(mes), "ffmpeg エンコード");
     if (pe->total_x264_pass > 1)
         sprintf_s(mes + strlen(mes), _countof(mes) - strlen(mes), "   %d / %d pass", pe->current_x264_pass, pe->total_x264_pass);
     if (pe->aud_parallel.th_aud)
