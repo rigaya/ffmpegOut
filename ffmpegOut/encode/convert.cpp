@@ -231,6 +231,59 @@ void sort_to_rgb(void *frame, CONVERT_CF_DATA *pixel_data, const int width, cons
     }
 }
 
+
+void copy_rgba(void* frame, CONVERT_CF_DATA* pixel_data, const int width, const int height) {
+    BYTE* ptr = pixel_data->data[0];
+    BYTE* dst, * src;
+    int y0 = 0, y1 = height - 1;
+    const int step = width * 4;
+    for (; y0 < height; y0++, y1--) {
+        dst = ptr + y1 * width * 4;
+        src = (BYTE*)frame + y0 * step;
+        for (int x = 0; x < width * 4; x++)
+            dst[x] = src[x];
+    }
+}
+void copy_rgba_sse2(void* frame, CONVERT_CF_DATA* pixel_data, const int width, const int height) {
+    BYTE* ptr = pixel_data->data[0];
+    BYTE* dst, * src, * src_fin;
+    __m128i x0, x1, x2, x3;
+    int y0 = 0, y1 = height - 1;
+    const int step = width * 4;
+    const int y_fin = height - 1;
+    for (; y0 < y_fin; y0++, y1--) {
+        dst = ptr + y0 * width * 4;
+        src = (BYTE*)frame + y1 * step;
+        src_fin = src + width * 4;
+        for (; src < src_fin; src += 64, dst += 64) {
+            x0 = _mm_loadu_si128((const __m128i*)(src + 0));
+            x1 = _mm_loadu_si128((const __m128i*)(src + 16));
+            x2 = _mm_loadu_si128((const __m128i*)(src + 32));
+            x3 = _mm_loadu_si128((const __m128i*)(src + 48));
+            _mm_storeu_si128((__m128i*)(dst + 0), x0);
+            _mm_storeu_si128((__m128i*)(dst + 16), x1);
+            _mm_storeu_si128((__m128i*)(dst + 32), x2);
+            _mm_storeu_si128((__m128i*)(dst + 48), x3);
+        }
+    }
+    dst = ptr + y0 * width * 4;
+    src = (BYTE*)frame + y1 * step;
+    src_fin = src + ((width * 4) & ~63);
+    for (; src < src_fin; src += 64, dst += 64) {
+        x0 = _mm_loadu_si128((const __m128i*)(src + 0));
+        x1 = _mm_loadu_si128((const __m128i*)(src + 16));
+        x2 = _mm_loadu_si128((const __m128i*)(src + 32));
+        x3 = _mm_loadu_si128((const __m128i*)(src + 48));
+        _mm_storeu_si128((__m128i*)(dst + 0), x0);
+        _mm_storeu_si128((__m128i*)(dst + 16), x1);
+        _mm_storeu_si128((__m128i*)(dst + 32), x2);
+        _mm_storeu_si128((__m128i*)(dst + 48), x3);
+    }
+    src_fin = src + ((width * 4) & 63);
+    for (; src < src_fin; src++, dst++)
+        *dst = *src;
+}
+
 void convert_yuy2_to_yv12(void *frame, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
     int x, y;
     BYTE *Y  = pixel_data->data[0];

@@ -103,4 +103,7 @@ void warning_malloc_batfile_tmp();
 void warning_failed_open_bat_orig();
 void warning_failed_open_bat_new();
 
+void error_get_exedit_file_mapping();
+void error_get_exedit_output_start();
+
 #endif //_AUO_ERROR_H_
