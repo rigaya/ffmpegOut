@@ -521,6 +521,47 @@ System::Void frmConfig::AudioEncodeModeChanged() {
     }
 }
 
+System::Void frmConfig::fcgCXAudioEncoderInternal_SelectedIndexChanged(System::Object ^sender, System::EventArgs ^e) {
+    setAudioIntDisplay();
+}
+System::Void frmConfig::fcgCXAudioEncModeInternal_SelectedIndexChanged(System::Object ^sender, System::EventArgs ^e) {
+    AudioIntEncodeModeChanged();
+}
+
+System::Void frmConfig::setAudioIntDisplay() {
+    AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud_int[fcgCXAudioEncoderInternal->SelectedIndex];
+    fcgCXAudioEncModeInternal->BeginUpdate();
+    fcgCXAudioEncModeInternal->Items->Clear();
+    for (int i = 0; i < astg->mode_count; i++) {
+        fcgCXAudioEncModeInternal->Items->Add(String(astg->mode[i].name).ToString());
+    }
+    fcgCXAudioEncModeInternal->EndUpdate();
+    if (fcgCXAudioEncModeInternal->Items->Count > 0)
+        fcgCXAudioEncModeInternal->SelectedIndex = 0;
+}
+System::Void frmConfig::AudioIntEncodeModeChanged() {
+    const int imode = fcgCXAudioEncModeInternal->SelectedIndex;
+    if (imode >= 0 && fcgCXAudioEncoderInternal->SelectedIndex >= 0) {
+        AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud_int[fcgCXAudioEncoderInternal->SelectedIndex];
+        if (astg->mode[imode].bitrate) {
+            fcgCXAudioEncModeInternal->Width = fcgCXAudioEncModeSmallWidth;
+            fcgLBAudioBitrateInternal->Visible = true;
+            fcgNUAudioBitrateInternal->Visible = true;
+            fcgNUAudioBitrateInternal->Minimum = astg->mode[imode].bitrate_min;
+            fcgNUAudioBitrateInternal->Maximum = astg->mode[imode].bitrate_max;
+            fcgNUAudioBitrateInternal->Increment = astg->mode[imode].bitrate_step;
+            SetNUValue(fcgNUAudioBitrateInternal, (conf->aud.in.bitrate > 0) ? conf->aud.in.bitrate : astg->mode[imode].bitrate_default);
+        } else {
+            fcgCXAudioEncModeInternal->Width = fcgCXAudioEncModeLargeWidth;
+            fcgLBAudioBitrateInternal->Visible = false;
+            fcgNUAudioBitrateInternal->Visible = false;
+            fcgNUAudioBitrateInternal->Minimum = 0;
+            fcgNUAudioBitrateInternal->Maximum = 65536;
+        }
+    }
+    SetfbcBTABEnable(fcgNUAudioBitrateInternal->Visible, (int)fcgNUAudioBitrateInternal->Maximum);
+}
+
 ///////////////   設定ファイル関連   //////////////////////
 System::Void frmConfig::CheckTSItemsEnabled(CONF_GUIEX *current_conf) {
     bool selected = (CheckedStgMenuItem != nullptr);
@@ -881,6 +922,8 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
     SetCXIndex(fcgCXAudioTempDir,        cnf->aud.ext.aud_temp_dir);
     SetCXIndex(fcgCXAudioEncTiming,      1);
     SetCXIndex(fcgCXAudioEncoderInternal, cnf->aud.in.encoder);
+    SetCXIndex(fcgCXAudioEncModeInternal, cnf->aud.in.enc_mode);
+    SetNUValue(fcgNUAudioBitrateInternal, (cnf->aud.in.bitrate != 0) ? cnf->aud.in.bitrate : GetCurrentAudioDefaultBitrate());
 
     //mux
     /*
@@ -941,8 +984,10 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     cnf->aud.ext.priority               = fcgCXAudioPriority->SelectedIndex;
     cnf->aud.ext.audio_encode_timing    = 1;
     cnf->aud.ext.aud_temp_dir           = fcgCXAudioTempDir->SelectedIndex;
-    cnf->aud.in.faw_check               = fcgCBFAWCheck->Checked;
     cnf->aud.in.encoder                 = fcgCXAudioEncoderInternal->SelectedIndex;
+    cnf->aud.in.faw_check               = fcgCBFAWCheck->Checked;
+    cnf->aud.in.enc_mode                = fcgCXAudioEncModeInternal->SelectedIndex;
+    cnf->aud.in.bitrate                 = (int)fcgNUAudioBitrateInternal->Value;
 
     //mux部
     /*
