@@ -42,7 +42,7 @@ enum {
 };
 
 enum AUO_PIPE_MODE {
-    AUO_PIPE_DISABLE = 0, 
+    AUO_PIPE_DISABLE = 0,
     AUO_PIPE_ENABLE,
     AUO_PIPE_MUXED, //Stderrのモードに使用し、StderrをStdOutに混合する
 };
@@ -68,6 +68,7 @@ typedef struct {
 void InitPipes(PIPE_SET *pipes);
 int RunProcess(char *args, const char *exe_dir, PROCESS_INFORMATION *pi, PIPE_SET *pipes, DWORD priority, BOOL hidden, BOOL minimized);
 void CloseStdIn(PIPE_SET *pipes);
+int read_from_pipe(PIPE_SET *pipes, BOOL fromStdErr);
 BOOL get_exe_message(const char *exe_path, const char *args, char *buf, size_t nSize, AUO_PIPE_MODE from_stderr);
 BOOL get_exe_message_to_file(const char *exe_path, const char *args, const char *filepath, AUO_PIPE_MODE from_stderr, DWORD loop_ms);
 

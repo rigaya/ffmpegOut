@@ -53,7 +53,6 @@ const double ZERO_SD_RATIO              = 0.25; //ゼロブロック内のゼロ
 int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
     std::vector<int> zero_blocks[3];
     int current_zero_blocks[3] = { 0, 0, 0 };
-    int i;
 
     short *data = NULL;
     const int step = audio_size / sizeof(short);
@@ -69,7 +68,7 @@ int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
     for (data = audio_dat; data < fin; data += step) {
         short check[3] = { *data, (BYTE)((*data >> 8) + 128), (BYTE)((*data & 0xff) + 128) };
 
-        for (i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             if (check[i] == 0) {
                 current_zero_blocks[i]++;
             } else {
@@ -82,6 +81,7 @@ int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
 
     //ゼロブロックをチェック
     BOOL check_result[3] = { FALSE, FALSE, FALSE };
+    int i;
     for (i = 0; i < 3; i++) {
         if (zero_blocks[i].size() < (size_t)(audio_n * ZERO_BLOCK_COUNT_THRESHOLD / audio_rate))
             continue;
