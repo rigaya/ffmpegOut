@@ -443,13 +443,19 @@ AUO_RESULT audio_faw2aac(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, 
                 }
                 //転送を実行
                 while (!pe->aud_parallel.abort) {
-                    const bool faw2aac_finished = th_faw2aac_finished();
+                    bool faw2aac_finished = th_faw2aac_finished();
                     bool readFinished = true;
                     DWORD sizeRead = 0;
                     char buffer[PIPE_BUF];
                     if (ReadFile(aud_track->from_auo.h_pipe, buffer, sizeof(buffer), &sizeRead, NULL) == 0) {
-                        return 1;
-                    } else if (sizeRead > 0) {
+                        auto err = GetLastError();
+                        if (err == ERROR_BROKEN_PIPE || err == ERROR_HANDLE_EOF || err == ERROR_OPERATION_ABORTED) {
+                            faw2aac_finished = true;
+                        } else if (err != ERROR_IO_PENDING) {
+                            return 1;
+                        }
+                    }
+                    if (sizeRead > 0) {
                         readFinished = false;
                         DWORD sizeWritten = 0;
                         memset(&overlapped, 0, sizeof(overlapped));
