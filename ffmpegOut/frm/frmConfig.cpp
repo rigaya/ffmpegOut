@@ -444,7 +444,9 @@ System::Void frmConfig::fcgCBAudioUseExt_CheckedChanged(System::Object^  sender,
 }
 
 System::Int32 frmConfig::GetCurrentAudioDefaultBitrate() {
-    return sys_dat->exstg->s_aud_ext[fcgCXAudioEncoder->SelectedIndex].mode[fcgCXAudioEncMode->SelectedIndex].bitrate_default;
+    AUDIO_SETTINGS *astg = (!fcgCBAudioUseInternal->Checked) ? &sys_dat->exstg->s_aud_ext[fcgCXAudioEncoder->SelectedIndex] : &sys_dat->exstg->s_aud_int[fcgCXAudioEncoderInternal->SelectedIndex];
+    const int encMode = (!fcgCBAudioUseInternal->Checked) ? fcgCXAudioEncMode->SelectedIndex : fcgCXAudioEncModeInternal->SelectedIndex;
+    return astg->mode[encMode].bitrate_default;
 }
 
 System::Void frmConfig::setAudioDisplay() {
