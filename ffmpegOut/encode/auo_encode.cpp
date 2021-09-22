@@ -55,6 +55,10 @@ void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx) {
     sprintf_s(pipename, nSize, AUO_NAMED_PIPE_BASE, GetCurrentProcessId(), audIdx);
 }
 
+bool video_is_last_pass(const PRM_ENC *pe) {
+    return pe->total_x264_pass == 0 || pe->current_x264_pass >= pe->total_x264_pass;
+}
+
 static BOOL check_muxer_exist(const MUXER_SETTINGS *muxer_stg) {
     if (PathFileExists(muxer_stg->fullpath)) 
         return TRUE;

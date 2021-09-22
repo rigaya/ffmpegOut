@@ -290,7 +290,7 @@ static inline void check_enc_priority(HANDLE h_aviutl, HANDLE h_x264, DWORD prio
 AUO_RESULT aud_parallel_task(const OUTPUT_INFO *oip, PRM_ENC *pe, BOOL use_internal) {
     AUO_RESULT ret = AUO_RESULT_SUCCESS;
     AUD_PARALLEL_ENC *aud_p = &pe->aud_parallel; //長いんで省略したいだけ
-    if (aud_p->th_aud) {
+    if (aud_p->th_aud && video_is_last_pass(pe)) {
         //---   排他ブロック 開始  ---> 音声スレッドが止まっていなければならない
         if (aud_p->he_vid_start && WaitForSingleObject(aud_p->he_vid_start, (use_internal) ? 0 : INFINITE) == WAIT_OBJECT_0) {
             if (aud_p->he_vid_start && aud_p->get_length) {
@@ -329,7 +329,7 @@ AUO_RESULT aud_parallel_task(const OUTPUT_INFO *oip, PRM_ENC *pe, BOOL use_inter
 static AUO_RESULT finish_aud_parallel_task(const OUTPUT_INFO *oip, PRM_ENC *pe, BOOL use_internal, AUO_RESULT vid_ret) {
     //エラーが発生していたら音声出力ループをとめる
     pe->aud_parallel.abort |= (vid_ret != AUO_RESULT_SUCCESS);
-    if (pe->aud_parallel.th_aud) {
+    if (pe->aud_parallel.th_aud && (video_is_last_pass(pe) || pe->aud_parallel.abort)) {
         write_log_auo_line(LOG_INFO, "音声処理の終了を待機しています...");
         set_window_title("音声処理の終了を待機しています...", PROGRESSBAR_MARQUEE);
         while (pe->aud_parallel.he_vid_start)
@@ -342,6 +342,7 @@ static AUO_RESULT finish_aud_parallel_task(const OUTPUT_INFO *oip, PRM_ENC *pe, 
 //並列処理スレッドの終了を待ち、終了コードを回収する
 static AUO_RESULT exit_audio_parallel_control(const OUTPUT_INFO *oip, PRM_ENC *pe, BOOL use_internal, AUO_RESULT vid_ret) {
     vid_ret |= finish_aud_parallel_task(oip, pe, use_internal, vid_ret); //wav出力を完了させる
+    if (!video_is_last_pass(pe) && !pe->aud_parallel.abort) return AUO_RESULT_SUCCESS;
     release_audio_parallel_events(pe);
     if (pe->aud_parallel.buffer) free(pe->aud_parallel.buffer);
     if (pe->aud_parallel.th_aud) {
@@ -545,7 +546,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         //x264が待機に入るまでこちらも待機
         while (WaitForInputIdle(pi_enc.hProcess, LOG_UPDATE_INTERVAL) == WAIT_TIMEOUT)
             log_process_events();
-        if (conf->aud.use_internal)
+        if (video_is_last_pass(pe) && conf->aud.use_internal)
             if_valid_set_event(pe->aud_parallel.he_aud_start);
 
         //ログウィンドウ側から制御を可能に
@@ -661,8 +662,6 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
         //音声の同時処理を終了させる
         ret |= finish_aud_parallel_task(oip, pe, conf->aud.use_internal, ret);
-        //音声との同時処理が終了
-        release_audio_parallel_events(pe);
 
         //タイムコード出力
         if (!ret && (afs || conf->vid.auo_tcfile_out))
