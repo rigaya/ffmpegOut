@@ -490,7 +490,8 @@ AUO_RESULT audio_faw2aac(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, 
                     CloseHandle(aud_dat[i_aud].from_auo.h_pipe);
                 }
                 if (aud_dat[i_aud].to_exe.h_pipe) {
-                    DisconnectNamedPipe(aud_dat[i_aud].to_exe.h_pipe);
+                    FlushFileBuffers(aud_dat[i_aud].to_exe.h_pipe);
+                    //DisconnectNamedPipe(aud_dat[i_aud].to_exe.h_pipe); //これをするとなぜかInvalid argumentというメッセージが出てしまう
                     CloseHandle(aud_dat[i_aud].to_exe.h_pipe);
                 }
                 if (aud_dat[i_aud].to_exe.he_ov_aud_namedpipe) {
