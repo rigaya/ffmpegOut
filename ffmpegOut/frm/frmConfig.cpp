@@ -195,10 +195,10 @@ System::Void frmConfig::LoadLocalStg() {
     LocalStg.audEncName->Clear();
     LocalStg.audEncExeName->Clear();
     LocalStg.audEncPath->Clear();
-    for (int i = 0; i < _ex_stg->s_aud_count; i++) {
-        LocalStg.audEncName->Add(String(_ex_stg->s_aud[i].dispname).ToString());
-        LocalStg.audEncExeName->Add(String(_ex_stg->s_aud[i].filename).ToString());
-        LocalStg.audEncPath->Add(String(_ex_stg->s_aud[i].fullpath).ToString());
+    for (int i = 0; i < _ex_stg->s_aud_ext_count; i++) {
+        LocalStg.audEncName->Add(String(_ex_stg->s_aud_ext[i].dispname).ToString());
+        LocalStg.audEncExeName->Add(String(_ex_stg->s_aud_ext[i].filename).ToString());
+        LocalStg.audEncPath->Add(String(_ex_stg->s_aud_ext[i].fullpath).ToString());
     }
 }
 
@@ -214,7 +214,7 @@ System::Boolean frmConfig::CheckLocalStg() {
     if (LocalStg.audEncExeName[fcgCXAudioEncoder->SelectedIndex]->Length) {
         String^ AudioEncoderPath = LocalStg.audEncPath[fcgCXAudioEncoder->SelectedIndex];
         if (!File::Exists(AudioEncoderPath) 
-            && (fcgCXAudioEncoder->SelectedIndex != sys_dat->exstg->s_aud_faw_index 
+            && (fcgCXAudioEncoder->SelectedIndex != sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked)
                 || !check_if_faw2aac_exists()) ) {
             //音声実行ファイルがない かつ
             //選択された音声がfawでない または fawであってもfaw2aacがない
@@ -225,13 +225,13 @@ System::Boolean frmConfig::CheckLocalStg() {
     }
     //FAWのチェック
     if (fcgCBFAWCheck->Checked) {
-        if (sys_dat->exstg->s_aud_faw_index == FAW_INDEX_ERROR) {
+        if (sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked) == FAW_INDEX_ERROR) {
             if (!error) err += L"\n\n";
             error = true;
             err += L"FAWCheckが選択されましたが、ffmpegOut.ini から\n"
                 + L"FAW の設定を読み込めませんでした。\n"
                 + L"ffmpegOut.ini を確認してください。\n";
-        } else if (!File::Exists(LocalStg.audEncPath[sys_dat->exstg->s_aud_faw_index])
+        } else if (!File::Exists(LocalStg.audEncPath[sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked)])
                    && !check_if_faw2aac_exists()) {
             //fawの実行ファイルが存在しない かつ faw2aacも存在しない
             if (!error) err += L"\n\n";
@@ -259,13 +259,13 @@ System::Void frmConfig::SaveLocalStg() {
     GetCHARfromString(_ex_stg->s_mux[MUXER_TC2MP4].fullpath,  sizeof(_ex_stg->s_mux[MUXER_TC2MP4].fullpath),  LocalStg.TC2MP4Path);
     GetCHARfromString(_ex_stg->s_mux[MUXER_MPG].fullpath,     sizeof(_ex_stg->s_mux[MUXER_MPG].fullpath),     LocalStg.MPGMuxerPath);
     GetCHARfromString(_ex_stg->s_mux[MUXER_MP4_RAW].fullpath, sizeof(_ex_stg->s_mux[MUXER_MP4_RAW].fullpath), LocalStg.MP4RawPath);
-    for (int i = 0; i < _ex_stg->s_aud_count; i++)
-        GetCHARfromString(_ex_stg->s_aud[i].fullpath,         sizeof(_ex_stg->s_aud[i].fullpath),             LocalStg.audEncPath[i]);
+    for (int i = 0; i < _ex_stg->s_aud_ext_count; i++)
+        GetCHARfromString(_ex_stg->s_aud_ext[i].fullpath,     sizeof(_ex_stg->s_aud_ext[i].fullpath),             LocalStg.audEncPath[i]);
     _ex_stg->save_local();
 }
 
 System::Void frmConfig::SetLocalStg() {
-    fcgLBffmpegOutPath->Text       = L"ffmpeg.exe / avconv.exe の指定";
+    fcgLBffmpegOutPath->Text       = L"ffmpeg.exe の指定";
     fcgTXffmpegOutPath->Text       = LocalStg.ffmpegOutPath;
     fcgTXMP4MuxerPath->Text       = LocalStg.MP4MuxerPath;
     fcgTXMKVMuxerPath->Text       = LocalStg.MKVMuxerPath;
@@ -438,13 +438,18 @@ System::Void frmConfig::fcgCXAudioEncMode_SelectedIndexChanged(System::Object^  
     AudioEncodeModeChanged();
 }
 
+System::Void frmConfig::fcgCBAudioUseExt_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+    fcgPNAudioExt->Visible = !fcgCBAudioUseInternal->Checked;
+    fcgPNAudioInternal->Visible = fcgCBAudioUseInternal->Checked;
+}
+
 System::Int32 frmConfig::GetCurrentAudioDefaultBitrate() {
-    return sys_dat->exstg->s_aud[fcgCXAudioEncoder->SelectedIndex].mode[fcgCXAudioEncMode->SelectedIndex].bitrate_default;
+    return sys_dat->exstg->s_aud_ext[fcgCXAudioEncoder->SelectedIndex].mode[fcgCXAudioEncMode->SelectedIndex].bitrate_default;
 }
 
 System::Void frmConfig::setAudioDisplay() {
     int index = fcgCXAudioEncoder->SelectedIndex;
-    AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud[index];
+    AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud_ext[index];
     //～の指定
     if (str_has_char(astg->filename)) {
         fcgLBAudioEncoderPath->Text = String(astg->filename).ToString() + L" の指定";
@@ -474,7 +479,7 @@ System::Void frmConfig::setAudioDisplay() {
 
 System::Void frmConfig::AudioEncodeModeChanged() {
     int index = fcgCXAudioEncMode->SelectedIndex;
-    AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud[fcgCXAudioEncoder->SelectedIndex];
+    AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud_ext[fcgCXAudioEncoder->SelectedIndex];
     if (astg->mode[index].bitrate) {
         fcgCXAudioEncMode->Width = fcgCXAudioEncModeSmallWidth;
         fcgLBAudioBitrate->Visible = true;
@@ -482,7 +487,7 @@ System::Void frmConfig::AudioEncodeModeChanged() {
         fcgNUAudioBitrate->Minimum = astg->mode[index].bitrate_min;
         fcgNUAudioBitrate->Maximum = astg->mode[index].bitrate_max;
         fcgNUAudioBitrate->Increment = astg->mode[index].bitrate_step;
-        SetNUValue(fcgNUAudioBitrate, (conf->aud.bitrate != 0) ? conf->aud.bitrate : astg->mode[index].bitrate_default);
+        SetNUValue(fcgNUAudioBitrate, (conf->aud.ext.bitrate != 0) ? conf->aud.ext.bitrate : astg->mode[index].bitrate_default);
     } else {
         fcgCXAudioEncMode->Width = fcgCXAudioEncModeLargeWidth;
         fcgLBAudioBitrate->Visible = false;
@@ -720,7 +725,7 @@ System::Void frmConfig::SetTXMaxLenAll() {
     SetTXMaxLen(fcgTXCmdEx,                sizeof(conf->vid.cmdex) - 1);
     SetTXMaxLen(fcgTXInCmd,                sizeof(conf->vid.incmd) - 1);
     SetTXMaxLen(fcgTXffmpegOutPath,        sizeof(sys_dat->exstg->s_local.ffmpeg_path) - 1);
-    SetTXMaxLen(fcgTXAudioEncoderPath,     sizeof(sys_dat->exstg->s_aud[0].fullpath) - 1);
+    SetTXMaxLen(fcgTXAudioEncoderPath,     sizeof(sys_dat->exstg->s_aud_ext[0].fullpath) - 1);
     SetTXMaxLen(fcgTXMP4MuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MP4].fullpath) - 1);
     SetTXMaxLen(fcgTXMKVMuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MKV].fullpath) - 1);
     SetTXMaxLen(fcgTXTC2MP4Path,           sizeof(sys_dat->exstg->s_mux[MUXER_TC2MP4].fullpath) - 1);
@@ -833,6 +838,7 @@ System::Void frmConfig::InitForm() {
     SetAllCheckChangedEvents(this); //変更の確認,ついでにNUの
     //フォームの変更可不可を更新
     fcgChangeMuxerVisible(nullptr, nullptr);
+    fcgCBAudioUseExt_CheckedChanged(nullptr, nullptr);
     EnableSettingsNoteChange(false);
     //表示位置の調整
     AdjustLocation();
@@ -861,17 +867,18 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
     fcgTXInCmd->Text                   = String(cnf->vid.incmd).ToString();
 
     //音声
-    fcgCBAudioOnly->Checked            = cnf->oth.out_audio_only != 0;
-    fcgCBFAWCheck->Checked             = cnf->aud.faw_check != 0;
-    SetCXIndex(fcgCXAudioEncoder,        cnf->aud.encoder);
-    fcgCBAudio2pass->Checked           = cnf->aud.use_2pass != 0;
-    fcgCBAudioUsePipe->Checked = (CurrentPipeEnabled && !cnf->aud.use_wav);
-    SetCXIndex(fcgCXAudioDelayCut,       cnf->aud.delay_cut);
-    SetCXIndex(fcgCXAudioEncMode,        cnf->aud.enc_mode);
-    SetNUValue(fcgNUAudioBitrate,       (cnf->aud.bitrate != 0) ? cnf->aud.bitrate : GetCurrentAudioDefaultBitrate());
-    SetCXIndex(fcgCXAudioPriority,       cnf->aud.priority);
-    SetCXIndex(fcgCXAudioTempDir,        cnf->aud.aud_temp_dir);
+    fcgCBAudioUseInternal->Checked     = cnf->aud.use_internal != 0;
+    fcgCBFAWCheck->Checked             = cnf->aud.ext.faw_check != 0;
+    SetCXIndex(fcgCXAudioEncoder,        cnf->aud.ext.encoder);
+    fcgCBAudio2pass->Checked           = cnf->aud.ext.use_2pass != 0;
+    fcgCBAudioUsePipe->Checked = (CurrentPipeEnabled && !cnf->aud.ext.use_wav);
+    SetCXIndex(fcgCXAudioDelayCut,       cnf->aud.ext.delay_cut);
+    SetCXIndex(fcgCXAudioEncMode,        cnf->aud.ext.enc_mode);
+    SetNUValue(fcgNUAudioBitrate,       (cnf->aud.ext.bitrate != 0) ? cnf->aud.ext.bitrate : GetCurrentAudioDefaultBitrate());
+    SetCXIndex(fcgCXAudioPriority,       cnf->aud.ext.priority);
+    SetCXIndex(fcgCXAudioTempDir,        cnf->aud.ext.aud_temp_dir);
     SetCXIndex(fcgCXAudioEncTiming,      1);
+    SetCXIndex(fcgCXAudioEncoderInternal, cnf->aud.in.encoder);
 
     //mux
     /*
@@ -921,17 +928,19 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     GetCHARfromString(cnf->vid.incmd, sizeof(cnf->vid.incmd), fcgTXInCmd->Text);
 
     //音声部
-    cnf->aud.encoder                = fcgCXAudioEncoder->SelectedIndex;
-    cnf->oth.out_audio_only         = fcgCBAudioOnly->Checked;
-    cnf->aud.faw_check              = fcgCBFAWCheck->Checked;
-    cnf->aud.enc_mode               = fcgCXAudioEncMode->SelectedIndex;
-    cnf->aud.bitrate                = (int)fcgNUAudioBitrate->Value;
-    cnf->aud.use_2pass              = fcgCBAudio2pass->Checked;
-    cnf->aud.use_wav                = !fcgCBAudioUsePipe->Checked;
-    cnf->aud.delay_cut              = fcgCXAudioDelayCut->SelectedIndex;
-    cnf->aud.priority               = fcgCXAudioPriority->SelectedIndex;
-    cnf->aud.audio_encode_timing    = 1;
-    cnf->aud.aud_temp_dir           = fcgCXAudioTempDir->SelectedIndex;
+    cnf->aud.use_internal               = fcgCBAudioUseInternal->Checked;
+    cnf->aud.ext.encoder                = fcgCXAudioEncoder->SelectedIndex;
+    cnf->aud.ext.faw_check              = fcgCBFAWCheck->Checked;
+    cnf->aud.ext.enc_mode               = fcgCXAudioEncMode->SelectedIndex;
+    cnf->aud.ext.bitrate                = (int)fcgNUAudioBitrate->Value;
+    cnf->aud.ext.use_2pass              = fcgCBAudio2pass->Checked;
+    cnf->aud.ext.use_wav                = !fcgCBAudioUsePipe->Checked;
+    cnf->aud.ext.delay_cut              = fcgCXAudioDelayCut->SelectedIndex;
+    cnf->aud.ext.priority               = fcgCXAudioPriority->SelectedIndex;
+    cnf->aud.ext.audio_encode_timing    = 1;
+    cnf->aud.ext.aud_temp_dir           = fcgCXAudioTempDir->SelectedIndex;
+    cnf->aud.in.faw_check               = fcgCBFAWCheck->Checked;
+    cnf->aud.in.encoder                 = fcgCXAudioEncoderInternal->SelectedIndex;
 
     //mux部
     /*
@@ -1085,10 +1094,6 @@ System::Void frmConfig::SetHelpToolTips() {
     fcgTTEx->SetToolTip(fcgCXAudioEncoder, L""
         + L"使用する音声エンコーダを指定します。\n"
         + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgCBAudioOnly,    L""
-        + L"動画の出力を行わず、音声エンコードのみ行います。\n"
-        + L"音声エンコードに失敗した場合などに使用してください。"
         );
     fcgTTEx->SetToolTip(fcgCBFAWCheck,     L""
         + L"音声エンコード時に音声がFakeAACWav(FAW)かどうかの判定を行い、\n"

@@ -51,6 +51,10 @@
 #include "auo_faw2aac.h"
 #include "cpu_info.h"
 
+void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx) {
+    sprintf_s(pipename, nSize, AUO_NAMED_PIPE_BASE, GetCurrentProcessId(), audIdx);
+}
+
 static BOOL check_muxer_exist(const MUXER_SETTINGS *muxer_stg) {
     if (PathFileExists(muxer_stg->fullpath)) 
         return TRUE;
@@ -109,12 +113,25 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, c
 
     //音声エンコーダ
     if (oip->flag & OUTPUT_INFO_FLAG_AUDIO) {
-        const AUDIO_SETTINGS *aud_stg = &exstg->s_aud[conf->aud.encoder];
-        if (str_has_char(aud_stg->filename) && !PathFileExists(aud_stg->fullpath)) {
-            //fawの場合はfaw2aacがあればOKだが、それもなければエラー
-            if (!(conf->aud.encoder == exstg->s_aud_faw_index && check_if_faw2aac_exists())) {
-                error_no_exe_file(aud_stg->filename, aud_stg->fullpath);
-                check = FALSE;
+        if (conf->aud.use_internal) {
+            CONF_AUDIO_BASE *cnf_aud = &conf->aud.in;
+            cnf_aud->audio_encode_timing = 2;
+            cnf_aud->delay_cut = AUDIO_DELAY_CUT_NONE;
+        } else {
+            CONF_AUDIO_BASE *cnf_aud = &conf->aud.ext;
+            const AUDIO_SETTINGS *aud_stg = &exstg->s_aud_ext[cnf_aud->encoder];
+            if (str_has_char(aud_stg->filename) && !PathFileExists(aud_stg->fullpath)) {
+                //fawの場合はfaw2aacがあればOKだが、それもなければエラー
+                if (!(exstg->is_faw(aud_stg) && check_if_faw2aac_exists())) {
+                    error_no_exe_file(aud_stg->filename, aud_stg->fullpath);
+                    check = FALSE;
+                }
+            }
+
+            //オーディオディレイカット
+            if (conf->vid.afs && cnf_aud->delay_cut == AUDIO_DELAY_CUT_ADD_VIDEO) {
+                info_afs_audio_delay_confliction();
+                cnf_aud->audio_encode_timing = 0;
             }
         }
     }
@@ -172,7 +189,9 @@ static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, con
     if (tmp_dir_index == TMP_DIR_CUSTOM) {
         //指定されたフォルダ
         if (DirectoryExistsOrCreate(sys_dat->exstg->s_local.custom_tmp_dir)) {
-            strcpy_s(pe->temp_filename, _countof(pe->temp_filename), sys_dat->exstg->s_local.custom_tmp_dir);
+            if (sys_dat->exstg->s_local.custom_tmp_dir == GetFullPath(sys_dat->exstg->s_local.custom_tmp_dir, pe->temp_filename, _countof(pe->temp_filename))) {
+                strcpy_s(pe->temp_filename, _countof(pe->temp_filename), sys_dat->exstg->s_local.custom_tmp_dir);
+            }
             PathRemoveBackslash(pe->temp_filename);
             write_log_auo_line_fmt(LOG_INFO, "一時フォルダ : %s", pe->temp_filename);
         } else {
@@ -191,24 +210,30 @@ static void set_aud_delay_cut(CONF_GUIEX *conf, PRM_ENC *pe, const OUTPUT_INFO *
     pe->delay_cut_additional_vframe = 0;
     pe->delay_cut_additional_aframe = 0;
     if (oip->flag & OUTPUT_INFO_FLAG_AUDIO) {
-        int audio_delay = sys_dat->exstg->s_aud[conf->aud.encoder].mode[conf->aud.enc_mode].delay;
-        if (audio_delay) {
-            const double fps = oip->rate / (double)oip->scale;
-            const int audio_rate = oip->audio_rate;
-            switch (conf->aud.delay_cut) {
-            case AUDIO_DELAY_CUT_DELETE_AUDIO:
-                pe->delay_cut_additional_aframe = -1 * audio_delay;
-                break;
-            case AUDIO_DELAY_CUT_ADD_VIDEO:
-                pe->delay_cut_additional_vframe = additional_vframe_for_aud_delay_cut(fps, audio_rate, audio_delay);
-                pe->delay_cut_additional_aframe = additional_silence_for_aud_delay_cut(fps, audio_rate, audio_delay);
-                break;
-            case AUDIO_DELAY_CUT_NONE:
-            default:
-                break;
-            }
+        if (conf->aud.use_internal) {
+            conf->aud.in.delay_cut = AUDIO_DELAY_CUT_NONE;
         } else {
-            conf->aud.delay_cut = AUDIO_DELAY_CUT_NONE;
+            CONF_AUDIO_BASE *cnf_aud = &conf->aud.ext;
+            const AUDIO_SETTINGS *aud_stg = &sys_dat->exstg->s_aud_ext[cnf_aud->encoder];
+            int audio_delay = aud_stg->mode[cnf_aud->enc_mode].delay;
+            if (audio_delay) {
+                const double fps = oip->rate / (double)oip->scale;
+                const int audio_rate = oip->audio_rate;
+                switch (cnf_aud->delay_cut) {
+                case AUDIO_DELAY_CUT_DELETE_AUDIO:
+                    pe->delay_cut_additional_aframe = -1 * audio_delay;
+                    break;
+                case AUDIO_DELAY_CUT_ADD_VIDEO:
+                    pe->delay_cut_additional_vframe = additional_vframe_for_aud_delay_cut(fps, audio_rate, audio_delay);
+                    pe->delay_cut_additional_aframe = additional_silence_for_aud_delay_cut(fps, audio_rate, audio_delay);
+                    break;
+                case AUDIO_DELAY_CUT_NONE:
+                default:
+                    break;
+                }
+            } else {
+                cnf_aud->delay_cut = AUDIO_DELAY_CUT_NONE;
+            }
         }
     }
 }
@@ -227,7 +252,7 @@ void set_enc_prm(CONF_GUIEX *conf, PRM_ENC *pe, const OUTPUT_INFO *oip, const SY
     sys_dat->exstg->load_encode_stg();
     sys_dat->exstg->load_append();
     sys_dat->exstg->load_fn_replace();
-    
+
     pe->video_out_type = check_video_ouput(conf, oip);
     pe->muxer_to_be_used = check_muxer_to_be_used(conf, pe->video_out_type, (oip->flag & OUTPUT_INFO_FLAG_AUDIO) != 0);
     pe->total_x264_pass = get_total_path(conf);
@@ -244,23 +269,28 @@ void set_enc_prm(CONF_GUIEX *conf, PRM_ENC *pe, const OUTPUT_INFO *oip, const SY
 
     //音声一時フォルダの決定
     char *cus_aud_tdir = pe->temp_filename;
-    if (conf->aud.aud_temp_dir) {
-        if (DirectoryExistsOrCreate(sys_dat->exstg->s_local.custom_audio_tmp_dir)) {
-            cus_aud_tdir = sys_dat->exstg->s_local.custom_audio_tmp_dir;
-            write_log_auo_line_fmt(LOG_INFO, "音声一時フォルダ : %s", cus_aud_tdir);
-        } else {
-            warning_no_aud_temp_root(sys_dat->exstg->s_local.custom_audio_tmp_dir);
+    if (!conf->aud.use_internal) {
+        if (conf->aud.ext.aud_temp_dir) {
+            if (DirectoryExistsOrCreate(sys_dat->exstg->s_local.custom_audio_tmp_dir)) {
+                cus_aud_tdir = sys_dat->exstg->s_local.custom_audio_tmp_dir;
+                write_log_auo_line_fmt(LOG_INFO, "音声一時フォルダ : %s", GetFullPath(cus_aud_tdir, pe->aud_temp_dir, _countof(pe->aud_temp_dir)));
+            } else {
+                warning_no_aud_temp_root(sys_dat->exstg->s_local.custom_audio_tmp_dir);
+            }
+        }
+        if (cus_aud_tdir == GetFullPath(cus_aud_tdir, pe->aud_temp_dir, _countof(pe->aud_temp_dir))) {
+            strcpy_s(pe->aud_temp_dir, cus_aud_tdir);
         }
     }
-    strcpy_s(pe->aud_temp_dir, _countof(pe->aud_temp_dir), cus_aud_tdir);
 
     //ファイル名置換を行い、一時ファイル名を作成
     strcpy_s(filename_replace, _countof(filename_replace), PathFindFileName(oip->savefile));
     sys_dat->exstg->apply_fn_replace(filename_replace, _countof(filename_replace));
     PathCombineLong(pe->temp_filename, _countof(pe->temp_filename), pe->temp_filename, filename_replace);
-    
+
     //FAWチェックとオーディオディレイの修正
-    if (conf->aud.faw_check)
+    const CONF_AUDIO_BASE *cnf_aud = (conf->aud.use_internal) ? &conf->aud.in : &conf->aud.ext;
+    if (cnf_aud->faw_check)
         auo_faw_check(&conf->aud, oip, pe, sys_dat->exstg);
     set_aud_delay_cut(conf, pe, oip, sys_dat);
 }
@@ -323,7 +353,7 @@ void get_muxout_filename(char *filename, size_t nSize, const SYSTEM_DATA *sys_da
 }
 
 //チャプターファイル名とapple形式のチャプターファイル名を同時に作成する
-void set_chap_filename(char *chap_file, size_t cf_nSize, char *chap_apple, size_t ca_nSize, const char *chap_base, 
+void set_chap_filename(char *chap_file, size_t cf_nSize, char *chap_apple, size_t ca_nSize, const char *chap_base,
                        const PRM_ENC *pe, const SYSTEM_DATA *sys_dat, const CONF_GUIEX *conf, const OUTPUT_INFO *oip) {
     strcpy_s(chap_file, cf_nSize, chap_base);
     cmd_replace(chap_file, cf_nSize, pe, sys_dat, conf, oip);
@@ -441,10 +471,6 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
     //%{fps_rate}
     int fps_rate = oip->rate;
     int fps_scale = oip->scale;
-#ifdef MSDK_SAMPLE_VERSION
-    if (conf->qsv.vpp.nDeinterlace == MFX_DEINTERLACE_IT)
-        fps_rate = (fps_rate * 4) / 5;
-#endif
     const int fps_gcd = get_gcd(fps_rate, fps_scale);
     fps_rate /= fps_gcd;
     fps_scale /= fps_gcd;
@@ -461,13 +487,18 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
     //replace_aspect_ratio(cmd, nSize, conf, oip);
 
     char fullpath[MAX_PATH_LEN];
-    replace(cmd, nSize, "%{ffmpeg_path}",GetFullPath(sys_dat->exstg->s_local.ffmpeg_path,             fullpath, _countof(fullpath)));
-    replace(cmd, nSize, "%{audencpath}",   GetFullPath(sys_dat->exstg->s_aud[conf->aud.encoder].fullpath, fullpath, _countof(fullpath)));
+    if (conf->aud.use_internal) {
+        replace(cmd, nSize, "%{audencpath}", "");
+    } else {
+        const CONF_AUDIO_BASE *cnf_aud = &conf->aud.ext;
+        const AUDIO_SETTINGS *aud_stg = &sys_dat->exstg->s_aud_ext[cnf_aud->encoder];
+        replace(cmd, nSize, "%{audencpath}", GetFullPath(aud_stg->fullpath, fullpath, _countof(fullpath)));
+    }
     replace(cmd, nSize, "%{mp4muxerpath}", GetFullPath(sys_dat->exstg->s_mux[MUXER_MP4].fullpath,         fullpath, _countof(fullpath)));
     replace(cmd, nSize, "%{mkvmuxerpath}", GetFullPath(sys_dat->exstg->s_mux[MUXER_MKV].fullpath,         fullpath, _countof(fullpath)));
 }
 
-//一時ファイルの移動・削除を行う 
+//一時ファイルの移動・削除を行う
 // move_from -> move_to
 // temp_filename … 動画ファイルの一時ファイル名。これにappendixをつけてmove_from を作る。
 //                  appndixがNULLのときはこれをそのままmove_fromとみなす。
@@ -608,14 +639,15 @@ AUO_RESULT getLogFilePath(char *log_file_path, size_t nSize, const PRM_ENC *pe, 
             //下へフォールスルー
         case AUTO_SAVE_LOG_OUTPUT_DIR:
         default:
-            apply_appendix(log_file_path, nSize, oip->savefile, "_log.txt"); 
+            apply_appendix(log_file_path, nSize, oip->savefile, "_log.txt");
             break;
     }
     return ret;
 }
 
-double get_duration(const OUTPUT_INFO *oip) {
-    return (((double)oip->n * (double)oip->scale) / (double)oip->rate);
+double get_duration(const OUTPUT_INFO *oip, const PRM_ENC *pe) {
+    //Aviutlから再生時間情報を取得
+    return ((double)(oip->n + pe->delay_cut_additional_vframe) * (double)oip->scale) / (double)oip->rate;
 }
 
 int ReadLogExe(PIPE_SET *pipes, const char *exename, LOG_CACHE *log_line_cache) {
@@ -638,8 +670,8 @@ void write_cached_lines(int log_level, const char *exename, LOG_CACHE *log_line_
     static const char *MESSAGE_FORMAT = "%s [%s]: %s";
     char *buffer = NULL;
     int buffer_len = 0;
-    log_level = clamp(log_level, LOG_INFO, LOG_ERROR);
-    const int additional_length = strlen(exename) + strlen(LOG_LEVEL_STR[log_level]) + strlen(MESSAGE_FORMAT) - strlen("%s") * 3 + 1;
+    const int log_level_idx = clamp(log_level, LOG_INFO, LOG_ERROR);
+    const int additional_length = strlen(exename) + strlen(LOG_LEVEL_STR[log_level_idx]) + strlen(MESSAGE_FORMAT) - strlen("%s") * 3 + 1;
     for (int i = 0; i < log_line_cache->idx; i++) {
         const int required_buffer_len = strlen(log_line_cache->lines[i]) + additional_length;
         if (buffer_len < required_buffer_len) {
@@ -648,7 +680,7 @@ void write_cached_lines(int log_level, const char *exename, LOG_CACHE *log_line_
             buffer_len = required_buffer_len;
         }
         if (buffer) {
-            sprintf_s(buffer, buffer_len, MESSAGE_FORMAT, exename, LOG_LEVEL_STR[log_level], log_line_cache->lines[i]);
+            sprintf_s(buffer, buffer_len, MESSAGE_FORMAT, exename, LOG_LEVEL_STR[log_level_idx], log_line_cache->lines[i]);
             write_log_line(log_level, buffer, true);
         }
     }

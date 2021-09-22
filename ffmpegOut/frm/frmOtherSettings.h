@@ -493,8 +493,8 @@ namespace ffmpegOut {
         System::Void fosSetComboBox() {
             fosCXDefaultAudioEncoder->SuspendLayout();
             fosCXDefaultAudioEncoder->Items->Clear();
-            for (int i = 0; i < fos_ex_stg->s_aud_count; i++)
-                fosCXDefaultAudioEncoder->Items->Add(String(fos_ex_stg->s_aud[i].dispname).ToString());
+            for (int i = 0; i < fos_ex_stg->s_aud_ext_count; i++)
+                fosCXDefaultAudioEncoder->Items->Add(String(fos_ex_stg->s_aud_ext[i].dispname).ToString());
             fosCXDefaultAudioEncoder->ResumeLayout();
         }
     private: 

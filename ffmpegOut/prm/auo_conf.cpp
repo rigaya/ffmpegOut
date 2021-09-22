@@ -38,11 +38,11 @@
 #include "auo_options.h"
 
 const int guiEx_config::conf_block_data[CONF_BLOCK_COUNT] = {
-    sizeof(CONF_ffmpegout),
-    sizeof(CONF_VIDEO),
-    sizeof(CONF_AUDIO),
-    sizeof(CONF_MUX),
-    sizeof(CONF_OTHER)
+    sizeof(CONF_GUIEX::enc),
+    sizeof(CONF_GUIEX::vid),
+    sizeof(CONF_GUIEX::aud),
+    sizeof(CONF_GUIEX::mux),
+    sizeof(CONF_GUIEX::oth)
 };
 
 const size_t guiEx_config::conf_block_pointer[CONF_BLOCK_COUNT] = {

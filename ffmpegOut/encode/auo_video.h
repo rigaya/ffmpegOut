@@ -36,6 +36,8 @@
 #define MAKEFOURCC(ch0, ch1, ch2, ch3)  ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) | ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24))
 #endif
 
+static const int DROP_FRAME_FLAG = INT_MAX;
+
 typedef struct {
     DWORD FOURCC;   //FOURCC
     DWORD size;  //1ピクセルあたりバイト数
@@ -73,6 +75,9 @@ static const COLORFORMAT_DATA COLORFORMATS[] = {
     { NULL,                           3 }, //RGB
     { NULL,                           4 }  //RGBA(Unused)
 };
+
+BOOL setup_afsvideo(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, CONF_GUIEX *conf, PRM_ENC *pe);
+void close_afsvideo(PRM_ENC *pe);
 
 AUO_RESULT video_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);
 

@@ -37,16 +37,20 @@
 #include "auo.h"
 #include "output.h"
 #include "auo_conf.h"
-#include "auo_pipe.h"
 #include "auo_settings.h"
 #include "auo_system.h"
 #include "auo_frm.h"
+#include "auo_pipe.h"
 
 static const char * const PIPE_FN = "-";
 
 static const char * const VID_FILE_APPENDIX = "_vid";
 
+static const char * const AUO_NAMED_PIPE_BASE = "\\\\.\\pipe\\Aviutl%08x_AuoAudioPipe%d";
+
 typedef AUO_RESULT (*encode_task) (CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);
+
+void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx);
 
 BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, const guiEx_settings *exstg);
 void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int current_pass, int total_pass);
@@ -71,7 +75,7 @@ AUO_RESULT getLogFilePath(char *log_file_path, size_t nSize, const PRM_ENC *pe, 
 int check_video_ouput(const CONF_GUIEX *conf, const OUTPUT_INFO *oip);
 int check_muxer_to_be_used(const CONF_GUIEX *conf, int video_output_type, BOOL audio_output);
 
-double get_duration(const OUTPUT_INFO *oip);
+double get_duration(const OUTPUT_INFO *oip, const PRM_ENC *pe);
 
 int ReadLogExe(PIPE_SET *pipes, const char *exename, LOG_CACHE *log_line_cache);
 void write_cached_lines(int log_level, const char *exename, LOG_CACHE *log_line_cache);

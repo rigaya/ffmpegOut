@@ -55,6 +55,7 @@ static const char * const STG_DEFAULT_DIRECTORY_APPENDIX = "_stg";
 static const char * const INI_SECTION_MAIN         = "FFMPEGOUT";
 static const char * const INI_SECTION_APPENDIX     = "APPENDIX";
 static const char * const INI_SECTION_AUD          = "AUDIO";
+static const char * const INI_SECTION_AUD_INTERNAL = "AUDIO_INTERNAL";
 static const char * const INI_SECTION_MUX          = "MUXER";
 static const char * const INI_SECTION_FN           = "FILENAME_REPLACE";
 static const char * const INI_SECTION_PREFIX       = "SETTING_";
@@ -152,6 +153,7 @@ static inline void WriteColorInfo(const char *section, const char *keyname, int 
     }
 }
 
+
 BOOL    guiEx_settings::init = FALSE;
 char    guiEx_settings::ini_section_main[256] = { 0 };
 char    guiEx_settings::auo_path[MAX_PATH_LEN] = { 0 };
@@ -178,14 +180,15 @@ void guiEx_settings::initialize(BOOL disable_loading) {
 }
 
 void guiEx_settings::initialize(BOOL disable_loading, const char *_auo_path, const char *main_section) {
-    s_aud_count = 0;
+    s_aud_ext_count = 0;
+    s_aud_int_count = 0;
     s_mux_count = 0;
-    s_aud = NULL;
+    s_aud_int = NULL;
+    s_aud_ext = NULL;
     s_mux = NULL;
     ZeroMemory(&s_local, sizeof(s_local));
     ZeroMemory(&s_log, sizeof(s_log));
     ZeroMemory(&s_append, sizeof(s_append));
-    s_aud_faw_index = FAW_INDEX_ERROR;
     if (!init) {
         if (_auo_path == NULL)
             get_auo_path(auo_path, _countof(auo_path));
@@ -231,7 +234,7 @@ BOOL guiEx_settings::get_init_success(BOOL no_message) {
         char mes[1024];
         char title[256];
         strcpy_s(mes, _countof(mes), AUO_NAME);
-        sprintf_s(PathFindExtension(mes), _countof(mes) - strlen(mes), 
+        sprintf_s(PathFindExtension(mes), _countof(mes) - strlen(mes),
             ".iniが存在しないか、iniファイルが古いです。\n%s を開始できません。\n"
             "iniファイルを更新してみてください。",
             AUO_FULL_NAME);
@@ -241,10 +244,20 @@ BOOL guiEx_settings::get_init_success(BOOL no_message) {
     return init;
 }
 
-int guiEx_settings::get_faw_index() {
-    for (int i = 0; i < s_aud_count; i++)
-        if (stristr(s_aud[i].filename, "faw"))
-            return i;
+BOOL guiEx_settings::is_faw(const AUDIO_SETTINGS *aud_stg) const {
+    return stristr((aud_stg->is_internal) ? aud_stg->codec : aud_stg->filename, "faw") ? TRUE : FALSE;
+}
+
+int guiEx_settings::get_faw_index(BOOL internal) const {
+    if (internal) {
+        for (int i = 0; i < s_aud_int_count; i++)
+            if (is_faw(&s_aud_int[i]))
+                return i;
+    } else {
+        for (int i = 0; i < s_aud_ext_count; i++)
+            if (is_faw(&s_aud_ext[i]))
+                return i;
+    }
     return FAW_INDEX_ERROR;
 }
 
@@ -255,22 +268,30 @@ void guiEx_settings::load_encode_stg() {
 }
 
 void guiEx_settings::load_aud() {
+    clear_aud();
+
+    s_aud_ext_count = GetPrivateProfileInt(INI_SECTION_AUD,          "count", 0, ini_fileName);
+    s_aud_int_count = GetPrivateProfileInt(INI_SECTION_AUD_INTERNAL, "count", 0, ini_fileName);
+    s_aud_mc.init(ini_filesize + (s_aud_ext_count + s_aud_int_count) * (sizeof(AUDIO_SETTINGS) + 1024));
+    load_aud(TRUE);
+    load_aud(FALSE);
+}
+
+void guiEx_settings::load_aud(BOOL internal) {
     int i, j, k;
     char encoder_section[INI_KEY_MAX_LEN];
     char key[INI_KEY_MAX_LEN];
-    size_t keybase_len;
 
-    clear_aud();
-
-    s_aud_count = GetPrivateProfileInt(INI_SECTION_AUD, "count", 0, ini_fileName);
-
-    s_aud_mc.init(ini_filesize + s_aud_count * (sizeof(AUDIO_SETTINGS) + 1024));
-    s_aud = (AUDIO_SETTINGS *)s_aud_mc.CutMem(s_aud_count * sizeof(AUDIO_SETTINGS));
+    const auto ini_section = (internal) ? INI_SECTION_AUD_INTERNAL : INI_SECTION_AUD;
+    const int s_aud_count = (internal) ? s_aud_int_count : s_aud_ext_count;
+    AUDIO_SETTINGS *s_aud = (AUDIO_SETTINGS *)s_aud_mc.CutMem(s_aud_count * sizeof(AUDIO_SETTINGS));
     for (i = 0; i < s_aud_count; i++) {
+        s_aud[i].is_internal = internal;
         sprintf_s(key, _countof(key), "audio_encoder_%d", i+1);
-        s_aud[i].keyName = s_aud_mc.SetPrivateProfileString(INI_SECTION_AUD, key, "key", ini_fileName);
+        s_aud[i].keyName = s_aud_mc.SetPrivateProfileString(ini_section, key, "key", ini_fileName);
         sprintf_s(encoder_section, _countof(encoder_section), "%s%s", INI_SECTION_PREFIX, s_aud[i].keyName);
         s_aud[i].dispname     = s_aud_mc.SetPrivateProfileString(encoder_section, "dispname",     "", ini_fileName);
+        s_aud[i].codec        = s_aud_mc.SetPrivateProfileString(encoder_section, "codec",        "", ini_fileName);
         s_aud[i].filename     = s_aud_mc.SetPrivateProfileString(encoder_section, "filename",     "", ini_fileName);
         s_aud[i].aud_appendix = s_aud_mc.SetPrivateProfileString(encoder_section, "aud_appendix", "", ini_fileName);
         s_aud[i].raw_appendix = s_aud_mc.SetPrivateProfileString(encoder_section, "raw_appendix", "", ini_fileName);
@@ -291,13 +312,13 @@ void guiEx_settings::load_aud() {
         for (j = 0; j < tmp_count; j++) {
             sprintf_s(key, _countof(key), "mode_%d", j+1);
             tmp_mode[j].name = s_aud_mc.SetPrivateProfileString(encoder_section, key, "", ini_fileName);
-            keybase_len = strlen(key);
+            const size_t keybase_len = strlen(key);
             strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_cmd");
             tmp_mode[j].cmd = s_aud_mc.SetPrivateProfileString(encoder_section, key, "", ini_fileName);
             strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_2pass");
             tmp_mode[j].enc_2pass = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
             strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_convert8bit");
-            tmp_mode[j].use_8bit =  GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
+            tmp_mode[j].use_8bit = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
             strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_delay");
             tmp_mode[j].delay = GetPrivateProfileInt(encoder_section, key, 0, ini_fileName);
             strcpy_s(key + keybase_len, _countof(key) - keybase_len, "_bitrate");
@@ -365,7 +386,11 @@ void guiEx_settings::load_aud() {
             }
         }
     }
-    s_aud_faw_index = get_faw_index();
+    if (internal) {
+        s_aud_int = s_aud;
+    } else {
+        s_aud_ext = s_aud;
+    }
 }
 
 void guiEx_settings::load_mux() {
@@ -495,8 +520,9 @@ void guiEx_settings::load_local() {
         strcpy_s(s_local.stg_dir, _countof(s_local.stg_dir), default_stg_dir);
 
     s_local.audio_buffer_size   = std::min((DWORD)GetPrivateProfileInt(ini_section_main, "audio_buffer",        AUDIO_BUFFER_DEFAULT, conf_fileName), AUDIO_BUFFER_MAX);
-    for (int i = 0; i < s_aud_count; i++)
-        GetPrivateProfileString(INI_SECTION_AUD, s_aud[i].keyName, "", s_aud[i].fullpath,       _countof(s_aud[i].fullpath),       conf_fileName);
+
+    for (int i = 0; i < s_aud_ext_count; i++)
+        GetPrivateProfileString(INI_SECTION_AUD, s_aud_ext[i].keyName, "", s_aud_ext[i].fullpath, _countof(s_aud_ext[i].fullpath), conf_fileName);
     for (int i = 0; i < s_mux_count; i++)
         GetPrivateProfileString(INI_SECTION_MUX, s_mux[i].keyName, "", s_mux[i].fullpath,       _countof(s_mux[i].fullpath),       conf_fileName);
 }
@@ -594,9 +620,10 @@ void guiEx_settings::save_local() {
     PathRemoveBlanks(s_local.bat_dir);
     PathRemoveBackslash(s_local.bat_dir);
     WritePrivateProfileString(ini_section_main, "last_bat_dir",          s_local.bat_dir,               conf_fileName);
-    for (int i = 0; i < s_aud_count; i++) {
-        PathRemoveBlanks(s_aud[i].fullpath);
-        WritePrivateProfileString(INI_SECTION_AUD, s_aud[i].keyName, s_aud[i].fullpath, conf_fileName);
+
+    for (int i = 0; i < s_aud_ext_count; i++) {
+        PathRemoveBlanks(s_aud_ext[i].fullpath);
+        WritePrivateProfileString(INI_SECTION_AUD, s_aud_ext[i].keyName, s_aud_ext[i].fullpath, conf_fileName);
     }
     /*for (int i = 0; i < s_mux_count; i++) {
         PathRemoveBlanks(s_mux[i].fullpath);
@@ -624,7 +651,7 @@ void guiEx_settings::save_log_win() {
     WriteColorInfo(ini_section_main, "log_color_text_info",    s_log.log_color_text[0],    DEFAULT_LOG_COLOR_TEXT[0],    conf_fileName);
     WriteColorInfo(ini_section_main, "log_color_text_warning", s_log.log_color_text[1],    DEFAULT_LOG_COLOR_TEXT[1],    conf_fileName);
     WriteColorInfo(ini_section_main, "log_color_text_error",   s_log.log_color_text[2],    DEFAULT_LOG_COLOR_TEXT[2],    conf_fileName);
-    WriteFontInfo(ini_section_main, "log_font", &s_log.log_font, conf_fileName);
+    WriteFontInfo( ini_section_main, "log_font", &s_log.log_font, conf_fileName);
 }
 
 void guiEx_settings::save_fbc() {
@@ -638,8 +665,8 @@ void guiEx_settings::save_fbc() {
 
 void guiEx_settings::clear_aud() {
     s_aud_mc.clear();
-    s_aud_count = 0;
-    s_aud_faw_index = FAW_INDEX_ERROR;
+    s_aud_ext_count = 0;
+    s_aud_int_count = 0;
 }
 
 void guiEx_settings::clear_mux() {

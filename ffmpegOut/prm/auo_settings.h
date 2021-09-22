@@ -176,8 +176,10 @@ typedef struct {
 } AUDIO_ENC_MODE;
 
 typedef struct {
+    BOOL is_internal;            //内蔵エンコーダかどうか
     char *keyName;               //iniファイルでのセクション名
     char *dispname;              //名前
+    char *codec;                 //コーデック名
     char *filename;              //拡張子付き名前
     char fullpath[MAX_PATH_LEN]; //エンコーダの場所(フルパス)
     char *aud_appendix;          //作成する音声ファイル名に追加する文字列
@@ -210,8 +212,8 @@ typedef struct {
     char *vid_cmd;                //映像mux用のコマンドライン
     char *aud_cmd;                //音声mux用のコマンドライン
     char *tc_cmd;                 //タイムコードmux用のコマンドライン
-    char *tmp_cmd;                //一時フォルダ指定用コマンドライン
     char *delay_cmd;              //音声エンコーダディレイ指定用のコマンドライン
+    char *tmp_cmd;                //一時フォルダ指定用コマンドライン
     char *help_cmd;               //ヘルプ表示用コマンドライン
     char *ver_cmd;                //バージョン表示用のコマンドライン
     int ex_count;                 //拡張オプションの数
@@ -310,27 +312,26 @@ private:
     static DWORD ini_filesize;                //iniファイル(読み込み用)のサイズ
 
     void load_aud();          //音声エンコーダ関連の設定の読み込み・更新
+    void load_aud(BOOL internal); //音声エンコーダ関連の設定の読み込み・更新
     void load_mux();          //muxerの設定の読み込み・更新
     void load_local();        //ファイルの場所等の設定の読み込み・更新
-
-    int get_faw_index();             //FAWのインデックスを取得する
 
     void make_default_stg_dir(char *default_stg_dir, DWORD nSize); //プロファイル設定ファイルの保存場所の作成
     BOOL check_inifile();            //iniファイルが読めるかテスト
 
 public:
     static char blog_url[MAX_PATH_LEN];      //ブログページのurl
-    int s_aud_count;                 //音声エンコーダの数
+    int s_aud_ext_count;                 //音声エンコーダの数
+    int s_aud_int_count;                 //音声エンコーダの数
     int s_mux_count;                 //muxerの数 (基本3固定)
-    AUDIO_SETTINGS *s_aud;           //音声エンコーダの設定
+    AUDIO_SETTINGS *s_aud_ext;       //音声エンコーダの設定
+    AUDIO_SETTINGS *s_aud_int;       //音声エンコーダの設定
     MUXER_SETTINGS *s_mux;           //muxerの設定
     LOCAL_SETTINGS s_local;          //ファイルの場所等
     std::vector<FILENAME_REPLACE> fn_rep;  //一時ファイル名置換
     LOG_WINDOW_SETTINGS s_log;       //ログウィンドウ関連の設定
     FILE_APPENDIX s_append;          //各種ファイルに追加する名前
     BITRATE_CALC_SETTINGS s_fbc;    //簡易ビットレート計算機設定
-
-    int s_aud_faw_index;            //FAWのインデックス
 
     guiEx_settings();
     guiEx_settings(BOOL disable_loading);
@@ -350,6 +351,9 @@ public:
     void save_fbc();          //簡易ビットレート計算機設定の保存
 
     void apply_fn_replace(char *target_filename, DWORD nSize);  //一時ファイル名置換の適用
+
+    BOOL is_faw(const AUDIO_SETTINGS *aud_stg) const;
+    int get_faw_index(BOOL internal) const; //FAWのインデックスを取得する
 
 private:
     void initialize(BOOL disable_loading);

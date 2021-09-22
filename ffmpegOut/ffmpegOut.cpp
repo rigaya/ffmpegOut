@@ -180,8 +180,9 @@ BOOL func_output( OUTPUT_INFO *oip )
 
         //ret |= run_bat_file(&conf_out, oip, &pe, &sys_dat, RUN_BAT_BEFORE);
 
+        const auto audio_encode_timing = (conf_out.aud.use_internal) ? 2 : conf_out.aud.ext.audio_encode_timing;
         for (int i = 0; !ret && i < 2; i++)
-            ret |= task[1 + (!!conf_out.enc.use_auto_npass)][i](&conf_out, oip, &pe, &sys_dat);
+            ret |= task[audio_encode_timing][i](&conf_out, oip, &pe, &sys_dat);
 
         //if (!ret) ret |= mux(&conf_out, oip, &pe, &sys_dat);
 
@@ -263,7 +264,9 @@ void get_default_conf(CONF_GUIEX *conf) {
     conf->mux.disable_mkvext = TRUE;
     conf->mux.disable_mp4ext = TRUE;
     conf->mux.disable_mpgext = TRUE;
-    conf->aud.audio_encode_timing = 1;
+    conf->aud.ext.audio_encode_timing = 1;
+    conf->aud.in.audio_encode_timing = 2;
+    conf->aud.use_internal = 1;
     conf->enc.auto_npass = 2;
     conf->enc.audio_input = TRUE;
     strcpy_s(conf->vid.outext, _countof(conf->vid.outext), ".avi");

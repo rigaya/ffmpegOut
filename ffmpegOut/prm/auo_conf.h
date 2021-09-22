@@ -124,6 +124,12 @@ typedef struct {
     int  aud_temp_dir;        //音声専用一時フォルダ
     int  audio_encode_timing; //音声を先にエンコード
     int  delay_cut;           //エンコード遅延の削除
+} CONF_AUDIO_BASE; //音声用設定
+
+typedef struct {
+    CONF_AUDIO_BASE ext;
+    CONF_AUDIO_BASE in;
+    BOOL use_internal;
 } CONF_AUDIO; //音声用設定
 
 typedef struct {
