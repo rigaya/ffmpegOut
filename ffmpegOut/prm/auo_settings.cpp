@@ -25,6 +25,8 @@
 //
 // --------------------------------------------------------------------------------------------
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #include <Math.h>
 #include <string.h>
@@ -492,7 +494,7 @@ void guiEx_settings::load_local() {
     if (!str_has_char(s_local.stg_dir) || !PathRootExists(s_local.stg_dir))
         strcpy_s(s_local.stg_dir, _countof(s_local.stg_dir), default_stg_dir);
 
-    s_local.audio_buffer_size   = min(GetPrivateProfileInt(ini_section_main, "audio_buffer",        AUDIO_BUFFER_DEFAULT, conf_fileName), AUDIO_BUFFER_MAX);
+    s_local.audio_buffer_size   = std::min((DWORD)GetPrivateProfileInt(ini_section_main, "audio_buffer",        AUDIO_BUFFER_DEFAULT, conf_fileName), AUDIO_BUFFER_MAX);
     for (int i = 0; i < s_aud_count; i++)
         GetPrivateProfileString(INI_SECTION_AUD, s_aud[i].keyName, "", s_aud[i].fullpath,       _countof(s_aud[i].fullpath),       conf_fileName);
     for (int i = 0; i < s_mux_count; i++)

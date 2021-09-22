@@ -32,6 +32,10 @@
 #include "auo_conf.h"
 #include "auo_system.h"
 
+#ifndef MAKEFOURCC
+#define MAKEFOURCC(ch0, ch1, ch2, ch3)  ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) | ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24))
+#endif
+
 typedef struct {
     DWORD FOURCC;   //FOURCC
     DWORD size;  //1ピクセルあたりバイト数

@@ -25,6 +25,8 @@
 //
 // --------------------------------------------------------------------------------------------
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #pragma comment(lib, "user32.lib") //WaitforInputIdle
 #include <stdlib.h>
