@@ -285,6 +285,10 @@ int additional_silence_for_aud_delay_cut(double fps, int audio_rate, int audio_d
     return (int)(vframe_added / (double)fps * audio_rate + 0.5) - audio_delay;
 }
 
+BOOL fps_after_afs_is_24fps(const int frame_n, const PRM_ENC *pe) {
+    return (pe->drop_count > (frame_n * 0.10));
+}
+
 int get_mux_excmd_mode(const CONF_GUIEX *conf, const PRM_ENC *pe) {
     int mode = 0;
     switch (pe->muxer_to_be_used) {

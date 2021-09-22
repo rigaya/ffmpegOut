@@ -39,6 +39,12 @@
 #include <vector>
 
 #include "output.h"
+#include "vphelp_client.h"
+
+#pragma warning( push )
+#pragma warning( disable: 4127 )
+#include "afs_client.h"
+#pragma warning( pop )
 
 #include "auo.h"
 #include "auo_frm.h"
@@ -55,6 +61,8 @@
 #include "auo_audio_parallel.h"
 
 #include "cpu_info.h"
+
+const int DROP_FRAME_FLAG = INT_MAX;
 
 typedef struct video_output_thread_t {
     CONVERT_CF_DATA *pixel_data;
@@ -89,9 +97,88 @@ int get_aviutl_color_format(int use_highbit, int output_csp) {
     }
 }
 
-static int calc_input_frame_size(int width, int height, int color_format) {
+static int calc_input_frame_size(int width, int height, int color_format, int& buf_size) {
     width = (color_format == CF_RGB) ? (width+3) & ~3 : (color_format == CF_RGBA) ? width : (width+1) & ~1;
-    return width * height * COLORFORMATS[color_format].size;
+    //widthが割り切れない場合、多めにアクセスが発生するので、そのぶんを確保しておく
+    const DWORD pixel_size = COLORFORMATS[color_format].size;
+    const DWORD simd_check = get_availableSIMD();
+    const DWORD align_size = (simd_check & AUO_SIMD_SSE2) ? ((simd_check & AUO_SIMD_AVX2) ? 64 : 32) : 1;
+#define ALIGN_NEXT(i, align) (((i) + (align-1)) & (~(align-1))) //alignは2の累乗(1,2,4,8,16,32...)
+    buf_size = ALIGN_NEXT(width * height * pixel_size + (ALIGN_NEXT(width, align_size / pixel_size) - width) * 2 * pixel_size, align_size);
+#undef ALIGN_NEXT
+    return width * height * pixel_size;
+}
+
+BOOL setup_afsvideo(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, CONF_GUIEX *conf, PRM_ENC *pe) {
+    //すでに初期化してある または 必要ない
+    if (pe->afs_init || pe->video_out_type == VIDEO_OUTPUT_DISABLED || !conf->vid.afs)
+        return TRUE;
+
+    const int color_format = get_aviutl_color_format(conf->enc.use_highbit_depth, conf->enc.output_csp);
+    int buf_size;
+    const int frame_size = calc_input_frame_size(oip->w, oip->h, color_format, buf_size);
+    //Aviutl(自動フィールドシフト)からの映像入力
+    if (afs_vbuf_setup((OUTPUT_INFO *)oip, conf->vid.afs, frame_size, buf_size, COLORFORMATS[color_format].FOURCC)) {
+        pe->afs_init = TRUE;
+        return TRUE;
+    } else if (conf->vid.afs && sys_dat->exstg->s_local.auto_afs_disable) {
+        afs_vbuf_release(); //一度解放
+        warning_auto_afs_disable();
+        conf->vid.afs = FALSE;
+        //再度使用するmuxerをチェックする
+        pe->muxer_to_be_used = check_muxer_to_be_used(conf, pe->video_out_type, (oip->flag & OUTPUT_INFO_FLAG_AUDIO) != 0);
+        return TRUE;
+    }
+    //エラー
+    error_afs_setup(conf->vid.afs, sys_dat->exstg->s_local.auto_afs_disable);
+    return FALSE;
+}
+
+void close_afsvideo(PRM_ENC *pe) {
+    if (!pe->afs_init || pe->video_out_type == VIDEO_OUTPUT_DISABLED)
+        return;
+
+    afs_vbuf_release();
+
+    pe->afs_init = FALSE;
+}
+
+static AUO_RESULT tcfile_out(int *jitter, int frame_n, double fps, BOOL afs, const PRM_ENC *pe) {
+    AUO_RESULT ret = AUO_RESULT_SUCCESS;
+    char auotcfile[MAX_PATH_LEN];
+    FILE *tcfile = NULL;
+
+    if (afs)
+        fps *= 4; //afsなら4倍精度
+    const double tm_multi = 1000.0 / fps;
+
+    //ファイル名作成
+    apply_appendix(auotcfile, _countof(auotcfile), pe->temp_filename, pe->append.tc);
+
+    if (NULL != fopen_s(&tcfile, auotcfile, "wb")) {
+        ret |= AUO_RESULT_ERROR; warning_auo_tcfile_failed();
+    } else {
+        fprintf(tcfile, "# timecode format v2\r\n");
+        if (afs) {
+            int time_additional_frame = 0;
+            if (pe->delay_cut_additional_vframe) {
+                const int multi_for_additional_vframe = 4 + !!fps_after_afs_is_24fps(frame_n, pe);
+                for (int i = 0; i < pe->delay_cut_additional_vframe; i++)
+                    fprintf(tcfile, "%.6lf\r\n", i * multi_for_additional_vframe * tm_multi);
+
+                time_additional_frame = pe->delay_cut_additional_vframe * multi_for_additional_vframe;
+            }
+            for (int i = 0; i < frame_n; i++)
+                if (jitter[i] != DROP_FRAME_FLAG)
+                    fprintf(tcfile, "%.6lf\r\n", (i * 4 + jitter[i] + time_additional_frame) * tm_multi);
+        } else {
+            frame_n += pe->delay_cut_additional_vframe;
+            for (int i = 0; i < frame_n; i++)
+                fprintf(tcfile, "%.6lf\r\n", i * tm_multi);
+        }
+        fclose(tcfile);
+    }
+    return ret;
 }
 
 //auo_pipe.cppのread_from_pipeの特別版
@@ -358,12 +445,14 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     char enc_args[MAX_CMD_LEN] = { 0 };
     char enc_dir[MAX_PATH_LEN] = { 0 };
     char *enc_path = sys_dat->exstg->s_local.ffmpeg_path;
-    
+
+    const BOOL afs = conf->vid.afs != 0;
     video_output_thread_t thread_data = { 0 };
     thread_data.repeat = pe->delay_cut_additional_vframe;
     CONVERT_CF_DATA pixel_data;
     set_pixel_data(&pixel_data, conf, oip->w, oip->h);
 
+    int *jitter = NULL;
     int rp_ret;
 
     //x264優先度関連の初期化
@@ -417,7 +506,13 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     write_args(enc_cmd);
     sprintf_s(enc_args, _countof(enc_args), "\"%s\" %s", enc_path, enc_cmd);
     
-    if ((rp_ret = RunProcess(enc_args, enc_dir, &pi_enc, &pipes, (set_priority == AVIUTLSYNC_PRIORITY_CLASS) ? GetPriorityClass(pe->h_p_aviutl) : set_priority, TRUE, FALSE)) != RP_SUCCESS) {
+    if ((jitter = (int *)calloc(oip->n + 1, sizeof(int))) == NULL) {
+        ret |= AUO_RESULT_ERROR; error_malloc_tc();
+        //Aviutl(afs)からのフレーム読み込み
+    } else if (!setup_afsvideo(oip, sys_dat, conf, pe)) {
+        ret |= AUO_RESULT_ERROR; //Aviutl(afs)からのフレーム読み込みに失敗
+        //Aviutl(afs)からのフレーム読み込み
+    } else if ((rp_ret = RunProcess(enc_args, enc_dir, &pi_enc, &pipes, (set_priority == AVIUTLSYNC_PRIORITY_CLASS) ? GetPriorityClass(pe->h_p_aviutl) : set_priority, TRUE, FALSE)) != RP_SUCCESS) {
         ret |= AUO_RESULT_ERROR; error_run_process("ffmpeg", rp_ret);
     } else if (video_output_create_thread(&thread_data, &pixel_data, pipes.f_stdin)) {
         ret |= AUO_RESULT_ERROR; error_video_output_thread_start();
@@ -426,7 +521,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         int i = 0;
         int framen = 0;
         void *frame = NULL;
-        BOOL enc_pause = FALSE, copy_frame = FALSE;
+        int *next_jitter = NULL;
+        BOOL enc_pause = FALSE, copy_frame = FALSE, drop = FALSE;
 
         //Aviutlの時間を取得
         PROCESS_TIME time_aviutl;
@@ -441,7 +537,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         enable_x264_control(&set_priority, &enc_pause, FALSE, FALSE, tm_vid_enc_start, oip->n);
 
         //------------メインループ------------
-        for (framen = ed.frame_start, i = 0, pe->drop_count = 0; (conf->enc.output_csp == OUT_CSP_RGBA ? (framen <= ed.frame_end) : (i < oip->n)); i++, framen++) {
+        for (framen = ed.frame_start, i = 0, next_jitter = jitter + 1, pe->drop_count = 0; (conf->enc.output_csp == OUT_CSP_RGBA ? (framen <= ed.frame_end) : (i < oip->n)); i++, framen++, next_jitter++) {
             //中断を確認
             ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
 
@@ -489,7 +585,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
                 }
             } else {
                 //Aviutl(afs)からフレームをもらう
-                if ((frame = oip->func_get_video_ex(i, aviutl_fourcc)) == NULL) {
+                if (NULL == (frame = ((afs) ? afs_get_video((OUTPUT_INFO *)oip, i, &drop, next_jitter) : oip->func_get_video_ex(i, aviutl_fourcc)))) {
                     ret |= AUO_RESULT_ERROR; error_afs_get_frame();
                     break;
                 }
@@ -498,11 +594,20 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
             //コピーフレームフラグ処理
             copy_frame = (i && (oip->func_get_flag(i) & OUTPUT_INFO_FRAME_FLAG_COPYFRAME));
 
-            //コピーフレームの場合は、映像バッファの中身を更新せず、そのままパイプに流す
-            if (!copy_frame)
-                convert_frame(frame, &pixel_data, oip->w, oip->h);  /// YUY2/YC48->NV12/YUV444変換, RGBコピー
-            //標準入力への書き込みを開始
-            SetEvent(thread_data.he_out_start);
+            drop |= (afs & copy_frame);
+
+            if (!drop) {
+                //コピーフレームの場合は、映像バッファの中身を更新せず、そのままパイプに流す
+                if (!copy_frame)
+                    convert_frame(frame, &pixel_data, oip->w, oip->h);  /// YUY2/YC48->NV12/YUV444変換, RGBコピー
+                //標準入力への書き込みを開始
+                SetEvent(thread_data.he_out_start);
+            } else {
+                *(next_jitter - 1) = DROP_FRAME_FLAG;
+                pe->drop_count++;
+                //次のフレームの変換を許可
+                SetEvent(thread_data.he_out_fin);
+            }
 
             // 「表示 -> セーブ中もプレビュー表示」がチェックされていると
             // func_update_preview() の呼び出しによって func_get_video_ex() の
@@ -530,6 +635,10 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         //音声との同時処理が終了
         release_audio_parallel_events(pe);
 
+        //タイムコード出力
+        if (!ret && (afs || conf->vid.auo_tcfile_out))
+            tcfile_out(jitter, oip->n, (double)oip->rate / (double)oip->scale, afs, pe);
+
         //エンコーダ終了待機
         while (WaitForSingleObject(pi_enc.hProcess, LOG_UPDATE_INTERVAL) == WAIT_TIMEOUT)
             ReadLogEnc(&pipes, pe->drop_count, i);
@@ -550,6 +659,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     CloseHandle(pi_enc.hThread);
 
     free_pixel_data(&pixel_data);
+    if (jitter) free(jitter);
 
     ret |= exit_audio_parallel_control(oip, pe, ret);
 

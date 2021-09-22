@@ -644,6 +644,7 @@ private: System::Windows::Forms::Label^  fcgLBAudioDelayCut;
 private: System::Windows::Forms::Label^  fcgLBInCmd;
 
 private: System::Windows::Forms::TextBox^  fcgTXInCmd;
+private: System::Windows::Forms::CheckBox^  fcgCBAFSTimecode;
 
 
 
@@ -713,6 +714,8 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgLBTempDir = (gcnew System::Windows::Forms::Label());
             this->fcgBTCustomTempDir = (gcnew System::Windows::Forms::Button());
             this->fcggroupBoxCmdEx = (gcnew System::Windows::Forms::GroupBox());
+            this->fcgLBInCmd = (gcnew System::Windows::Forms::Label());
+            this->fcgTXInCmd = (gcnew System::Windows::Forms::TextBox());
             this->fcgCXCmdExInsert = (gcnew System::Windows::Forms::ComboBox());
             this->fcgTXCmdEx = (gcnew System::Windows::Forms::TextBox());
             this->fcgTXCustomTempDir = (gcnew System::Windows::Forms::TextBox());
@@ -819,8 +822,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgOpenFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
             this->fcgTTEx = (gcnew System::Windows::Forms::ToolTip(this->components));
             this->fcgCSReplaceStrings = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
-            this->fcgTXInCmd = (gcnew System::Windows::Forms::TextBox());
-            this->fcgLBInCmd = (gcnew System::Windows::Forms::Label());
+            this->fcgCBAFSTimecode = (gcnew System::Windows::Forms::CheckBox());
             this->fcgtabControlVideo->SuspendLayout();
             this->fcgtabPageExSettings->SuspendLayout();
             this->fcggroupBoxCmdEx->SuspendLayout();
@@ -844,11 +846,12 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgtabControlVideo->Location = System::Drawing::Point(0, 25);
             this->fcgtabControlVideo->Name = L"fcgtabControlVideo";
             this->fcgtabControlVideo->SelectedIndex = 0;
-            this->fcgtabControlVideo->Size = System::Drawing::Size(616, 445);
+            this->fcgtabControlVideo->Size = System::Drawing::Size(616, 467);
             this->fcgtabControlVideo->TabIndex = 0;
             // 
             // fcgtabPageExSettings
             // 
+            this->fcgtabPageExSettings->Controls->Add(this->fcgCBAFSTimecode);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCBAudioInput);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCB2passEnc);
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBOutputExt);
@@ -869,7 +872,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBffmpegOutPriority);
             this->fcgtabPageExSettings->Location = System::Drawing::Point(4, 23);
             this->fcgtabPageExSettings->Name = L"fcgtabPageExSettings";
-            this->fcgtabPageExSettings->Size = System::Drawing::Size(608, 418);
+            this->fcgtabPageExSettings->Size = System::Drawing::Size(608, 440);
             this->fcgtabPageExSettings->TabIndex = 3;
             this->fcgtabPageExSettings->Text = L"映像";
             this->fcgtabPageExSettings->UseVisualStyleBackColor = true;
@@ -877,7 +880,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgCBAudioInput
             // 
             this->fcgCBAudioInput->AutoSize = true;
-            this->fcgCBAudioInput->Location = System::Drawing::Point(165, 65);
+            this->fcgCBAudioInput->Location = System::Drawing::Point(154, 65);
             this->fcgCBAudioInput->Name = L"fcgCBAudioInput";
             this->fcgCBAudioInput->Size = System::Drawing::Size(78, 18);
             this->fcgCBAudioInput->TabIndex = 15;
@@ -888,7 +891,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgCB2passEnc
             // 
             this->fcgCB2passEnc->AutoSize = true;
-            this->fcgCB2passEnc->Location = System::Drawing::Point(30, 65);
+            this->fcgCB2passEnc->Location = System::Drawing::Point(22, 65);
             this->fcgCB2passEnc->Name = L"fcgCB2passEnc";
             this->fcgCB2passEnc->Size = System::Drawing::Size(119, 18);
             this->fcgCB2passEnc->TabIndex = 14;
@@ -899,7 +902,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgLBOutputExt
             // 
             this->fcgLBOutputExt->AutoSize = true;
-            this->fcgLBOutputExt->Location = System::Drawing::Point(353, 15);
+            this->fcgLBOutputExt->Location = System::Drawing::Point(362, 15);
             this->fcgLBOutputExt->Name = L"fcgLBOutputExt";
             this->fcgLBOutputExt->Size = System::Drawing::Size(62, 14);
             this->fcgLBOutputExt->TabIndex = 13;
@@ -907,7 +910,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             // fcgTXOutputExt
             // 
-            this->fcgTXOutputExt->Location = System::Drawing::Point(440, 12);
+            this->fcgTXOutputExt->Location = System::Drawing::Point(449, 12);
             this->fcgTXOutputExt->Name = L"fcgTXOutputExt";
             this->fcgTXOutputExt->Size = System::Drawing::Size(150, 21);
             this->fcgTXOutputExt->TabIndex = 12;
@@ -916,7 +919,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgLBOutputCsp
             // 
             this->fcgLBOutputCsp->AutoSize = true;
-            this->fcgLBOutputCsp->Location = System::Drawing::Point(27, 97);
+            this->fcgLBOutputCsp->Location = System::Drawing::Point(19, 126);
             this->fcgLBOutputCsp->Name = L"fcgLBOutputCsp";
             this->fcgLBOutputCsp->Size = System::Drawing::Size(62, 14);
             this->fcgLBOutputCsp->TabIndex = 11;
@@ -925,7 +928,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgLBInterlaced
             // 
             this->fcgLBInterlaced->AutoSize = true;
-            this->fcgLBInterlaced->Location = System::Drawing::Point(27, 130);
+            this->fcgLBInterlaced->Location = System::Drawing::Point(19, 159);
             this->fcgLBInterlaced->Name = L"fcgLBInterlaced";
             this->fcgLBInterlaced->Size = System::Drawing::Size(93, 14);
             this->fcgLBInterlaced->TabIndex = 10;
@@ -935,7 +938,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             this->fcgCXOutputCsp->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXOutputCsp->FormattingEnabled = true;
-            this->fcgCXOutputCsp->Location = System::Drawing::Point(135, 94);
+            this->fcgCXOutputCsp->Location = System::Drawing::Point(127, 123);
             this->fcgCXOutputCsp->Name = L"fcgCXOutputCsp";
             this->fcgCXOutputCsp->Size = System::Drawing::Size(152, 22);
             this->fcgCXOutputCsp->TabIndex = 9;
@@ -945,7 +948,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             this->fcgCXInterlaced->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXInterlaced->FormattingEnabled = true;
-            this->fcgCXInterlaced->Location = System::Drawing::Point(135, 127);
+            this->fcgCXInterlaced->Location = System::Drawing::Point(127, 156);
             this->fcgCXInterlaced->Name = L"fcgCXInterlaced";
             this->fcgCXInterlaced->Size = System::Drawing::Size(152, 22);
             this->fcgCXInterlaced->TabIndex = 8;
@@ -953,7 +956,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             // fcgBTffmpegOutPath
             // 
-            this->fcgBTffmpegOutPath->Location = System::Drawing::Point(282, 34);
+            this->fcgBTffmpegOutPath->Location = System::Drawing::Point(274, 34);
             this->fcgBTffmpegOutPath->Name = L"fcgBTffmpegOutPath";
             this->fcgBTffmpegOutPath->Size = System::Drawing::Size(27, 22);
             this->fcgBTffmpegOutPath->TabIndex = 2;
@@ -964,7 +967,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgTXffmpegOutPath
             // 
             this->fcgTXffmpegOutPath->AllowDrop = true;
-            this->fcgTXffmpegOutPath->Location = System::Drawing::Point(30, 34);
+            this->fcgTXffmpegOutPath->Location = System::Drawing::Point(22, 34);
             this->fcgTXffmpegOutPath->Name = L"fcgTXffmpegOutPath";
             this->fcgTXffmpegOutPath->Size = System::Drawing::Size(246, 21);
             this->fcgTXffmpegOutPath->TabIndex = 1;
@@ -984,7 +987,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgLBTempDir
             // 
             this->fcgLBTempDir->AutoSize = true;
-            this->fcgLBTempDir->Location = System::Drawing::Point(353, 72);
+            this->fcgLBTempDir->Location = System::Drawing::Point(366, 101);
             this->fcgLBTempDir->Name = L"fcgLBTempDir";
             this->fcgLBTempDir->Size = System::Drawing::Size(60, 14);
             this->fcgLBTempDir->TabIndex = 4;
@@ -992,7 +995,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             // fcgBTCustomTempDir
             // 
-            this->fcgBTCustomTempDir->Location = System::Drawing::Point(572, 127);
+            this->fcgBTCustomTempDir->Location = System::Drawing::Point(572, 156);
             this->fcgBTCustomTempDir->Name = L"fcgBTCustomTempDir";
             this->fcgBTCustomTempDir->Size = System::Drawing::Size(29, 23);
             this->fcgBTCustomTempDir->TabIndex = 6;
@@ -1006,12 +1009,29 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcggroupBoxCmdEx->Controls->Add(this->fcgTXInCmd);
             this->fcggroupBoxCmdEx->Controls->Add(this->fcgCXCmdExInsert);
             this->fcggroupBoxCmdEx->Controls->Add(this->fcgTXCmdEx);
-            this->fcggroupBoxCmdEx->Location = System::Drawing::Point(8, 160);
+            this->fcggroupBoxCmdEx->Location = System::Drawing::Point(8, 183);
             this->fcggroupBoxCmdEx->Name = L"fcggroupBoxCmdEx";
             this->fcggroupBoxCmdEx->Size = System::Drawing::Size(589, 251);
             this->fcggroupBoxCmdEx->TabIndex = 7;
             this->fcggroupBoxCmdEx->TabStop = false;
             this->fcggroupBoxCmdEx->Text = L"コマンド";
+            // 
+            // fcgLBInCmd
+            // 
+            this->fcgLBInCmd->AutoSize = true;
+            this->fcgLBInCmd->Location = System::Drawing::Point(9, 199);
+            this->fcgLBInCmd->Name = L"fcgLBInCmd";
+            this->fcgLBInCmd->Size = System::Drawing::Size(68, 14);
+            this->fcgLBInCmd->TabIndex = 7;
+            this->fcgLBInCmd->Text = L"入力オプション";
+            // 
+            // fcgTXInCmd
+            // 
+            this->fcgTXInCmd->AllowDrop = true;
+            this->fcgTXInCmd->Location = System::Drawing::Point(93, 196);
+            this->fcgTXInCmd->Name = L"fcgTXInCmd";
+            this->fcgTXInCmd->Size = System::Drawing::Size(490, 21);
+            this->fcgTXInCmd->TabIndex = 6;
             // 
             // fcgCXCmdExInsert
             // 
@@ -1041,7 +1061,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             // fcgTXCustomTempDir
             // 
-            this->fcgTXCustomTempDir->Location = System::Drawing::Point(387, 128);
+            this->fcgTXCustomTempDir->Location = System::Drawing::Point(387, 157);
             this->fcgTXCustomTempDir->Name = L"fcgTXCustomTempDir";
             this->fcgTXCustomTempDir->Size = System::Drawing::Size(182, 21);
             this->fcgTXCustomTempDir->TabIndex = 5;
@@ -1052,7 +1072,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             this->fcgCXTempDir->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXTempDir->FormattingEnabled = true;
-            this->fcgCXTempDir->Location = System::Drawing::Point(375, 100);
+            this->fcgCXTempDir->Location = System::Drawing::Point(375, 129);
             this->fcgCXTempDir->Name = L"fcgCXTempDir";
             this->fcgCXTempDir->Size = System::Drawing::Size(209, 22);
             this->fcgCXTempDir->TabIndex = 4;
@@ -1062,7 +1082,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // 
             this->fcgCXffmpegOutPriority->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXffmpegOutPriority->FormattingEnabled = true;
-            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(440, 42);
+            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(449, 42);
             this->fcgCXffmpegOutPriority->Name = L"fcgCXffmpegOutPriority";
             this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(152, 22);
             this->fcgCXffmpegOutPriority->TabIndex = 3;
@@ -1071,7 +1091,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgLBffmpegOutPriority
             // 
             this->fcgLBffmpegOutPriority->AutoSize = true;
-            this->fcgLBffmpegOutPriority->Location = System::Drawing::Point(353, 45);
+            this->fcgLBffmpegOutPriority->Location = System::Drawing::Point(362, 45);
             this->fcgLBffmpegOutPriority->Name = L"fcgLBffmpegOutPriority";
             this->fcgLBffmpegOutPriority->Size = System::Drawing::Size(81, 14);
             this->fcgLBffmpegOutPriority->TabIndex = 1;
@@ -2056,7 +2076,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgBTCancel
             // 
             this->fcgBTCancel->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-            this->fcgBTCancel->Location = System::Drawing::Point(771, 474);
+            this->fcgBTCancel->Location = System::Drawing::Point(771, 496);
             this->fcgBTCancel->Name = L"fcgBTCancel";
             this->fcgBTCancel->Size = System::Drawing::Size(84, 28);
             this->fcgBTCancel->TabIndex = 5;
@@ -2067,7 +2087,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgBTOK
             // 
             this->fcgBTOK->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-            this->fcgBTOK->Location = System::Drawing::Point(893, 474);
+            this->fcgBTOK->Location = System::Drawing::Point(893, 496);
             this->fcgBTOK->Name = L"fcgBTOK";
             this->fcgBTOK->Size = System::Drawing::Size(84, 28);
             this->fcgBTOK->TabIndex = 6;
@@ -2078,7 +2098,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             // fcgBTDefault
             // 
             this->fcgBTDefault->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-            this->fcgBTDefault->Location = System::Drawing::Point(9, 476);
+            this->fcgBTDefault->Location = System::Drawing::Point(9, 498);
             this->fcgBTDefault->Name = L"fcgBTDefault";
             this->fcgBTDefault->Size = System::Drawing::Size(112, 28);
             this->fcgBTDefault->TabIndex = 7;
@@ -2093,7 +2113,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgLBVersionDate->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->fcgLBVersionDate->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
-            this->fcgLBVersionDate->Location = System::Drawing::Point(478, 483);
+            this->fcgLBVersionDate->Location = System::Drawing::Point(478, 505);
             this->fcgLBVersionDate->Name = L"fcgLBVersionDate";
             this->fcgLBVersionDate->Size = System::Drawing::Size(49, 15);
             this->fcgLBVersionDate->TabIndex = 8;
@@ -2106,7 +2126,7 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgLBVersion->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->fcgLBVersion->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
-            this->fcgLBVersion->Location = System::Drawing::Point(204, 483);
+            this->fcgLBVersion->Location = System::Drawing::Point(204, 505);
             this->fcgLBVersion->Name = L"fcgLBVersion";
             this->fcgLBVersion->Size = System::Drawing::Size(49, 15);
             this->fcgLBVersion->TabIndex = 9;
@@ -2132,28 +2152,22 @@ private: System::Windows::Forms::TextBox^  fcgTXInCmd;
             this->fcgCSReplaceStrings->Name = L"fcgCSReplaceStrings";
             this->fcgCSReplaceStrings->Size = System::Drawing::Size(61, 4);
             // 
-            // fcgTXInCmd
+            // fcgCBAFSTimecode
             // 
-            this->fcgTXInCmd->AllowDrop = true;
-            this->fcgTXInCmd->Location = System::Drawing::Point(93, 196);
-            this->fcgTXInCmd->Name = L"fcgTXInCmd";
-            this->fcgTXInCmd->Size = System::Drawing::Size(490, 21);
-            this->fcgTXInCmd->TabIndex = 6;
-            // 
-            // fcgLBInCmd
-            // 
-            this->fcgLBInCmd->AutoSize = true;
-            this->fcgLBInCmd->Location = System::Drawing::Point(9, 199);
-            this->fcgLBInCmd->Name = L"fcgLBInCmd";
-            this->fcgLBInCmd->Size = System::Drawing::Size(68, 14);
-            this->fcgLBInCmd->TabIndex = 7;
-            this->fcgLBInCmd->Text = L"入力オプション";
+            this->fcgCBAFSTimecode->AutoSize = true;
+            this->fcgCBAFSTimecode->Location = System::Drawing::Point(22, 89);
+            this->fcgCBAFSTimecode->Name = L"fcgCBAFSTimecode";
+            this->fcgCBAFSTimecode->Size = System::Drawing::Size(113, 18);
+            this->fcgCBAFSTimecode->TabIndex = 16;
+            this->fcgCBAFSTimecode->Tag = L"chValue";
+            this->fcgCBAFSTimecode->Text = L"afsタイムコード出力";
+            this->fcgCBAFSTimecode->UseVisualStyleBackColor = true;
             // 
             // frmConfig
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
-            this->ClientSize = System::Drawing::Size(1008, 505);
+            this->ClientSize = System::Drawing::Size(1008, 527);
             this->Controls->Add(this->fcgLBVersion);
             this->Controls->Add(this->fcgLBVersionDate);
             this->Controls->Add(this->fcgBTDefault);

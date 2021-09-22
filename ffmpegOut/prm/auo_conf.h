@@ -86,7 +86,7 @@ typedef struct {
     int     output_csp;
     int     pass;
     BOOL    use_auto_npass;
-    int        auto_npass;
+    int     auto_npass;
     int     bitrate;
     BOOL    interlaced;
     BOOL    audio_input;

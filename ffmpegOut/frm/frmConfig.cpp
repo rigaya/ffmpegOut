@@ -854,6 +854,7 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
     SetCXIndex(fcgCXTempDir,             cnf->oth.temp_dir);
     fcgCB2passEnc->Checked             = cnf->enc.use_auto_npass != 0;
     fcgCBAudioInput->Checked           = cnf->enc.audio_input != 0;
+    fcgCBAFSTimecode->Checked          = cnf->vid.auo_tcfile_out != 0;
 
     fcgTXCmdEx->Text                   = String(cnf->vid.cmdex).ToString();
     fcgTXOutputExt->Text               = String(cnf->vid.outext).ToString();
@@ -910,9 +911,9 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     cnf->enc.audio_input            = fcgCBAudioInput->Checked;
     cnf->enc.auto_npass             = 2;
     //cnf->vid.amp_check              = NULL;
-    cnf->vid.afs                    = FALSE;
+    cnf->vid.afs                    = fcgCBAFSTimecode->Checked;
+    cnf->vid.auo_tcfile_out         = fcgCBAFSTimecode->Checked;
     cnf->vid.afs_bitrate_correction = FALSE;
-    cnf->vid.auo_tcfile_out         = FALSE;
     cnf->vid.check_keyframe         = FALSE;
     cnf->vid.priority               = fcgCXffmpegOutPriority->SelectedIndex;
     cnf->oth.temp_dir               = fcgCXTempDir->SelectedIndex;
