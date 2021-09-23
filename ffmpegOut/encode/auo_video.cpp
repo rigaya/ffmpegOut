@@ -600,14 +600,16 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
             }
 
             //標準入力への書き込み完了をチェック
-            while (WAIT_TIMEOUT == WaitForSingleObject(thread_data.he_out_fin, 0)) {
+            for (int itr = 0; WAIT_TIMEOUT == WaitForSingleObject(thread_data.he_out_fin, 0); itr++) {
                 ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
-                if (ReadLogEnc(&pipes, pe->drop_count, i) < 0) {
-                    //勝手に死んだ...
-                    ret |= AUO_RESULT_ERROR; error_x264_dead();
-                    break;
+                if ((itr & 63) == 63) {
+                    if (ReadLogEnc(&pipes, pe->drop_count, i) < 0) {
+                        //勝手に死んだ...
+                        ret |= AUO_RESULT_ERROR; error_x264_dead();
+                        break;
+                    }
+                    log_process_events();
                 }
-                log_process_events();
                 if (conf->aud.use_internal) {
                     //音声同時処理
                     ret |= aud_parallel_task(oip, pe, conf->aud.use_internal);
