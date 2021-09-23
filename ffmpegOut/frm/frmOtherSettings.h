@@ -484,7 +484,7 @@ namespace ffmpegOut {
             fos_ex_stg->s_log.log_level                  =(fosCBOutputMoreLog->Checked) ? LOG_MORE : LOG_INFO;
             fos_ex_stg->s_local.get_relative_path        = fosCBGetRelativePath->Checked;
             fos_ex_stg->s_local.run_bat_minimized        = fosCBRunBatMinimized->Checked;
-            fos_ex_stg->s_local.default_audio_encoder    = fosCXDefaultAudioEncoder->SelectedIndex;
+            fos_ex_stg->s_local.default_audio_encoder_ext= fosCXDefaultAudioEncoder->SelectedIndex;
             fos_ex_stg->save_local();
             fos_ex_stg->save_log_win();
             this->Close();
@@ -513,7 +513,7 @@ namespace ffmpegOut {
             fosCBOutputMoreLog->Checked          = fos_ex_stg->s_log.log_level != LOG_INFO;
             fosCBGetRelativePath->Checked        = fos_ex_stg->s_local.get_relative_path != 0;
             fosCBRunBatMinimized->Checked        = fos_ex_stg->s_local.run_bat_minimized != 0;
-            fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder, 0, fosCXDefaultAudioEncoder->Items->Count);
+            fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder_ext, 0, fosCXDefaultAudioEncoder->Items->Count);
             if (str_has_char(fos_ex_stg->s_local.conf_font.name))
                 SetFontFamilyToForm(this, gcnew FontFamily(String(fos_ex_stg->s_local.conf_font.name).ToString()), this->Font->FontFamily);
         }

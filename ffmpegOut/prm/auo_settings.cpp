@@ -495,7 +495,9 @@ void guiEx_settings::load_local() {
     s_local.run_bat_minimized         = GetPrivateProfileInt(   ini_section_main, "run_bat_minimized",        DEFAULT_RUN_BAT_MINIMIZED,     conf_fileName);
     //s_local.set_keyframe_as_afs_24fps = GetPrivateProfileInt(   ini_section_main, "set_keyframe_as_afs_24fps", DEFAULT_SET_KEYFRAME_AFS24FPS, conf_fileName);
     //s_local.auto_ref_limit_by_level   = GetPrivateProfileInt(   ini_section_main, "auto_ref_limit_by_level",   DEFAULT_AUTO_REFLIMIT_BYLEVEL, conf_fileName);
-    s_local.default_audio_encoder     = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder",     DEFAULT_AUDIO_ENCODER,         conf_fileName);
+    s_local.default_audio_encoder_ext = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder",     DEFAULT_AUDIO_ENCODER_EXT,    conf_fileName);
+    s_local.default_audio_encoder_in  = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder_in",  DEFAULT_AUDIO_ENCODER_IN,     conf_fileName);
+    s_local.default_audenc_use_in     = GetPrivateProfileInt(   ini_section_main, "default_audenc_use_in",     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
 
     //s_local.amp_retry_limit           = GetPrivateProfileInt(   INI_SECTION_AMP,  "amp_retry_limit",          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
     //s_local.amp_bitrate_margin_multi  = GetPrivateProfileDouble(INI_SECTION_AMP,  "amp_bitrate_margin_multi", DEFAULT_AMP_MARGIN,            conf_fileName);
@@ -585,7 +587,9 @@ void guiEx_settings::save_local() {
     WritePrivateProfileIntWithDefault(   ini_section_main, "run_bat_minimized",         s_local.run_bat_minimized,        DEFAULT_RUN_BAT_MINIMIZED,     conf_fileName);
     //WritePrivateProfileIntWithDefault(   ini_section_main, "set_keyframe_as_afs_24fps", s_local.set_keyframe_as_afs_24fps, DEFAULT_SET_KEYFRAME_AFS24FPS, conf_fileName);
     //WritePrivateProfileIntWithDefault(   ini_section_main, "auto_ref_limit_by_level",   s_local.auto_ref_limit_by_level,   DEFAULT_AUTO_REFLIMIT_BYLEVEL, conf_fileName);
-    WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder",     s_local.default_audio_encoder,     DEFAULT_AUDIO_ENCODER,         conf_fileName);
+    WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder",     s_local.default_audio_encoder_ext, DEFAULT_AUDIO_ENCODER_EXT,     conf_fileName);
+    WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder_in",  s_local.default_audio_encoder_in,  DEFAULT_AUDIO_ENCODER_IN,      conf_fileName);
+    WritePrivateProfileIntWithDefault(   ini_section_main, "default_audenc_use_in",     s_local.default_audenc_use_in,     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
 
     //WritePrivateProfileIntWithDefault(   INI_SECTION_AMP,  "amp_retry_limit",           s_local.amp_retry_limit,          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
     //WritePrivateProfileDoubleWithDefault(INI_SECTION_AMP,  "amp_bitrate_margin_multi",  s_local.amp_bitrate_margin_multi, DEFAULT_AMP_MARGIN,            conf_fileName);

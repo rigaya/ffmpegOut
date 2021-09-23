@@ -264,6 +264,9 @@ void get_default_conf(CONF_GUIEX *conf) {
     conf->mux.disable_mkvext = TRUE;
     conf->mux.disable_mp4ext = TRUE;
     conf->mux.disable_mpgext = TRUE;
+    conf->aud.ext.encoder = sys_dat.exstg->s_local.default_audio_encoder_ext;
+    conf->aud.in.encoder = sys_dat.exstg->s_local.default_audio_encoder_in;
+    conf->aud.use_internal = sys_dat.exstg->s_local.default_audenc_use_in;
     conf->aud.ext.audio_encode_timing = 1;
     conf->aud.in.audio_encode_timing = 2;
     conf->aud.use_internal = 1;
