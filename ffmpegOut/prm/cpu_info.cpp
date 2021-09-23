@@ -25,11 +25,14 @@
 //
 // --------------------------------------------------------------------------------------------
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #include <vector>
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <chrono>
 #include <intrin.h>
 #include <tchar.h>
 #include "cpu_info.h"
@@ -178,7 +181,7 @@ bool get_cpu_info(cpu_info_t *cpu_info) {
                 cache->linesize = Cache->LineSize;
                 cache->size += Cache->Size;
                 cache->associativity = Cache->Associativity;
-                cpu_info->max_cache_level = max(cpu_info->max_cache_level, cache->level);
+                cpu_info->max_cache_level = std::max<uint32_t>(cpu_info->max_cache_level, cache->level);
             }
             break;
         }
@@ -199,74 +202,70 @@ bool get_cpu_info(cpu_info_t *cpu_info) {
     return true;
 }
 
-const int LOOP_COUNT = 5000;
-const int CLOCKS_FOR_2_INSTRUCTION = 2;
-const int COUNT_OF_REPEAT = 4; //以下のようにCOUNT_OF_REPEAT分マクロ展開する
-#define REPEAT4(instruction) \
-    instruction \
-    instruction \
-    instruction \
-    instruction
-
-static UINT64 __fastcall repeatFunc(int *test) {
-    __m128i x0 = _mm_sub_epi32(_mm_setzero_si128(), _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128()));
-    __m128i x1 = _mm_add_epi32(x0, x0);
-    //計算結果を強引に使うことで最適化による計算の削除を抑止する
-    __m128i x2 = _mm_add_epi32(x1, _mm_set1_epi32(*test));
-    UINT dummy;
-    UINT64 start = __rdtscp(&dummy);
-
-    for (int i = LOOP_COUNT; i; i--) {
-        //2重にマクロを使うことでCOUNT_OF_REPEATの2乗分ループ内で実行する
-        //これでループカウンタの影響はほぼ無視できるはず
-        //ここでのPXORは依存関係により、1クロックあたり1回に限定される
-        REPEAT4(REPEAT4(
-        x0 = _mm_xor_si128(x0, x1);
-        x0 = _mm_xor_si128(x0, x2);))
-    }
-    
-    UINT64 fin = __rdtscp(&dummy); //終了はrdtscpで受ける
-    
-    //計算結果を強引に使うことで最適化による計算の削除を抑止する
-    x0 = _mm_add_epi32(x0, x1);
-    x0 = _mm_add_epi32(x0, x2);
-    *test = x0.m128i_i32[0];
-
-    return fin - start;
+const int TEST_COUNT = 5000;
+__declspec(noinline)
+int64_t runl_por(int loop_count, int& dummy_dep) {
+    unsigned int dummy;
+    const auto ts = __rdtscp(&dummy);
+    int i = loop_count;
+#define ADD_XOR { i += loop_count; i ^= loop_count; }
+#define ADD_XOR4 {ADD_XOR;ADD_XOR;ADD_XOR;ADD_XOR;}
+#define ADD_XOR16 {ADD_XOR4;ADD_XOR4;ADD_XOR4;ADD_XOR4;}
+    do {
+        ADD_XOR16;
+        ADD_XOR16;
+        ADD_XOR16;
+        ADD_XOR16;
+        loop_count--;
+    } while (loop_count > 0);
+    const auto te = __rdtscp(&dummy);
+    dummy_dep = i;
+    return te - ts;
 }
 
-static unsigned int __stdcall getCPUClockMaxSubFunc(void *arg) {
-    UINT64 *prm = (UINT64 *)arg;
-    //渡されたスレッドIDからスレッドAffinityを決定
-    //特定のコアにスレッドを縛り付ける
-    SetThreadAffinityMask(GetCurrentThread(), 1 << (int)*prm);
-    //高優先度で実行
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-
-    int test = 0;
-    UINT64 result = MAXUINT64;
-    
-    for (int j = 0; j < 4; j++) {
-        for (int i = 0; i < 800; i++) {
-            //連続で大量に行うことでTurboBoostを働かせる
-            //何回か行って最速値を使用する
-            result = min(result, repeatFunc(&test));
-        }
-        Sleep(1); //一度スレッドを休ませて、仕切りなおす (Sleep(0)でもいいかも)
+//rdtscpを使うと0xc0000096例外 (一般ソフトウェア例外)を発する場合があるらしい
+//そこでそれを検出する
+bool check_rdtscp_available() {
+#if defined(_WIN32) || defined(_WIN64)
+    __try {
+        UINT dummy;
+        __rdtscp(&dummy);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
     }
+#endif //defined(_WIN32) || defined(_WIN64)
+    return true;
+}
 
-    *prm = result;
+static double get_tick_per_clock() {
+    const int outer_loop_count = 100;
+    const int inner_loop_count = TEST_COUNT;
+    int dummy = 0;
+    auto tick_min = runl_por(inner_loop_count, dummy);
+    for (int i = 0; i < outer_loop_count; i++) {
+        auto ret = runl_por(inner_loop_count, dummy);
+        tick_min = std::min(tick_min, ret);
+    }
+    return tick_min / (128.0 * inner_loop_count);
+}
 
-    return 0;
+static double get_tick_per_sec() {
+    const int outer_loop_count = TEST_COUNT;
+    int dummy = 0;
+    runl_por(outer_loop_count, dummy);
+    auto start = std::chrono::high_resolution_clock::now();
+    auto tick = runl_por(outer_loop_count, dummy);
+    auto fin = std::chrono::high_resolution_clock::now();
+    double second = std::chrono::duration_cast<std::chrono::microseconds>(fin - start).count() * 1e-6;
+    return tick / second;
 }
 
 //__rdtscが定格クロックに基づいた値を返すのを利用して、実際の動作周波数を得る
 //やや時間がかかるので注意
-double getCPUMaxTurboClock(unsigned int num_thread) {
-    double resultClock = 0;
-    double defaultClock = getCPUDefaultClock();
-    if (0.0 >= defaultClock) {
-        return 0.0;
+double getCPUMaxTurboClock() {
+    static double turboClock = 0.0;
+    if (turboClock > 0.0) {
+        return turboClock;
     }
 
     //http://instlatx64.atw.hu/
@@ -276,54 +275,22 @@ double getCPUMaxTurboClock(unsigned int num_thread) {
     int CPUInfo[4] = {-1};
     __cpuid(CPUInfo, 0x80000007);
     if (0 == (CPUInfo[3] & (1<<8))) {
-        return defaultClock;
+        return 0.0;
     }
     //rdtscp命令のチェック (Fn:8000_0001:EDX27)
     __cpuid(CPUInfo, 0x80000001);
     if (0 == (CPUInfo[3] & (1<<27))) {
-        return defaultClock;
+        return 0.0;
+    }
+    //例外が発生するなら処理を中断する
+    if (!check_rdtscp_available()) {
+        return 0.0;
     }
 
-    cpu_info_t cpu_info;
-    get_cpu_info(&cpu_info);
-    //ハーパースレッディングを考慮してスレッドIDを渡す
-    int thread_id_multi = (cpu_info.logical_cores > cpu_info.physical_cores) ? cpu_info.logical_cores / cpu_info.physical_cores : 1;
-    //上限は物理プロセッサ数、0なら自動的に物理プロセッサ数に設定
-    num_thread = (0 == num_thread) ? max(1, cpu_info.physical_cores - (cpu_info.logical_cores == cpu_info.physical_cores)) : min(num_thread, cpu_info.physical_cores);
-
-    std::vector<HANDLE> list_of_threads(num_thread, NULL);
-    std::vector<UINT64> list_of_result(num_thread, 0);
-    DWORD thread_loaded = 0;
-    for ( ; thread_loaded < num_thread; thread_loaded++) {
-        list_of_result[thread_loaded] = thread_loaded * thread_id_multi; //スレッドIDを渡す
-        list_of_threads[thread_loaded] = (HANDLE)_beginthreadex(NULL, 0, getCPUClockMaxSubFunc, &list_of_result[thread_loaded], CREATE_SUSPENDED, NULL);
-        if (NULL == list_of_threads[thread_loaded]) {
-            break; //失敗したらBreak
-        }
-    }
-    
-    if (thread_loaded) {
-        for (DWORD i_thread = 0; i_thread < thread_loaded; i_thread++) {
-            ResumeThread(list_of_threads[i_thread]);
-        }
-        WaitForMultipleObjects(thread_loaded, &list_of_threads[0], TRUE, INFINITE);
-    }
-
-    if (thread_loaded < num_thread) {
-        resultClock = defaultClock;
-    } else {
-        UINT64 min_result = *std::min_element(list_of_result.begin(), list_of_result.end());
-        resultClock = (min_result) ? defaultClock * (double)(LOOP_COUNT * COUNT_OF_REPEAT * COUNT_OF_REPEAT * 2) / (double)min_result : defaultClock;
-        resultClock = max(resultClock, defaultClock);
-    }
-
-    for (auto thread : list_of_threads) {
-        if (NULL != thread) {
-            CloseHandle(thread);
-        }
-    }
-
-    return resultClock;
+    const double tick_per_clock = get_tick_per_clock();
+    const double tick_per_sec = get_tick_per_sec();
+    turboClock = (tick_per_sec / tick_per_clock) * 1e-9;
+    return turboClock;
 }
 
 #if ENABLE_OPENCL
@@ -383,7 +350,7 @@ int getCPUInfo(TCHAR *buffer, size_t nSize) {
             if (noDefaultClockInCPUName) {
                 _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(" @ %.2fGHz"), defaultClock);
             }
-            double maxFrequency = getCPUMaxTurboClock(0);
+            double maxFrequency = getCPUMaxTurboClock();
             //大きな違いがなければ、TurboBoostはないものとして表示しない
             if (maxFrequency / defaultClock > 1.01) {
                 _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(" [TB: %.2fGHz]"), maxFrequency);
