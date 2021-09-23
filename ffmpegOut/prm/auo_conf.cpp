@@ -103,6 +103,11 @@ BOOL guiEx_config::adjust_conf_size(CONF_GUIEX *conf_buf, void *old_data, int ol
             dst = (BYTE *)conf_buf + conf_block_pointer[i];
             memcpy(dst, block, std::min(((CONF_GUIEX *)data_table)->block_size[i], conf_block_data[i]));
         }
+        // 互換性維持のため
+        if (((CONF_GUIEX *)data_table)->block_size[2] == sizeof(CONF_GUIEX::aud)
+            && ((CONF_GUIEX *)data_table)->block_size[2] == 44 /*sizeof(CONF_AUDIO_BASE)*/) {
+            conf_buf->aud.use_internal = FALSE;
+        }
         ret = TRUE;
     }
     return ret;
@@ -147,6 +152,11 @@ int guiEx_config::load_auo_conf(CONF_GUIEX *conf, const char *stg_file) {
         filedat = dat + ((CONF_GUIEX *)dat)->block_head_p[i];
         dst = (BYTE *)conf + conf_block_pointer[i];
         memcpy(dst, filedat, std::min(((CONF_GUIEX *)dat)->block_size[i], conf_block_data[i]));
+    }
+    // 互換性維持のため
+    if (((CONF_GUIEX *)dat)->block_size[2] != sizeof(CONF_GUIEX::aud)
+        && ((CONF_GUIEX *)dat)->block_size[2] == 44 /*sizeof(CONF_AUDIO_BASE)*/) {
+        conf->aud.use_internal = FALSE;
     }
 
     //初期化するかどうかで使うので。
