@@ -219,6 +219,18 @@ static void build_full_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, cons
                     get_audio_pipe_name(pipename, _countof(pipename), i_aud);
                     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -i \"%s\"", pipename);
                 }
+                if (pe->aud_count > 0) {
+                    const CONF_AUDIO_BASE *cnf_aud = &conf->aud.in;
+                    const AUDIO_SETTINGS *aud_stg = &sys_dat->exstg->s_aud_int[cnf_aud->encoder];
+                    if (sys_dat->exstg->is_faw(aud_stg)) {
+                        sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -c:a copy");
+                    } else if (strcmp(aud_stg->codec, "custom") != 0) { // custom 選択時は特に何も指定しない
+                        sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -c:a %s", aud_stg->codec);
+                        if (aud_stg->mode[cnf_aud->enc_mode].bitrate) {
+                            sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -b:a %dk", cnf_aud->bitrate);
+                        }
+                    }
+                }
             } else {
                 char tmp[MAX_PATH_LEN];
                 get_aud_filename(tmp, _countof(tmp), pe, 0);
