@@ -512,11 +512,23 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
 // name          … 一時ファイルの種類の名前
 // must_exist    … trueのとき、移動するべきファイルが存在しないとエラーを返し、ファイルが存在しないことを伝える
 static BOOL move_temp_file(const char *appendix, const char *temp_filename, const char *savefile, DWORD ret, BOOL erase, const char *name, BOOL must_exist) {
-    char move_from[MAX_PATH_LEN] = { 0 };
+    char move_from_tmp[MAX_PATH_LEN] = { 0 };
     if (appendix)
-        apply_appendix(move_from, _countof(move_from), temp_filename, appendix);
+        apply_appendix(move_from_tmp, _countof(move_from_tmp), temp_filename, appendix);
     else
-        strcpy_s(move_from, _countof(move_from), temp_filename);
+        strcpy_s(move_from_tmp, temp_filename);
+
+    char move_from[MAX_PATH_LEN] = { 0 };
+    if (strcmp(name, "出力") == 0) {
+        // 連番出力等の場合、1番が出ているかだけチェックする
+        sprintf_s(move_from, move_from_tmp, 1);
+        // ファイル名が変わっている(=連番出力等の場合)この後の処理をスキップ
+        if (strcmp(move_from, move_from_tmp) != 0) {
+            return TRUE;
+        }
+    } else {
+        strcpy_s(move_from, move_from_tmp);
+    }
 
     if (!PathFileExists(move_from)) {
         if (must_exist)
