@@ -204,6 +204,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     //    ret |= run_bat_file(&conf_out, oip, &pe, &sys_dat, RUN_BAT_AFTER);
 
     oip->savefile = orig_savfile;
+    free_enc_prm(&pe);
 
     return (ret & AUO_RESULT_ERROR) ? FALSE : TRUE;
 }
