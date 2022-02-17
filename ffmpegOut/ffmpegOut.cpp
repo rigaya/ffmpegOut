@@ -155,7 +155,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     AUO_RESULT ret = AUO_RESULT_SUCCESS;
     static const encode_task task[3][2] = { { video_output, audio_output }, { audio_output, video_output }, { audio_output_parallel, video_output }  };
     PRM_ENC pe = { 0 };
-    CONF_GUIEX conf_out = g_conf;
+    CONF_GUIEX conf_out = { 0 };
     const DWORD tm_start_enc = timeGetTime();
 
     //データの初期化
@@ -169,6 +169,11 @@ BOOL func_output( OUTPUT_INFO *oip )
 
     //ログウィンドウを開く
     open_log_window(oip->savefile, &sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
+    if (memcmp(&conf_out, &g_conf, sizeof(g_conf)) == 0) {
+        error_conf_not_initialized();
+        return FALSE;
+    }
+    conf_out = g_conf;
     set_prevent_log_close(TRUE); //※1 start
 
     //各種設定を行う

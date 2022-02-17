@@ -32,6 +32,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
+void error_conf_not_initialized();
 void warning_failed_getting_temp_path();
 void warning_no_temp_root(const char *dir);
 void warning_no_aud_temp_root(const char *dir);
