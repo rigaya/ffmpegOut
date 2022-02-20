@@ -81,8 +81,7 @@ EXTERN_C OUTPUT_PLUGIN_TABLE __declspec(dllexport) * __stdcall GetOutputPluginTa
 //---------------------------------------------------------------------
 
 static CONF_GUIEX g_conf = { 0 };
-static SYSTEM_DATA sys_dat = { 0 };
-
+static SYSTEM_DATA g_sys_dat = { 0 };
 
 //---------------------------------------------------------------------
 //        出力プラグイン出力関数
@@ -146,7 +145,7 @@ BOOL func_init()
 
 BOOL func_exit() 
 {
-    delete_SYSTEM_DATA(&sys_dat);
+    delete_SYSTEM_DATA(&g_sys_dat);
     return TRUE;
 }
 
@@ -157,10 +156,23 @@ BOOL func_output( OUTPUT_INFO *oip )
     PRM_ENC pe = { 0 };
     CONF_GUIEX conf_out = { 0 };
     const DWORD tm_start_enc = timeGetTime();
+    char default_stg_file[MAX_PATH_LEN] = { 0 };
 
     //データの初期化
-    init_SYSTEM_DATA(&sys_dat);
-    if (!sys_dat.exstg->get_init_success()) return FALSE;
+    init_SYSTEM_DATA(&g_sys_dat);
+    if (!g_sys_dat.exstg->get_init_success()) return FALSE;
+
+    const bool conf_not_initialized = memcmp(&conf_out, &g_conf, sizeof(g_conf)) == 0;
+    if (conf_not_initialized) {
+        PathCombine(default_stg_file, g_sys_dat.exstg->s_local.stg_dir, CONF_LAST_OUT);
+        if (!PathFileExists(default_stg_file)
+            || guiEx_config::load_guiEx_conf(&g_conf, default_stg_file) != CONF_ERROR_NONE) {
+            //前回出力した設定ファイルがない場合は、デフォルト設定をロード
+            init_CONF_GUIEX(&g_conf, FALSE);
+            memset(default_stg_file, 0, sizeof(default_stg_file));
+        }
+    }
+    conf_out = g_conf;
 
     //出力拡張子の設定
     char *orig_savfile = oip->savefile;
@@ -168,30 +180,28 @@ BOOL func_output( OUTPUT_INFO *oip )
     make_outfilename_and_set_to_oipsavefile(oip, outfilename, _countof(outfilename), &conf_out);
 
     //ログウィンドウを開く
-    open_log_window(oip->savefile, &sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
-    if (memcmp(&conf_out, &g_conf, sizeof(g_conf)) == 0) {
-        error_conf_not_initialized();
-        return FALSE;
+    open_log_window(oip->savefile, &g_sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
+    if (conf_not_initialized) {
+        warning_conf_not_initialized(default_stg_file);
     }
-    conf_out = g_conf;
     set_prevent_log_close(TRUE); //※1 start
 
     //各種設定を行う
-    set_enc_prm(&conf_out, &pe, oip, &sys_dat);
+    set_enc_prm(&conf_out, &pe, oip, &g_sys_dat);
     pe.h_p_aviutl = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId()); //※2 start
 
     //チェックを行い、エンコード可能ならエンコードを開始する
-    if (check_output(&conf_out, oip, &pe, sys_dat.exstg)) {
+    if (check_output(&conf_out, oip, &pe, g_sys_dat.exstg)) {
 
         //ret |= run_bat_file(&conf_out, oip, &pe, &sys_dat, RUN_BAT_BEFORE);
 
         const auto audio_encode_timing = (conf_out.aud.use_internal) ? 2 : conf_out.aud.ext.audio_encode_timing;
         for (int i = 0; !ret && i < 2; i++)
-            ret |= task[audio_encode_timing][i](&conf_out, oip, &pe, &sys_dat);
+            ret |= task[audio_encode_timing][i](&conf_out, oip, &pe, &g_sys_dat);
 
         //if (!ret) ret |= mux(&conf_out, oip, &pe, &sys_dat);
 
-        ret |= move_temporary_files(&conf_out, &pe, &sys_dat, oip, ret);
+        ret |= move_temporary_files(&conf_out, &pe, &g_sys_dat, oip, ret);
 
         write_log_auo_enc_time("総エンコード時間  ", timeGetTime() - tm_start_enc);
 
@@ -203,12 +213,18 @@ BOOL func_output( OUTPUT_INFO *oip )
 
     CloseHandle(pe.h_p_aviutl); //※2 end
     set_prevent_log_close(FALSE); //※1 end
-    auto_save_log(&conf_out, oip, &pe, &sys_dat); //※1 end のあとで行うこと
+    auto_save_log(&conf_out, oip, &pe, &g_sys_dat); //※1 end のあとで行うこと
 
     //if (!(ret & (AUO_RESULT_ERROR | AUO_RESULT_ABORT)))
     //    ret |= run_bat_file(&conf_out, oip, &pe, &sys_dat, RUN_BAT_AFTER);
 
     oip->savefile = orig_savfile;
+    // エラーが発生しなかった場合は設定を保存
+    if (ret == AUO_RESULT_SUCCESS) {
+        memset(default_stg_file, 0, sizeof(default_stg_file));
+        PathCombine(default_stg_file, g_sys_dat.exstg->s_local.stg_dir, CONF_LAST_OUT);
+        guiEx_config::save_guiEx_conf(&conf_out, default_stg_file);
+    }
     free_enc_prm(&pe);
 
     return (ret & AUO_RESULT_ERROR) ? FALSE : TRUE;
@@ -223,9 +239,9 @@ BOOL func_output( OUTPUT_INFO *oip )
 #pragma warning( disable: 4100 )
 BOOL func_config(HWND hwnd, HINSTANCE dll_hinst)
 {
-    init_SYSTEM_DATA(&sys_dat);
-    if (sys_dat.exstg->get_init_success())
-        ShowfrmConfig(&g_conf, &sys_dat);
+    init_SYSTEM_DATA(&g_sys_dat);
+    if (g_sys_dat.exstg->get_init_success())
+        ShowfrmConfig(&g_conf, &g_sys_dat);
     return TRUE;
 }
 #pragma warning( pop )
@@ -239,8 +255,8 @@ int func_config_get( void *data, int size )
 
 int func_config_set( void *data,int size )
 {
-    init_SYSTEM_DATA(&sys_dat);
-    if (!sys_dat.exstg->get_init_success(TRUE))
+    init_SYSTEM_DATA(&g_sys_dat);
+    if (!g_sys_dat.exstg->get_init_success(TRUE))
         return NULL;
     init_CONF_GUIEX(&g_conf, FALSE);
     return (guiEx_config::adjust_conf_size(&g_conf, data, size)) ? size : NULL;
@@ -270,12 +286,15 @@ void get_default_conf(CONF_GUIEX *conf) {
     conf->mux.disable_mkvext = TRUE;
     conf->mux.disable_mp4ext = TRUE;
     conf->mux.disable_mpgext = TRUE;
-    conf->aud.ext.encoder = sys_dat.exstg->s_local.default_audio_encoder_ext;
-    conf->aud.in.encoder = sys_dat.exstg->s_local.default_audio_encoder_in;
-    conf->aud.use_internal = sys_dat.exstg->s_local.default_audenc_use_in;
+    conf->aud.ext.encoder = g_sys_dat.exstg->s_local.default_audio_encoder_ext;
+    conf->aud.in.encoder = g_sys_dat.exstg->s_local.default_audio_encoder_in;
+    conf->aud.use_internal = g_sys_dat.exstg->s_local.default_audenc_use_in;
     conf->aud.ext.audio_encode_timing = 1;
     conf->aud.in.audio_encode_timing = 2;
-    conf->aud.use_internal = 1;
+    { const AUDIO_SETTINGS *aud_stg_in = &g_sys_dat.exstg->s_aud_int[conf->aud.in.encoder];
+    conf->aud.in.bitrate = aud_stg_in->mode[conf->aud.in.enc_mode].bitrate_default; }
+    { const AUDIO_SETTINGS *aud_stg_ext = &g_sys_dat.exstg->s_aud_ext[conf->aud.ext.encoder];
+    conf->aud.ext.bitrate = aud_stg_ext->mode[conf->aud.ext.enc_mode].bitrate_default; }
     conf->enc.auto_npass = 2;
     conf->enc.audio_input = TRUE;
     strcpy_s(conf->vid.outext, _countof(conf->vid.outext), ".avi");
