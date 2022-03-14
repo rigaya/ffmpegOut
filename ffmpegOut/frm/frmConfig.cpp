@@ -206,14 +206,16 @@ System::Boolean frmConfig::CheckLocalStg() {
     bool error = false;
     String^ err = "";
     //ffmpegのチェック
-    if (!File::Exists(LocalStg.ffmpegOutPath)) {
+    if (LocalStg.ffmpegOutPath->Length > 0
+        && !File::Exists(LocalStg.ffmpegOutPath)) {
         error = true;
         err += L"指定された ffmpeg は存在しません。\n [ " + LocalStg.ffmpegOutPath + L" ]\n";
     }
     //音声エンコーダのチェック (実行ファイル名がない場合はチェックしない)
     if (LocalStg.audEncExeName[fcgCXAudioEncoder->SelectedIndex]->Length) {
         String^ AudioEncoderPath = LocalStg.audEncPath[fcgCXAudioEncoder->SelectedIndex];
-        if (!File::Exists(AudioEncoderPath) 
+        if (AudioEncoderPath->Length > 0
+            && !File::Exists(AudioEncoderPath)
             && (fcgCXAudioEncoder->SelectedIndex != sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked)
                 || !check_if_faw2aac_exists()) ) {
             //音声実行ファイルがない かつ
@@ -248,7 +250,7 @@ System::Boolean frmConfig::CheckLocalStg() {
 System::Void frmConfig::SaveLocalStg() {
     guiEx_settings *_ex_stg = sys_dat->exstg;
     _ex_stg->load_encode_stg();
-    GetCHARfromString(_ex_stg->s_local.ffmpeg_path,         sizeof(_ex_stg->s_local.ffmpeg_path),         LocalStg.ffmpegOutPath);
+    GetCHARfromString(_ex_stg->s_local.ffmpeg_path,           sizeof(_ex_stg->s_local.ffmpeg_path),           LocalStg.ffmpegOutPath);
     GetCHARfromString(_ex_stg->s_local.custom_tmp_dir,        sizeof(_ex_stg->s_local.custom_tmp_dir),        LocalStg.CustomTmpDir);
     GetCHARfromString(_ex_stg->s_local.custom_mp4box_tmp_dir, sizeof(_ex_stg->s_local.custom_mp4box_tmp_dir), LocalStg.CustomMP4TmpDir);
     GetCHARfromString(_ex_stg->s_local.custom_audio_tmp_dir,  sizeof(_ex_stg->s_local.custom_audio_tmp_dir),  LocalStg.CustomAudTmpDir);
