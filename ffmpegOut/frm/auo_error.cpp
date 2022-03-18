@@ -121,6 +121,11 @@ void error_nothing_to_output() {
     write_log_auo_line(LOG_ERROR, "出力すべきものがありません。");
 }
 
+void error_output_zero_frames() {
+    write_log_auo_line(LOG_ERROR, "出力フレーム数が 0 フレームのため、エンコードできません。");
+    write_log_auo_line(LOG_ERROR, "選択範囲が適切になっているか確認して出力しなおしてください。");
+}
+
 void error_amp_bitrate_confliction() {
     write_log_auo_line(LOG_ERROR, "上限ビットレートが、目標ビットレートより小さく設定されています。エンコードできません。");
     write_log_auo_line(LOG_ERROR, "ビットレート設定を見なおしてください。");
