@@ -152,6 +152,7 @@ std::filesystem::path find_latest_ffmpeg(const std::vector<std::filesystem::path
     if (selectedPathList.size() == 1) {
         return selectedPathList.front();
     }
+#if 0
     int version = 0;
     std::filesystem::path ret;
     for (auto& path : selectedPathList) {
@@ -162,6 +163,9 @@ std::filesystem::path find_latest_ffmpeg(const std::vector<std::filesystem::path
         }
     }
     return ret;
+#else
+    return selectedPathList.front();
+#endif
 }
 
 void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx) {
