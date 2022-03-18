@@ -193,6 +193,15 @@ static BOOL check_muxer_exist(MUXER_SETTINGS *muxer_stg, const char *aviutl_dir,
     return FALSE;
 }
 
+BOOL check_if_exedit_is_used() {
+    char name[256];
+    wsprintf(name, "exedit_%d_%d", '01', GetCurrentProcessId());
+    auto handle = unique_handle(OpenFileMapping(FILE_MAP_WRITE, FALSE, name),
+        [](HANDLE h) { if (h != INVALID_HANDLE_VALUE) CloseHandle(h); });
+
+    return handle != nullptr;
+}
+
 static BOOL check_temp_file_open(const char *temp_filename, const char *defaultExeDir) {
     DWORD err = ERROR_SUCCESS;
 
