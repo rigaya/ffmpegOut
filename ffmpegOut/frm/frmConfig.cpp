@@ -882,6 +882,13 @@ System::Void frmConfig::InitForm() {
     //フォームの変更可不可を更新
     fcgChangeMuxerVisible(nullptr, nullptr);
     fcgCBAudioUseExt_CheckedChanged(nullptr, nullptr);
+    fcgTXffmpegOutPath_Leave(nullptr, nullptr);
+    fcgTXAudioEncoderPath_Leave(nullptr, nullptr);
+    fcgTXMP4MuxerPath_Leave(nullptr, nullptr);
+    fcgTXTC2MP4Path_Leave(nullptr, nullptr);
+    fcgTXMP4RawPath_Leave(nullptr, nullptr);
+    fcgTXMKVMuxerPath_Leave(nullptr, nullptr);
+    fcgTXMPGMuxerPath_Leave(nullptr, nullptr);
     EnableSettingsNoteChange(false);
     //表示位置の調整
     AdjustLocation();
