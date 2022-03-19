@@ -349,7 +349,7 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
     //ffmpegout
     if (!conf->oth.disable_guicmd && pe->video_out_type != VIDEO_OUTPUT_DISABLED) {
         if (!PathFileExists(exstg->s_local.ffmpeg_path)) {
-            const auto targetExes = find_target_exe_files("ffmpeg", exeFiles);
+            const auto targetExes = find_target_exe_files(ENCODER_NAME, exeFiles);
             if (targetExes.size() > 0) {
                 const auto latestVidEnc = find_latest_ffmpeg(targetExes);
                 if (exstg->s_local.get_relative_path) {
@@ -359,11 +359,11 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
                 }
             }
             if (!PathFileExists(exstg->s_local.ffmpeg_path)) {
-                error_no_exe_file("ffmpeg.exe", exstg->s_local.ffmpeg_path);
+                error_no_exe_file(ENCODER_NAME, exstg->s_local.ffmpeg_path);
                 check = FALSE;
             }
         }
-        info_use_exe_found("ffmpeg", exstg->s_local.ffmpeg_path);
+        info_use_exe_found(ENCODER_NAME, exstg->s_local.ffmpeg_path);
     }
 
     //音声エンコーダ
@@ -390,6 +390,19 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
                 error_invalid_ini_file();
                 check = FALSE;
             }
+#if 0
+            AUDIO_SETTINGS *aud_stg = &exstg->s_aud_int[cnf_aud->encoder];
+            if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
+                AUDIO_SETTINGS *aud_default = nullptr;
+                if (default_audenc_cnf_avail) {
+                    aud_default = &exstg->s_aud_ext[exstg->s_local.default_audio_encoder_ext];
+                } else if (default_audenc_auo_avail) {
+                    aud_default = &exstg->s_aud_ext[DEFAULT_AUDIO_ENCODER_EXT];
+                }
+                error_unsupported_audio_format_by_muxer(pe->video_out_type, aud_stg->dispname, (aud_default) ? aud_default->dispname : nullptr);
+                check = FALSE;
+            }
+#endif
         } else {
             CONF_AUDIO_BASE *cnf_aud = &conf->aud.ext;
             const bool default_audenc_cnf_avail = (exstg->s_local.default_audio_encoder_ext < exstg->s_aud_ext_count
@@ -465,9 +478,9 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
                 if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
                     AUDIO_SETTINGS *aud_default = nullptr;
                     if (default_audenc_cnf_avail) {
-                        aud_default = &exstg->s_aud[exstg->s_local.default_audio_encoder];
+                        aud_default = &exstg->s_aud_ext[exstg->s_local.default_audio_encoder_ext];
                     } else if (default_audenc_auo_avail) {
-                        aud_default = &exstg->s_aud[DEFAULT_AUDIO_ENCODER];
+                        aud_default = &exstg->s_aud_ext[DEFAULT_AUDIO_ENCODER_EXT];
                     }
                     error_unsupported_audio_format_by_muxer(pe->video_out_type, aud_stg->dispname, (aud_default) ? aud_default->dispname : nullptr);
                     check = FALSE;
