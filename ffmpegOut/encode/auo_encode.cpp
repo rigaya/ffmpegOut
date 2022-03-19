@@ -347,11 +347,23 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
 
     //必要な実行ファイル
     //ffmpegout
-    if (!conf->oth.disable_guicmd) {
-        if (pe->video_out_type != VIDEO_OUTPUT_DISABLED && !PathFileExists(exstg->s_local.ffmpeg_path)) {
-            error_no_exe_file("ffmpeg.exe", exstg->s_local.ffmpeg_path);
-            check = FALSE;
+    if (!conf->oth.disable_guicmd && pe->video_out_type != VIDEO_OUTPUT_DISABLED) {
+        if (!PathFileExists(exstg->s_local.ffmpeg_path)) {
+            const auto targetExes = find_target_exe_files("ffmpeg", exeFiles);
+            if (targetExes.size() > 0) {
+                const auto latestVidEnc = find_latest_ffmpeg(targetExes);
+                if (exstg->s_local.get_relative_path) {
+                    GetRelativePathTo(exstg->s_local.ffmpeg_path, _countof(exstg->s_local.ffmpeg_path), latestVidEnc.string().c_str(), FILE_ATTRIBUTE_NORMAL, aviutl_dir);
+                } else {
+                    strcpy_s(exstg->s_local.ffmpeg_path, latestVidEnc.string().c_str());
+                }
+            }
+            if (!PathFileExists(exstg->s_local.ffmpeg_path)) {
+                error_no_exe_file("ffmpeg.exe", exstg->s_local.ffmpeg_path);
+                check = FALSE;
+            }
         }
+        info_use_exe_found("ffmpeg", exstg->s_local.ffmpeg_path);
     }
 
     //音声エンコーダ
