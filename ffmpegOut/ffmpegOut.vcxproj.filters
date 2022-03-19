@@ -292,4 +292,9 @@
       <Filter>リソース ファイル</Filter>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ffmpegOut.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>
