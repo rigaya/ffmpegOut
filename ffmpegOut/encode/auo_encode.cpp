@@ -276,7 +276,21 @@ static BOOL check_temp_file_open(const char *temp_filename, const char *defaultE
     return FALSE;
 }
 
-BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_settings *exstg) {
+BOOL audio_encoder_exe_exists(const CONF_GUIEX *conf, const guiEx_settings *exstg) {
+    const BOOL use_internal = conf->aud.use_internal;
+    const int aud_idx = (use_internal) ? conf->aud.in.encoder : conf->aud.ext.encoder;
+    const AUDIO_SETTINGS *aud_list = (use_internal) ? exstg->s_aud_int : exstg->s_aud_ext;
+    const AUDIO_SETTINGS *aud_stg = &aud_list[aud_idx];
+    if (!str_has_char(aud_stg->filename)) {
+        return TRUE;
+    }
+    if (aud_idx == exstg->get_faw_index(use_internal)) {
+        return TRUE;
+    }
+    return PathFileExists(aud_stg->fullpath);
+}
+
+BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_settings *exstg) {
     BOOL check = TRUE;
     //ファイル名長さ
     if (strlen(oip->savefile) > (MAX_PATH_LEN - MAX_APPENDIX_LEN - 1)) {
@@ -368,6 +382,9 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
 
     //音声エンコーダ
     if (oip->flag & OUTPUT_INFO_FLAG_AUDIO) {
+        //音声長さチェック
+        check_audio_length(oip);
+
         if (conf->aud.use_internal) {
             CONF_AUDIO_BASE *cnf_aud = &conf->aud.in;
             cnf_aud->audio_encode_timing = 2;
@@ -420,7 +437,7 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
             }
             if (0 <= cnf_aud->encoder && cnf_aud->encoder < exstg->s_aud_ext_count) {
                 AUDIO_SETTINGS *aud_stg = &exstg->s_aud_ext[cnf_aud->encoder];
-                if (str_has_char(aud_stg->filename) && !PathFileExists(aud_stg->fullpath)) {
+                if (!audio_encoder_exe_exists(conf, exstg)) {
                     //とりあえず、exe_filesを探す
                     {
                         const auto targetExes = select_exe_file(find_target_exe_files(aud_stg->filename, exeFiles));
@@ -471,7 +488,7 @@ BOOL check_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, g
                         }
                     }
                 }
-                if (str_has_char(aud_stg->filename)) {
+                if (str_has_char(aud_stg->filename) && (cnf_aud->encoder != exstg->get_faw_index(conf->aud.use_internal) || !check_if_faw2aac_exists())) {
                     info_use_exe_found("音声エンコーダ", aud_stg->fullpath);
                 }
 #if 0
