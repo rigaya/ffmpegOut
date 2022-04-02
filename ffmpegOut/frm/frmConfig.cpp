@@ -1096,13 +1096,13 @@ System::Void frmConfig::SetAllCheckChangedEvents(Control ^top) {
 
 System::Void frmConfig::SetHelpToolTips() {
     fcgTTEx->SetToolTip(fcgBTffmpegOutPath, L""
-        + L"ffmpeg.exe/avconv.exeの場所を指定します。\n"
+        + L"ffmpeg.exeの場所を指定します。\n"
         + L"\n"
         + L"この設定はffmpegOut.confに保存され、\n"
         + L"バッチ処理ごとの変更はできません。"
         );
     fcgTTEx->SetToolTip(fcgCXOutputCsp,       L""
-        + L"ffmpeg.exe/avconv.exeに渡す映像データの色空間を指定します。"
+        + L"ffmpeg.exeに渡す映像データの色空間を指定します。"
         );
     fcgTTEx->SetToolTip(fcgCB2passEnc,       L""
         + L"自動的に2passエンコードを行います。"
