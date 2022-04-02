@@ -2913,11 +2913,11 @@ private: System::Windows::Forms::Label^  label4;
         }
     private: 
         System::Void fcgTXffmpegOutPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgBTffmpegOutPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXffmpegOutPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.ffmpegOutPath = L"";
-                fcgBTffmpegOutPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXffmpegOutPath->ForeColor = System::Drawing::SystemColors::ControlDark;
             } else {
-                fcgBTffmpegOutPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXffmpegOutPath->ForeColor = System::Drawing::SystemColors::WindowText;
                 LocalStg.ffmpegOutPath = fcgTXffmpegOutPath->Text;
                 fcgBTffmpegOutPath->ContextMenuStrip = (File::Exists(fcgTXffmpegOutPath->Text)) ? fcgCSExeFiles : nullptr;
             }
