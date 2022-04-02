@@ -53,6 +53,7 @@
 #include "auo_audio.h"
 #include "auo_faw2aac.h"
 #include "cpu_info.h"
+#include "exe_version.h"
 
 using unique_handle = std::unique_ptr<std::remove_pointer<HANDLE>::type, std::function<void(HANDLE)>>;
 
@@ -144,28 +145,39 @@ static std::vector<std::filesystem::path> select_exe_file(const std::vector<std:
     }
 }
 
+static std::vector<std::filesystem::path> avoid_aud_enc(const std::vector<std::filesystem::path>& pathList) {
+    if (pathList.size() == 1) {
+        return pathList;
+    }
+
+    std::vector<std::filesystem::path> newList;
+    for (const auto& path : pathList) {
+        if (!ends_with(tolowercase(path.filename().string()), "_audenc.exe")) {
+            newList.push_back(path);
+        }
+    }
+    return (newList.size()) ? newList : pathList;
+}
+
 std::filesystem::path find_latest_ffmpeg(const std::vector<std::filesystem::path>& pathList) {
     if (pathList.size() == 0) {
         return std::filesystem::path();
     }
-    auto selectedPathList = select_exe_file(pathList);
+    auto selectedPathList = avoid_aud_enc(select_exe_file(pathList));
     if (selectedPathList.size() == 1) {
         return selectedPathList.front();
     }
-#if 0
-    int version = 0;
+    int version[4] = { 0 };
     std::filesystem::path ret;
     for (auto& path : selectedPathList) {
-        int v = get_x264_rev(path.string().c_str());
-        if (v >= version) {
-            version = v;
+        int value[4] = { 0 };
+        int v = get_exe_version_from_cmd(path.string().c_str(), "-version", value);
+        if (version_a_larger_than_b(value, version) > 0) {
+            memcpy(version, value, sizeof(version));
             ret = path;
         }
     }
     return ret;
-#else
-    return selectedPathList.front();
-#endif
 }
 
 void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx) {

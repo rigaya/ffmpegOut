@@ -35,6 +35,14 @@
 #include "auo_util.h"
 #include "exe_version.h"
 
+int version_a_larger_than_b(const int a[4], const int b[4]) {
+    for (int i = 0; i < 4; i++) {
+        if (a[i] > b[i]) return +1;
+        if (a[i] < b[i]) return -1;
+    }
+    return 0;
+}
+
 std::string ver_string(int ver[4]) {
     const int VER_LENGTH = 4;
     if (nullptr == ver)
@@ -159,7 +167,8 @@ int get_exe_version_from_cmd(const char *exe_path, const char *cmd_ver, int vers
         }
         for (char *rtr = nullptr; 0 != ret && nullptr != (str = strtok_s(str, "\n", &rtr)); ) {
             char *ptr = str;
-            static const char *PREFIX[] = { "fdkaac", "flac", "qaac", "refalac", "opus-tools", "version", "revision.", "revision", "rev.", "rev", " r.", " r", " v" };
+            //static const char *PREFIX[] = { "fdkaac", "flac", "qaac", "refalac", "opus-tools", "version", "revision.", "revision", "rev.", "rev", " r.", " r", " v" };
+            static const char *PREFIX[] = { "libavcodec" };
             for (int i = 0; i < _countof(PREFIX); i++) {
                 char *qtr = NULL;
                 if (NULL != (qtr = stristr(ptr, PREFIX[i]))) {
