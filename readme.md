@@ -107,6 +107,7 @@ ffmpegOut の Aviutl から削除するには、"plugins" フォルダ内の下�
 
 - [フォルダ] ffmpegOut_stg
 - [ファイル] ffmpegOut.auo
+- [ファイル] ffmpegOut.conf (存在する場合のみ)
 - [ファイル] ffmpegOut(.ini)
 - [ファイル] auo_setup.auf
 
