@@ -74,7 +74,7 @@ jobs:
         id: archieve
         run: |
           mkdir ffmpegOut_release
-          7z x -offmpegOut_release\ auo_setup_2.01.zip
+          7z x -offmpegOut_release\ auo_setup.zip
           copy /y .\Release\ffmpegOut.auo ffmpegOut_release\plugins\
           copy /y .\ffmpegOut\ffmpegOut.ini ffmpegOut_release\plugins\
           echo D | xcopy /y /e .\ffmpegOut\stg ffmpegOut_release\plugins\ffmpegOut_stg
@@ -85,6 +85,7 @@ jobs:
 
       - name: Check Version
         id: check_ver
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           powershell "$ver = (Get-ItemProperty .\Release\ffmpegOut.auo).VersionInfo.FileVersion; if ($ver -eq '${{ needs.get_version_name.outputs.version_name }}') { exit 0; } exit 1;"
 
