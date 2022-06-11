@@ -67,6 +67,8 @@ namespace ffmpegOut {
         frmConfig(CONF_GUIEX *_conf, const SYSTEM_DATA *_sys_dat)
         {
             InitData(_conf, _sys_dat);
+            dwStgReader = nullptr;
+            themeMode = AuoTheme::DefaultLight;
             cnf_stgSelected = (CONF_GUIEX*)calloc(1, sizeof(CONF_GUIEX));
             InitializeComponent();
             //
@@ -86,6 +88,8 @@ namespace ffmpegOut {
             }
             CloseBitrateCalc();
             if (cnf_stgSelected) free(cnf_stgSelected); cnf_stgSelected = NULL;
+            if (dwStgReader != nullptr)
+                delete dwStgReader;
             if (qualityTimer != nullptr)
                 delete qualityTimer;
         }
@@ -777,6 +781,10 @@ private: System::Windows::Forms::ComboBox^  fcgCXAudioEncModeInternal;
 private: System::Windows::Forms::Label^  label4;
 
 
+private: System::Windows::Forms::Panel^  fcgPNHideTabControlVideo;
+private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
+
+
 
 
 
@@ -963,6 +971,8 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgOpenFileDialog = (gcnew System::Windows::Forms::OpenFileDialog());
             this->fcgTTEx = (gcnew System::Windows::Forms::ToolTip(this->components));
             this->fcgCSReplaceStrings = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+            this->fcgPNHideTabControlVideo = (gcnew System::Windows::Forms::Panel());
+            this->fcgPNHideToolStripBorder = (gcnew System::Windows::Forms::Panel());
             this->fcgtabControlVideo->SuspendLayout();
             this->fcgtabPageExSettings->SuspendLayout();
             this->fcggroupBoxCmdEx->SuspendLayout();
@@ -979,6 +989,7 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgtabPageMPG->SuspendLayout();
             this->fcgtabPageMux->SuspendLayout();
             this->fcgtabPageBat->SuspendLayout();
+            this->fcgPNHideTabControlVideo->SuspendLayout();
             this->SuspendLayout();
             // 
             // fcgtabControlVideo
@@ -986,7 +997,7 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgtabControlVideo->Controls->Add(this->fcgtabPageExSettings);
             this->fcgtabControlVideo->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
-            this->fcgtabControlVideo->Location = System::Drawing::Point(0, 25);
+            this->fcgtabControlVideo->Location = System::Drawing::Point(2, 2);
             this->fcgtabControlVideo->Name = L"fcgtabControlVideo";
             this->fcgtabControlVideo->SelectedIndex = 0;
             this->fcgtabControlVideo->Size = System::Drawing::Size(616, 467);
@@ -1738,10 +1749,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXAudioEncoderPath->Size = System::Drawing::Size(303, 21);
             this->fcgTXAudioEncoderPath->TabIndex = 5;
             this->fcgTXAudioEncoderPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXAudioEncoderPath_TextChanged);
-            this->fcgTXAudioEncoderPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXAudioEncoderPath_Enter);
-            this->fcgTXAudioEncoderPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXAudioEncoderPath_Leave);
             this->fcgTXAudioEncoderPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXAudioEncoderPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXAudioEncoderPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXAudioEncoderPath_Enter);
+            this->fcgTXAudioEncoderPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXAudioEncoderPath_Leave);
             // 
             // fcgtabControlMux
             // 
@@ -1752,7 +1763,7 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgtabControlMux->Controls->Add(this->fcgtabPageBat);
             this->fcgtabControlMux->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
-            this->fcgtabControlMux->Location = System::Drawing::Point(622, 356);
+            this->fcgtabControlMux->Location = System::Drawing::Point(625, 356);
             this->fcgtabControlMux->Name = L"fcgtabControlMux";
             this->fcgtabControlMux->SelectedIndex = 0;
             this->fcgtabControlMux->Size = System::Drawing::Size(384, 214);
@@ -1815,10 +1826,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXTC2MP4Path->Size = System::Drawing::Size(202, 21);
             this->fcgTXTC2MP4Path->TabIndex = 4;
             this->fcgTXTC2MP4Path->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXTC2MP4Path_TextChanged);
-            this->fcgTXTC2MP4Path->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXTC2MP4Path_Enter);
-            this->fcgTXTC2MP4Path->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXTC2MP4Path_Leave);
             this->fcgTXTC2MP4Path->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXTC2MP4Path->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXTC2MP4Path->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXTC2MP4Path_Enter);
+            this->fcgTXTC2MP4Path->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXTC2MP4Path_Leave);
             // 
             // fcgBTMP4MuxerPath
             // 
@@ -1839,10 +1850,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXMP4MuxerPath->TabIndex = 2;
             this->fcgTXMP4MuxerPath->Tag = L"";
             this->fcgTXMP4MuxerPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4MuxerPath_TextChanged);
-            this->fcgTXMP4MuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4MuxerPath_Enter);
-            this->fcgTXMP4MuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4MuxerPath_Leave);
             this->fcgTXMP4MuxerPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXMP4MuxerPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXMP4MuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4MuxerPath_Enter);
+            this->fcgTXMP4MuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4MuxerPath_Leave);
             // 
             // fcgLBTC2MP4Path
             // 
@@ -1910,10 +1921,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXMP4RawPath->Size = System::Drawing::Size(202, 21);
             this->fcgTXMP4RawPath->TabIndex = 21;
             this->fcgTXMP4RawPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4RawMuxerPath_TextChanged);
-            this->fcgTXMP4RawPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4RawPath_Enter);
-            this->fcgTXMP4RawPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4RawPath_Leave);
             this->fcgTXMP4RawPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXMP4RawPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXMP4RawPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4RawPath_Enter);
+            this->fcgTXMP4RawPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMP4RawPath_Leave);
             // 
             // fcgLBMP4RawPath
             // 
@@ -1994,10 +2005,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXMKVMuxerPath->Size = System::Drawing::Size(207, 21);
             this->fcgTXMKVMuxerPath->TabIndex = 2;
             this->fcgTXMKVMuxerPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXMKVMuxerPath_TextChanged);
-            this->fcgTXMKVMuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMKVMuxerPath_Enter);
-            this->fcgTXMKVMuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMKVMuxerPath_Leave);
             this->fcgTXMKVMuxerPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXMKVMuxerPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXMKVMuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMKVMuxerPath_Enter);
+            this->fcgTXMKVMuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMKVMuxerPath_Leave);
             // 
             // fcgLBMKVMuxerPath
             // 
@@ -2070,10 +2081,10 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgTXMPGMuxerPath->Size = System::Drawing::Size(207, 21);
             this->fcgTXMPGMuxerPath->TabIndex = 22;
             this->fcgTXMPGMuxerPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXMPGMuxerPath_TextChanged);
-            this->fcgTXMPGMuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMPGMuxerPath_Enter);
-            this->fcgTXMPGMuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMPGMuxerPath_Leave);
             this->fcgTXMPGMuxerPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
             this->fcgTXMPGMuxerPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXMPGMuxerPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXMPGMuxerPath_Enter);
+            this->fcgTXMPGMuxerPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXMPGMuxerPath_Leave);
             // 
             // fcgLBMPGMuxerPath
             // 
@@ -2391,20 +2402,37 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgCSReplaceStrings->Name = L"fcgCSReplaceStrings";
             this->fcgCSReplaceStrings->Size = System::Drawing::Size(61, 4);
             // 
+            // fcgPNHideTabControlVideo
+            // 
+            this->fcgPNHideTabControlVideo->Controls->Add(this->fcgtabControlVideo);
+            this->fcgPNHideTabControlVideo->Location = System::Drawing::Point(-1, 25);
+            this->fcgPNHideTabControlVideo->Name = L"fcgPNHideTabControlVideo";
+            this->fcgPNHideTabControlVideo->Size = System::Drawing::Size(620, 471);
+            this->fcgPNHideTabControlVideo->TabIndex = 15;
+            // 
+            // fcgPNHideToolStripBorder
+            // 
+            this->fcgPNHideToolStripBorder->Location = System::Drawing::Point(0, 22);
+            this->fcgPNHideToolStripBorder->Name = L"fcgPNHideToolStripBorder";
+            this->fcgPNHideToolStripBorder->Size = System::Drawing::Size(1020, 4);
+            this->fcgPNHideToolStripBorder->TabIndex = 16;
+            this->fcgPNHideToolStripBorder->Visible = false;
+            // 
             // frmConfig
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
             this->ClientSize = System::Drawing::Size(1008, 527);
+            this->Controls->Add(this->fcgPNHideToolStripBorder);
+            this->Controls->Add(this->fcgPNHideTabControlVideo);
             this->Controls->Add(this->fcgLBVersion);
             this->Controls->Add(this->fcgLBVersionDate);
             this->Controls->Add(this->fcgBTDefault);
             this->Controls->Add(this->fcgBTOK);
             this->Controls->Add(this->fcgBTCancel);
-            this->Controls->Add(this->fcgtabControlMux);
             this->Controls->Add(this->fcggroupBoxAudio);
             this->Controls->Add(this->fcgtoolStripSettings);
-            this->Controls->Add(this->fcgtabControlVideo);
+            this->Controls->Add(this->fcgtabControlMux);
             this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedDialog;
@@ -2440,6 +2468,7 @@ private: System::Windows::Forms::Label^  label4;
             this->fcgtabPageMux->PerformLayout();
             this->fcgtabPageBat->ResumeLayout(false);
             this->fcgtabPageBat->PerformLayout();
+            this->fcgPNHideTabControlVideo->ResumeLayout(false);
             this->ResumeLayout(false);
             this->PerformLayout();
 
@@ -2449,6 +2478,8 @@ private: System::Windows::Forms::Label^  label4;
         const SYSTEM_DATA *sys_dat;
         CONF_GUIEX *conf;
         LocalSettings LocalStg;
+        DarkenWindowStgReader *dwStgReader;
+        AuoTheme themeMode;
         TBValueBitrateConvert TBBConvert;
         System::Threading::Timer^ qualityTimer;
         int timerChangeValue;
@@ -2459,6 +2490,12 @@ private: System::Windows::Forms::Label^  label4;
         CONF_GUIEX *cnf_stgSelected;
         String^ lastQualityStr;
     private:
+        System::Void CheckTheme();
+        System::Void SetAllMouseMove(Control ^top, const AuoTheme themeTo);
+        System::Void fcgMouseEnter_SetColor(System::Object^  sender, System::EventArgs^  e);
+        System::Void fcgMouseLeave_SetColor(System::Object^  sender, System::EventArgs^  e);
+        System::Void TabControl_DarkDrawItem(System::Object^ sender, DrawItemEventArgs^ e);
+
         System::Int32 GetCurrentAudioDefaultBitrate();
         System::Void InitComboBox();
         System::Void setAudioDisplay();
@@ -2915,9 +2952,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXffmpegOutPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXffmpegOutPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.ffmpegOutPath = L"";
-                fcgTXffmpegOutPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXffmpegOutPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXffmpegOutPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXffmpegOutPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.ffmpegOutPath = fcgTXffmpegOutPath->Text;
                 fcgBTffmpegOutPath->ContextMenuStrip = (File::Exists(fcgTXffmpegOutPath->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2926,9 +2963,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXAudioEncoderPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXAudioEncoderPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.audEncPath[fcgCXAudioEncoder->SelectedIndex] = L"";
-                fcgTXAudioEncoderPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXAudioEncoderPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXAudioEncoderPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXAudioEncoderPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.audEncPath[fcgCXAudioEncoder->SelectedIndex] = fcgTXAudioEncoderPath->Text;
                 fcgBTAudioEncoderPath->ContextMenuStrip = (File::Exists(fcgTXAudioEncoderPath->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2937,9 +2974,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXMP4MuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMP4MuxerPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.MP4MuxerPath = L"";
-                fcgTXMP4MuxerPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXMP4MuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXMP4MuxerPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXMP4MuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.MP4MuxerPath = fcgTXMP4MuxerPath->Text;
                 fcgBTMP4MuxerPath->ContextMenuStrip = (File::Exists(fcgTXMP4MuxerPath->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2948,9 +2985,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXTC2MP4Path_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXTC2MP4Path->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.TC2MP4Path = L"";
-                fcgTXTC2MP4Path->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXTC2MP4Path->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXTC2MP4Path->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXTC2MP4Path->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.TC2MP4Path = fcgTXTC2MP4Path->Text;
                 fcgBTTC2MP4Path->ContextMenuStrip = (File::Exists(fcgTXTC2MP4Path->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2959,9 +2996,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXMP4RawMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMP4RawPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.MP4RawPath = L"";
-                fcgTXMP4RawPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXMP4RawPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXMP4RawPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXMP4RawPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.MP4RawPath = fcgTXMP4RawPath->Text;
                 fcgBTMP4RawPath->ContextMenuStrip = (File::Exists(fcgTXMP4RawPath->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2970,9 +3007,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXMKVMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMKVMuxerPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.MKVMuxerPath = L"";
-                fcgTXMKVMuxerPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXMKVMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXMKVMuxerPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXMKVMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.MKVMuxerPath = fcgTXMKVMuxerPath->Text;
                 fcgBTMKVMuxerPath->ContextMenuStrip = (File::Exists(fcgTXMKVMuxerPath->Text)) ? fcgCSExeFiles : nullptr;
             }
@@ -2981,9 +3018,9 @@ private: System::Windows::Forms::Label^  label4;
         System::Void fcgTXMPGMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMPGMuxerPath->Text == String(use_default_exe_path).ToString()) {
                 LocalStg.MPGMuxerPath = L"";
-                fcgTXMPGMuxerPath->ForeColor = System::Drawing::SystemColors::ControlDark;
+                fcgTXMPGMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXMPGMuxerPath->ForeColor = System::Drawing::SystemColors::WindowText;
+                fcgTXMPGMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
                 LocalStg.MPGMuxerPath = fcgTXMPGMuxerPath->Text;
                 fcgBTMPGMuxerPath->ContextMenuStrip = (File::Exists(fcgTXMPGMuxerPath->Text)) ? fcgCSExeFiles : nullptr;
             }

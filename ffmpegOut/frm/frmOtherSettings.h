@@ -58,6 +58,8 @@ namespace ffmpegOut {
             //
             //TODO: ここにコンストラクタ コードを追加します
             //
+            themeMode = AuoTheme::DefaultLight;
+            dwStgReader = nullptr;
         }
 
     protected:
@@ -113,6 +115,7 @@ namespace ffmpegOut {
     private: System::Windows::Forms::CheckBox^  fosCBLogDisableTransparency;
     private: System::Windows::Forms::Label^  fosLBDisableVisualStyles;
     private: System::Windows::Forms::CheckBox^  fosCBLogStartMinimized;
+    private: System::Windows::Forms::Panel^  fosPNHideTabPage;
 
 
 
@@ -187,7 +190,11 @@ namespace ffmpegOut {
             this->fosfontDialog = (gcnew System::Windows::Forms::FontDialog());
             this->fosTabControl = (gcnew System::Windows::Forms::TabControl());
             this->fostabPageGeneral = (gcnew System::Windows::Forms::TabPage());
+            this->fosCXDefaultAudioEncoder = (gcnew System::Windows::Forms::ComboBox());
+            this->fosLBDefaultAudioEncoder = (gcnew System::Windows::Forms::Label());
             this->fostabPageGUI = (gcnew System::Windows::Forms::TabPage());
+            this->fosCBOutputMoreLog = (gcnew System::Windows::Forms::CheckBox());
+            this->fosCBWineCompat = (gcnew System::Windows::Forms::CheckBox());
             this->fosCBRunBatMinimized = (gcnew System::Windows::Forms::CheckBox());
             this->fosCBGetRelativePath = (gcnew System::Windows::Forms::CheckBox());
             this->fosBTSetFont = (gcnew System::Windows::Forms::Button());
@@ -197,13 +204,11 @@ namespace ffmpegOut {
             this->fosCBLogDisableTransparency = (gcnew System::Windows::Forms::CheckBox());
             this->fosLBDisableVisualStyles = (gcnew System::Windows::Forms::Label());
             this->fosCBLogStartMinimized = (gcnew System::Windows::Forms::CheckBox());
-            this->fosCXDefaultAudioEncoder = (gcnew System::Windows::Forms::ComboBox());
-            this->fosLBDefaultAudioEncoder = (gcnew System::Windows::Forms::Label());
-            this->fosCBOutputMoreLog = (gcnew System::Windows::Forms::CheckBox());
-            this->fosCBWineCompat = (gcnew System::Windows::Forms::CheckBox());
+            this->fosPNHideTabPage = (gcnew System::Windows::Forms::Panel());
             this->fosTabControl->SuspendLayout();
             this->fostabPageGeneral->SuspendLayout();
             this->fostabPageGUI->SuspendLayout();
+            this->fosPNHideTabPage->SuspendLayout();
             this->SuspendLayout();
             // 
             // fosCBCancel
@@ -269,10 +274,10 @@ namespace ffmpegOut {
             // 
             this->fosTabControl->Controls->Add(this->fostabPageGeneral);
             this->fosTabControl->Controls->Add(this->fostabPageGUI);
-            this->fosTabControl->Location = System::Drawing::Point(1, 1);
+            this->fosTabControl->Location = System::Drawing::Point(2, 2);
             this->fosTabControl->Name = L"fosTabControl";
             this->fosTabControl->SelectedIndex = 0;
-            this->fosTabControl->Size = System::Drawing::Size(392, 336);
+            this->fosTabControl->Size = System::Drawing::Size(388, 332);
             this->fosTabControl->TabIndex = 17;
             // 
             // fostabPageGeneral
@@ -285,10 +290,28 @@ namespace ffmpegOut {
             this->fostabPageGeneral->Location = System::Drawing::Point(4, 24);
             this->fostabPageGeneral->Name = L"fostabPageGeneral";
             this->fostabPageGeneral->Padding = System::Windows::Forms::Padding(3);
-            this->fostabPageGeneral->Size = System::Drawing::Size(384, 308);
+            this->fostabPageGeneral->Size = System::Drawing::Size(380, 304);
             this->fostabPageGeneral->TabIndex = 0;
             this->fostabPageGeneral->Text = L"一般設定";
             this->fostabPageGeneral->UseVisualStyleBackColor = true;
+            // 
+            // fosCXDefaultAudioEncoder
+            // 
+            this->fosCXDefaultAudioEncoder->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->fosCXDefaultAudioEncoder->FormattingEnabled = true;
+            this->fosCXDefaultAudioEncoder->Location = System::Drawing::Point(41, 101);
+            this->fosCXDefaultAudioEncoder->Name = L"fosCXDefaultAudioEncoder";
+            this->fosCXDefaultAudioEncoder->Size = System::Drawing::Size(190, 23);
+            this->fosCXDefaultAudioEncoder->TabIndex = 27;
+            // 
+            // fosLBDefaultAudioEncoder
+            // 
+            this->fosLBDefaultAudioEncoder->AutoSize = true;
+            this->fosLBDefaultAudioEncoder->Location = System::Drawing::Point(14, 78);
+            this->fosLBDefaultAudioEncoder->Name = L"fosLBDefaultAudioEncoder";
+            this->fosLBDefaultAudioEncoder->Size = System::Drawing::Size(130, 15);
+            this->fosLBDefaultAudioEncoder->TabIndex = 26;
+            this->fosLBDefaultAudioEncoder->Text = L"デフォルトの音声エンコーダ";
             // 
             // fostabPageGUI
             // 
@@ -303,12 +326,32 @@ namespace ffmpegOut {
             this->fostabPageGUI->Controls->Add(this->fosCBLogDisableTransparency);
             this->fostabPageGUI->Controls->Add(this->fosLBDisableVisualStyles);
             this->fostabPageGUI->Controls->Add(this->fosCBLogStartMinimized);
-            this->fostabPageGUI->Location = System::Drawing::Point(4, 24);
+            this->fostabPageGUI->Location = System::Drawing::Point(4, 22);
             this->fostabPageGUI->Name = L"fostabPageGUI";
-            this->fostabPageGUI->Size = System::Drawing::Size(384, 308);
+            this->fostabPageGUI->Size = System::Drawing::Size(384, 310);
             this->fostabPageGUI->TabIndex = 1;
             this->fostabPageGUI->Text = L"ログ・設定画面";
             this->fostabPageGUI->UseVisualStyleBackColor = true;
+            // 
+            // fosCBOutputMoreLog
+            // 
+            this->fosCBOutputMoreLog->AutoSize = true;
+            this->fosCBOutputMoreLog->Location = System::Drawing::Point(17, 266);
+            this->fosCBOutputMoreLog->Name = L"fosCBOutputMoreLog";
+            this->fosCBOutputMoreLog->Size = System::Drawing::Size(143, 19);
+            this->fosCBOutputMoreLog->TabIndex = 32;
+            this->fosCBOutputMoreLog->Text = L"音声・muxのログも表示";
+            this->fosCBOutputMoreLog->UseVisualStyleBackColor = true;
+            // 
+            // fosCBWineCompat
+            // 
+            this->fosCBWineCompat->AutoSize = true;
+            this->fosCBWineCompat->Location = System::Drawing::Point(17, 238);
+            this->fosCBWineCompat->Name = L"fosCBWineCompat";
+            this->fosCBWineCompat->Size = System::Drawing::Size(104, 19);
+            this->fosCBWineCompat->TabIndex = 31;
+            this->fosCBWineCompat->Text = L"wine互換モード";
+            this->fosCBWineCompat->UseVisualStyleBackColor = true;
             // 
             // fosCBRunBatMinimized
             // 
@@ -402,43 +445,13 @@ namespace ffmpegOut {
             this->fosCBLogStartMinimized->Text = L"ログウィンドウを最小化で開始する";
             this->fosCBLogStartMinimized->UseVisualStyleBackColor = true;
             // 
-            // fosCXDefaultAudioEncoder
+            // fosPNHideTabPage
             // 
-            this->fosCXDefaultAudioEncoder->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->fosCXDefaultAudioEncoder->FormattingEnabled = true;
-            this->fosCXDefaultAudioEncoder->Location = System::Drawing::Point(41, 101);
-            this->fosCXDefaultAudioEncoder->Name = L"fosCXDefaultAudioEncoder";
-            this->fosCXDefaultAudioEncoder->Size = System::Drawing::Size(190, 23);
-            this->fosCXDefaultAudioEncoder->TabIndex = 27;
-            // 
-            // fosLBDefaultAudioEncoder
-            // 
-            this->fosLBDefaultAudioEncoder->AutoSize = true;
-            this->fosLBDefaultAudioEncoder->Location = System::Drawing::Point(14, 78);
-            this->fosLBDefaultAudioEncoder->Name = L"fosLBDefaultAudioEncoder";
-            this->fosLBDefaultAudioEncoder->Size = System::Drawing::Size(130, 15);
-            this->fosLBDefaultAudioEncoder->TabIndex = 26;
-            this->fosLBDefaultAudioEncoder->Text = L"デフォルトの音声エンコーダ";
-            // 
-            // fosCBOutputMoreLog
-            // 
-            this->fosCBOutputMoreLog->AutoSize = true;
-            this->fosCBOutputMoreLog->Location = System::Drawing::Point(17, 266);
-            this->fosCBOutputMoreLog->Name = L"fosCBOutputMoreLog";
-            this->fosCBOutputMoreLog->Size = System::Drawing::Size(143, 19);
-            this->fosCBOutputMoreLog->TabIndex = 32;
-            this->fosCBOutputMoreLog->Text = L"音声・muxのログも表示";
-            this->fosCBOutputMoreLog->UseVisualStyleBackColor = true;
-            // 
-            // fosCBWineCompat
-            // 
-            this->fosCBWineCompat->AutoSize = true;
-            this->fosCBWineCompat->Location = System::Drawing::Point(17, 238);
-            this->fosCBWineCompat->Name = L"fosCBWineCompat";
-            this->fosCBWineCompat->Size = System::Drawing::Size(104, 19);
-            this->fosCBWineCompat->TabIndex = 31;
-            this->fosCBWineCompat->Text = L"wine互換モード";
-            this->fosCBWineCompat->UseVisualStyleBackColor = true;
+            this->fosPNHideTabPage->Controls->Add(this->fosTabControl);
+            this->fosPNHideTabPage->Location = System::Drawing::Point(-1, -1);
+            this->fosPNHideTabPage->Name = L"fosPNHideTabPage";
+            this->fosPNHideTabPage->Size = System::Drawing::Size(392, 336);
+            this->fosPNHideTabPage->TabIndex = 18;
             // 
             // frmOtherSettings
             // 
@@ -446,7 +459,7 @@ namespace ffmpegOut {
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Inherit;
             this->CancelButton = this->fosCBCancel;
             this->ClientSize = System::Drawing::Size(392, 381);
-            this->Controls->Add(this->fosTabControl);
+            this->Controls->Add(this->fosPNHideTabPage);
             this->Controls->Add(this->fosCBOK);
             this->Controls->Add(this->fosCBCancel);
             this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
@@ -464,10 +477,14 @@ namespace ffmpegOut {
             this->fostabPageGeneral->PerformLayout();
             this->fostabPageGUI->ResumeLayout(false);
             this->fostabPageGUI->PerformLayout();
+            this->fosPNHideTabPage->ResumeLayout(false);
             this->ResumeLayout(false);
 
         }
 #pragma endregion
+    private:
+        AuoTheme themeMode;
+        const DarkenWindowStgReader *dwStgReader;
     private: 
         System::Void fosCBOK_Click(System::Object^  sender, System::EventArgs^  e) {
             //DisableToolTipHelp = fosCBDisableToolTip->Checked;
@@ -550,6 +567,47 @@ namespace ffmpegOut {
                 exstg.s_local.conf_font.style = 0;
                 exstg.save_local();
                 SetFontFamilyToForm(this, fosfontDialog->Font->FontFamily, this->Font->FontFamily);
+            }
+        }
+    public:
+        System::Void frmOtherSettings::SetTheme(AuoTheme themeTo, const DarkenWindowStgReader *dwStg) {
+            dwStgReader = dwStg;
+            CheckTheme(themeTo);
+        }
+    private:
+        System::Void frmOtherSettings::CheckTheme(const AuoTheme themeTo) {
+            //変更の必要がなければ終了
+            if (themeTo == themeMode) return;
+
+            //一度ウィンドウの再描画を完全に抑止する
+            SendMessage(reinterpret_cast<HWND>(this->Handle.ToPointer()), WM_SETREDRAW, 0, 0);
+            //tabcontrolのborderを隠す
+            SwitchComboBoxBorder(fosTabControl, fosPNHideTabPage, themeMode, themeTo, dwStgReader);
+            SetAllColor(this, themeTo, this->GetType(), dwStgReader);
+            SetAllMouseMove(this, themeTo);
+            //一度ウィンドウの再描画を再開し、強制的に再描画させる
+            SendMessage(reinterpret_cast<HWND>(this->Handle.ToPointer()), WM_SETREDRAW, 1, 0);
+            this->Refresh();
+            themeMode = themeTo;
+        }
+    private:
+        System::Void frmOtherSettings::fosMouseEnter_SetColor(System::Object^  sender, System::EventArgs^  e) {
+            fcgMouseEnterLeave_SetColor(sender, themeMode, DarkenWindowState::Hot, dwStgReader);
+        }
+    private:
+        System::Void frmOtherSettings::fosMouseLeave_SetColor(System::Object^  sender, System::EventArgs^  e) {
+            fcgMouseEnterLeave_SetColor(sender, themeMode, DarkenWindowState::Normal, dwStgReader);
+        }
+    private:
+        System::Void frmOtherSettings::SetAllMouseMove(Control ^top, const AuoTheme themeTo) {
+            if (themeTo == themeMode) return;
+            System::Type^ type = top->GetType();
+            if (type == CheckBox::typeid) {
+                top->MouseEnter += gcnew System::EventHandler(this, &frmOtherSettings::fosMouseEnter_SetColor);
+                top->MouseLeave += gcnew System::EventHandler(this, &frmOtherSettings::fosMouseLeave_SetColor);
+            }
+            for (int i = 0; i < top->Controls->Count; i++) {
+                SetAllMouseMove(top->Controls[i], themeTo);
             }
         }
 };
