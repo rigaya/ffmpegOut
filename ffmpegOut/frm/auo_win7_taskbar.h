@@ -69,8 +69,8 @@ public:
         }
     };
     //表示・非表示の切り替え
-    void set_visible(bool _visible) {
-        visible = _visible;
+    void set_visible(bool value) {
+        visible = value;
         set_mode(currentMode);
     }
     //モードの設定
