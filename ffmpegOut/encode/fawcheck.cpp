@@ -44,10 +44,10 @@ const double ZERO_SUM_RATIO_MIN[3]      = { 768.0 / 1536.0, 256.0 / 1536.0, 256.
 const double ZERO_SUM_RATIO_MAX         = 0.99479; //全体に対するゼロの数上限
 const double ZERO_SD_RATIO              = 0.25; //ゼロブロック内のゼロの平均数に対する標準偏差
 
-//int		audio_rate;		//	音声サンプリングレート
-//int		audio_ch;		//	音声チャンネル数
-//int		audio_n;		//	音声サンプリング数
-//int		audio_size;		//	音声１サンプルのバイト数
+//int        audio_rate;        //    音声サンプリングレート
+//int        audio_ch;        //    音声チャンネル数
+//int        audio_n;        //    音声サンプリング数
+//int        audio_size;        //    音声１サンプルのバイト数
 
 //音声データは16bitのみということで
 int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
@@ -81,8 +81,8 @@ int FAWCheck(short *audio_dat, int audio_n, int audio_rate, int audio_size) {
 
     //ゼロブロックをチェック
     BOOL check_result[3] = { FALSE, FALSE, FALSE };
-    int i;
-    for (i = 0; i < 3; i++) {
+    int i = 0;
+    for (; i < 3; i++) {
         if (zero_blocks[i].size() < (size_t)(audio_n * ZERO_BLOCK_COUNT_THRESHOLD / audio_rate))
             continue;
         int zero_sum = 0;
