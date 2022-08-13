@@ -37,10 +37,10 @@
 #include "auo.h"
 #include "output.h"
 #include "auo_conf.h"
+#include "auo_pipe.h"
 #include "auo_settings.h"
 #include "auo_system.h"
 #include "auo_frm.h"
-#include "auo_pipe.h"
 
 static const char * const PIPE_FN = "-";
 
