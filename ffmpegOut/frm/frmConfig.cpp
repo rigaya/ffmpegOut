@@ -813,8 +813,8 @@ System::Void frmConfig::SetTXMaxLenAll() {
     SetTXMaxLen(fcgTXCustomTempDir,        sizeof(sys_dat->exstg->s_local.custom_tmp_dir) - 1);
     SetTXMaxLen(fcgTXCustomAudioTempDir,   sizeof(sys_dat->exstg->s_local.custom_audio_tmp_dir) - 1);
     SetTXMaxLen(fcgTXMP4BoxTempDir,        sizeof(sys_dat->exstg->s_local.custom_mp4box_tmp_dir) - 1);
-    SetTXMaxLen(fcgTXBatBeforePath,        sizeof(conf->oth.batfile_before) - 1);
-    SetTXMaxLen(fcgTXBatAfterPath,         sizeof(conf->oth.batfile_after) - 1);
+    SetTXMaxLen(fcgTXBatBeforePath,        sizeof(conf->oth.batfile.before_process) - 1);
+    SetTXMaxLen(fcgTXBatAfterPath,         sizeof(conf->oth.batfile.after_process) - 1);
 
     SetTXMaxLen(fcgTXOutputExt,            sizeof(conf->vid.outext) - 1);
 

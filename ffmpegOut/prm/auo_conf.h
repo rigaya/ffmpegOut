@@ -42,11 +42,19 @@ enum {
     TMP_DIR_CUSTOM = 2,
 };
 
-enum {
-    RUN_BAT_NONE   = 0x00,
-    RUN_BAT_AFTER  = 0x01,
-    RUN_BAT_BEFORE = 0x02,
+enum : DWORD {
+    RUN_BAT_NONE           = 0x00,
+    RUN_BAT_BEFORE_PROCESS = 0x01,
+    RUN_BAT_AFTER_PROCESS  = 0x02,
+    RUN_BAT_BEFORE_AUDIO   = 0x04,
+    RUN_BAT_AFTER_AUDIO    = 0x08,
 };
+
+static inline int get_run_bat_idx(DWORD flag) {
+    DWORD ret;
+    _BitScanForward(&ret, flag);
+    return (int)ret;
+}
 
 static const char *const CONF_NAME    = "ffmpegOut ConfigFile";
 const int CONF_NAME_BLOCK_LEN         = 32;
@@ -54,7 +62,7 @@ const int CONF_BLOCK_MAX              = 32;
 const int CONF_BLOCK_COUNT            = 5; //最大 CONF_BLOCK_MAXまで
 const int CONF_HEAD_SIZE              = (3 + CONF_BLOCK_MAX) * sizeof(int) + CONF_BLOCK_MAX * sizeof(size_t) + CONF_NAME_BLOCK_LEN;
 
-static const char *const CONF_LAST_OUT = "前回出力.stg";
+static const char *const CONF_LAST_OUT   = "前回出力.stg";
 
 enum {
     CONF_ERROR_NONE = 0,
@@ -85,7 +93,7 @@ static const char *const AUDIO_DELAY_CUT_MODE[] = {
     NULL
 };
 
-typedef struct {
+typedef struct CONF_ffmpegout {
     BOOL    use_highbit_depth;
     int     output_csp;
     int     pass;
@@ -96,7 +104,7 @@ typedef struct {
     BOOL    audio_input;
 } CONF_ffmpegout;
 
-typedef struct {
+typedef struct CONF_VIDEO {
     BOOL   afs;                      //自動フィールドシフトの使用
     BOOL   afs_bitrate_correction;   //afs & 2pass時、ドロップ数に応じてビットレートを補正
     BOOL   auo_tcfile_out;           //auo側でタイムコードを出力する
@@ -128,13 +136,13 @@ typedef struct {
     int  delay_cut;           //エンコード遅延の削除
 } CONF_AUDIO_BASE; //音声用設定
 
-typedef struct {
+typedef struct CONF_AUDIO {
     CONF_AUDIO_BASE ext;
     CONF_AUDIO_BASE in;
     BOOL use_internal;
 } CONF_AUDIO; //音声用設定
 
-typedef struct {
+typedef struct CONF_MUX {
     BOOL disable_mp4ext;  //mp4出力時、外部muxerを使用する
     BOOL disable_mkvext;  //mkv出力時、外部muxerを使用する
     int  mp4_mode;        //mp4 外部muxer用追加コマンドの設定
@@ -147,18 +155,25 @@ typedef struct {
     int  mpg_mode;        //mpg 外部muxer用追加コマンドの設定
 } CONF_MUX; //muxer用設定
 
-typedef struct {
-    BOOL disable_guicmd;         //GUIによるコマンドライン生成を停止(CLIモード)
-    int  temp_dir;               //一時ディレクトリ
-    BOOL out_audio_only;         //音声のみ出力
-    char notes[128];             //メモ
+typedef struct CONF_OTHER {
+    BOOL  disable_guicmd;         //GUIによるコマンドライン生成を停止(CLIモード)
+    int   temp_dir;               //一時ディレクトリ
+    BOOL  out_audio_only;         //音声のみ出力
+    char  notes[128];             //メモ
     DWORD run_bat;                //バッチファイルを実行するかどうか (RUN_BAT_xxx)
     DWORD dont_wait_bat_fin;      //バッチファイルの処理終了待機をするかどうか (RUN_BAT_xxx)
-    char batfile_after[MAX_PATH_LEN];   //エンコ後バッチファイルのパス
-    char batfile_before[MAX_PATH_LEN];  //エンコ前バッチファイルのパス
+    union {
+        char batfiles[4][512];        //バッチファイルのパス
+        struct {
+            char before_process[512]; //エンコ前バッチファイルのパス
+            char after_process[512];  //エンコ後バッチファイルのパス
+            char before_audio[512];   //音声エンコ前バッチファイルのパス
+            char after_audio[512];    //音声エンコ後バッチファイルのパス
+        } batfile;
+    };
 } CONF_OTHER;
 
-typedef struct {
+typedef struct CONF_GUIEX {
     char        conf_name[CONF_NAME_BLOCK_LEN];  //保存時に使用
     int         size_all;                        //保存時: CONF_GUIEXの全サイズ / 設定中、エンコ中: CONF_INITIALIZED
     int         head_size;                       //ヘッダ部分の全サイズ
@@ -184,7 +199,6 @@ public:
     static int  save_guiEx_conf(const CONF_GUIEX *conf, const char *stg_file); //設定をstgファイルとして保存
 };
 
-//定義はffmpegOut.cpp
-void init_CONF_GUIEX(CONF_GUIEX *conf, BOOL use_highbit); //初期化し、x264設定のデフォルトを設定 
+void init_CONF_GUIEX(CONF_GUIEX *conf, BOOL use_highbit); //初期化し、デフォルトを設定
 
 #endif //_AUO_CONF_H_
