@@ -42,6 +42,7 @@
 #include "h264_level.h"
 
 #include "frmConfig_helper.h"
+#include "auo_mes.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -52,7 +53,7 @@ using namespace System::Drawing;
 using namespace System::IO;
 
 
-namespace ffmpegOut {
+namespace AUO_NAME_R {
 
     /// <summary>
     /// frmConfig の概要
@@ -69,6 +70,7 @@ namespace ffmpegOut {
         frmConfig(CONF_GUIEX *_conf, const SYSTEM_DATA *_sys_dat)
         {
             InitData(_conf, _sys_dat);
+            list_lng = nullptr;
             dwStgReader = nullptr;
             themeMode = AuoTheme::DefaultLight;
             cnf_stgSelected = (CONF_GUIEX*)calloc(1, sizeof(CONF_GUIEX));
@@ -76,6 +78,7 @@ namespace ffmpegOut {
             //
             //TODO: ここにコンストラクタ コードを追加します
             //
+            LoadLangText();
         }
 
     protected:
@@ -94,6 +97,8 @@ namespace ffmpegOut {
                 delete dwStgReader;
             if (qualityTimer != nullptr)
                 delete qualityTimer;
+            if (list_lng != nullptr)
+                delete list_lng;
         }
     private: System::Windows::Forms::TabControl^  fcgtabControlVideo;
 
@@ -785,6 +790,8 @@ private: System::Windows::Forms::Label^  label4;
 
 private: System::Windows::Forms::Panel^  fcgPNHideTabControlVideo;
 private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
+private: System::Windows::Forms::ToolStripDropDownButton^  fcgTSLanguage;
+private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
 
 
 
@@ -975,6 +982,8 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             this->fcgCSReplaceStrings = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->fcgPNHideTabControlVideo = (gcnew System::Windows::Forms::Panel());
             this->fcgPNHideToolStripBorder = (gcnew System::Windows::Forms::Panel());
+            this->fcgTSLanguage = (gcnew System::Windows::Forms::ToolStripDropDownButton());
+            this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
             this->fcgtabControlVideo->SuspendLayout();
             this->fcgtabPageExSettings->SuspendLayout();
             this->fcggroupBoxCmdEx->SuspendLayout();
@@ -1283,11 +1292,11 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             // 
             this->fcgtoolStripSettings->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
-            this->fcgtoolStripSettings->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(13) {
+            this->fcgtoolStripSettings->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(15) {
                 this->fcgTSBSave,
                     this->fcgTSBSaveNew, this->fcgTSBDelete, this->fcgtoolStripSeparator1, this->fcgTSSettings, this->fcgTSBCMDOnly, this->toolStripSeparator3,
-                    this->fcgTSBBitrateCalc, this->toolStripSeparator2, this->fcgTSBOtherSettings, this->fcgTSLSettingsNotes, this->fcgTSTSettingsNotes,
-                    this->toolStripSeparator4
+                    this->fcgTSLanguage, this->toolStripSeparator1, this->fcgTSBBitrateCalc, this->toolStripSeparator2, this->fcgTSBOtherSettings,
+                    this->fcgTSLSettingsNotes, this->fcgTSTSettingsNotes, this->toolStripSeparator4
             });
             this->fcgtoolStripSettings->Location = System::Drawing::Point(0, 0);
             this->fcgtoolStripSettings->Name = L"fcgtoolStripSettings";
@@ -2420,6 +2429,22 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             this->fcgPNHideToolStripBorder->TabIndex = 16;
             this->fcgPNHideToolStripBorder->Visible = false;
             // 
+            // fcgTSLanguage
+            // 
+            this->fcgTSLanguage->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
+            this->fcgTSLanguage->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+            this->fcgTSLanguage->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSLanguage.Image")));
+            this->fcgTSLanguage->ImageTransparentColor = System::Drawing::Color::Magenta;
+            this->fcgTSLanguage->Name = L"fcgTSLanguage";
+            this->fcgTSLanguage->Size = System::Drawing::Size(44, 22);
+            this->fcgTSLanguage->Text = L"言語";
+            // 
+            // toolStripSeparator1
+            // 
+            this->toolStripSeparator1->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
+            this->toolStripSeparator1->Name = L"toolStripSeparator1";
+            this->toolStripSeparator1->Size = System::Drawing::Size(6, 25);
+            // 
             // frmConfig
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
@@ -2478,6 +2503,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
 #pragma endregion
     private:
         const SYSTEM_DATA *sys_dat;
+        std::vector<std::string> *list_lng;
         CONF_GUIEX *conf;
         LocalSettings LocalStg;
         DarkenWindowStgReader *dwStgReader;
@@ -2498,6 +2524,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         System::Void fcgMouseLeave_SetColor(System::Object^  sender, System::EventArgs^  e);
         System::Void TabControl_DarkDrawItem(System::Object^ sender, DrawItemEventArgs^ e);
 
+        System::Void LoadLangText();
         System::Int32 GetCurrentAudioDefaultBitrate();
         System::Void InitComboBox();
         System::Void setAudioDisplay();
@@ -2538,6 +2565,13 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         ToolStripMenuItem^ fcgTSSettingsSearchItem(String^ stgPath);
         System::Void CheckTSSettingsDropDownItem(ToolStripMenuItem^ mItem);
         System::Void CheckTSItemsEnabled(CONF_GUIEX *current_conf);
+
+        System::Void InitLangList();
+        System::Void SaveSelectedLanguage(const char *language_text);
+        System::Void SetSelectedLanguage(const char *language_text);
+        System::Void CheckTSLanguageDropDownItem(ToolStripMenuItem^ mItem);
+        System::Void fcgTSLanguage_DropDownItemClicked(System::Object^  sender, System::Windows::Forms::ToolStripItemClickedEventArgs^  e);
+
         System::Void SetHelpToolTips();
         System::Void ShowExehelp(String^ ExePath, String^ args);
         System::Void fcgTSBOtherSettings_Click(System::Object^  sender, System::EventArgs^  e);
@@ -2573,63 +2607,93 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         }
     private:
         System::Void NUSelectAll(System::Object^  sender, System::EventArgs^  e) {
-             NumericUpDown^ NU = dynamic_cast<NumericUpDown^>(sender);
-             NU->Select(0, NU->Text->Length);
-         }
+            NumericUpDown^ NU = dynamic_cast<NumericUpDown^>(sender);
+            NU->Select(0, NU->Text->Length);
+        }
     private:
-        System::Void setComboBox(ComboBox^ CX, const X264_OPTION_STR * list) {
+        System::Void setComboBox(ComboBox^ CX, const ENC_OPTION_STR * list) {
             CX->BeginUpdate();
+            const int prevIdx = CX->SelectedIndex;
             CX->Items->Clear();
-            for (int i = 0; list[i].desc; i++)
-                CX->Items->Add(String(list[i].desc).ToString());
+            for (int i = 0; list[i].desc; i++) {
+                String^ string = nullptr;
+                if (list[i].mes != AUO_MES_UNKNOWN) {
+                    string = LOAD_CLI_STRING(list[i].mes);
+                } 
+                if (string == nullptr || string->Length == 0) {
+                    string = String(list[i].desc).ToString();
+                }
+                CX->Items->Add(string);
+            }
+            SetCXIndex(CX, prevIdx);
             CX->EndUpdate();
         }
     private:
         System::Void setComboBox(ComboBox^ CX, const char * const * list) {
             CX->BeginUpdate();
+            const int prevIdx = CX->SelectedIndex;
             CX->Items->Clear();
             for (int i = 0; list[i]; i++)
                 CX->Items->Add(String(list[i]).ToString());
+            SetCXIndex(CX, prevIdx);
             CX->EndUpdate();
         }
     private:
         System::Void setComboBox(ComboBox^ CX, const WCHAR * const * list) {
             CX->BeginUpdate();
+            const int prevIdx = CX->SelectedIndex;
             CX->Items->Clear();
             for (int i = 0; list[i]; i++)
                 CX->Items->Add(String(list[i]).ToString());
+            SetCXIndex(CX, prevIdx);
             CX->EndUpdate();
         }
     private:
         System::Void setPriorityList(ComboBox^ CX) {
             CX->BeginUpdate();
+            const int prevIdx = CX->SelectedIndex;
             CX->Items->Clear();
-            for (int i = 0; priority_table[i].text; i++)
-                CX->Items->Add(String(priority_table[i].text).ToString());
+            for (int i = 0; priority_table[i].text; i++) {
+                String^ string = nullptr;
+                if (priority_table[i].mes != AUO_MES_UNKNOWN) {
+                    string = LOAD_CLI_STRING(priority_table[i].mes);
+                }
+                if (string == nullptr || string->Length == 0) {
+                    string = String(priority_table[i].text).ToString();
+                }
+                CX->Items->Add(string);
+            }
+            SetCXIndex(CX, prevIdx);
             CX->EndUpdate();
         }
     private:
         System::Void setMuxerCmdExNames(ComboBox^ CX, int muxer_index) {
             CX->BeginUpdate();
+            const int prevIdx = CX->SelectedIndex;
             CX->Items->Clear();
             MUXER_SETTINGS *mstg = &sys_dat->exstg->s_mux[muxer_index];
             for (int i = 0; i < mstg->ex_count; i++)
                 CX->Items->Add(String(mstg->ex_cmd[i].name).ToString());
+            SetCXIndex(CX, prevIdx);
             CX->EndUpdate();
         }
     private:
         System::Void setAudioEncoderNames() {
             fcgCXAudioEncoder->BeginUpdate();
+            const int prevIdx = fcgCXAudioEncoder->SelectedIndex;
             fcgCXAudioEncoder->Items->Clear();
             //fcgCXAudioEncoder->Items->AddRange(reinterpret_cast<array<String^>^>(LocalStg.audEncName->ToArray(String::typeid)));
             fcgCXAudioEncoder->Items->AddRange(LocalStg.audEncName->ToArray());
+            SetCXIndex(fcgCXAudioEncoder, prevIdx);
             fcgCXAudioEncoder->EndUpdate();
 
             fcgCXAudioEncoderInternal->BeginUpdate();
+            const int prevIdxInternal = fcgCXAudioEncoderInternal->SelectedIndex;
             fcgCXAudioEncoderInternal->Items->Clear();
             for (int i = 0; i < sys_dat->exstg->s_aud_int_count; i++) {
                 fcgCXAudioEncoderInternal->Items->Add(String(sys_dat->exstg->s_aud_int[i].dispname).ToString());
             }
+            SetCXIndex(fcgCXAudioEncoderInternal, prevIdxInternal);
             fcgCXAudioEncoderInternal->EndUpdate();
         }
     private:
@@ -2643,7 +2707,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             maxLength = TX->MaxLength;
             if (stringBytes > maxLength - 1) {
                 e->Cancel = true;
-                MessageBox::Show(this, L"入力された文字数が多すぎます。減らしてください。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+                MessageBox::Show(this, LOAD_CLI_STRING(AUO_CONFIG_TEXT_LIMIT_LENGTH), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
             }
         }
     private:
@@ -2672,99 +2736,119 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             Directory::SetCurrentDirectory(CurrentDir);
             return ret;
         }
+    private:
+        System::Void frmConfig::ExeTXPathEnter() {
+            fcgTXffmpegOutPath_Enter(nullptr, nullptr);
+            fcgTXAudioEncoderPath_Enter(nullptr, nullptr);
+            fcgTXMP4MuxerPath_Enter(nullptr, nullptr);
+            fcgTXTC2MP4Path_Enter(nullptr, nullptr);
+            fcgTXMP4RawPath_Enter(nullptr, nullptr);
+            fcgTXMKVMuxerPath_Enter(nullptr, nullptr);
+            fcgTXMPGMuxerPath_Enter(nullptr, nullptr);
+        }
+    private:
+        System::Void frmConfig::ExeTXPathLeave() {
+            fcgTXffmpegOutPath_Leave(nullptr, nullptr);
+            fcgTXAudioEncoderPath_Leave(nullptr, nullptr);
+            fcgTXMP4MuxerPath_Leave(nullptr, nullptr);
+            fcgTXTC2MP4Path_Leave(nullptr, nullptr);
+            fcgTXMP4RawPath_Leave(nullptr, nullptr);
+            fcgTXMKVMuxerPath_Leave(nullptr, nullptr);
+            fcgTXMPGMuxerPath_Leave(nullptr, nullptr);
+        }
     private: 
         System::Void fcgBTffmpegOutPath_Click(System::Object^  sender, System::EventArgs^  e) {
             openExeFile(fcgTXffmpegOutPath, LocalStg.ffmpegOutExeName);
         }
     private:
         System::Void fcgTXffmpegOutPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXffmpegOutPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXffmpegOutPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXffmpegOutPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXffmpegOutPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXffmpegOutPath->Text->Length == 0) {
-                fcgTXffmpegOutPath->Text = String(use_default_exe_path).ToString();
+                fcgTXffmpegOutPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXAudioEncoderPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXAudioEncoderPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXAudioEncoderPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXAudioEncoderPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXAudioEncoderPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXAudioEncoderPath->Text->Length == 0) {
-                fcgTXAudioEncoderPath->Text = String(use_default_exe_path).ToString();
+                fcgTXAudioEncoderPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXMP4MuxerPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMP4MuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMP4MuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXMP4MuxerPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXMP4MuxerPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMP4MuxerPath->Text->Length == 0) {
-                fcgTXMP4MuxerPath->Text = String(use_default_exe_path).ToString();
+                fcgTXMP4MuxerPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXTC2MP4Path_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXTC2MP4Path->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXTC2MP4Path->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXTC2MP4Path->Text = L"";
             }
         }
     private:
         System::Void fcgTXTC2MP4Path_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXTC2MP4Path->Text->Length == 0) {
-                fcgTXTC2MP4Path->Text = String(use_default_exe_path).ToString();
+                fcgTXTC2MP4Path->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXMP4RawPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMP4RawPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMP4RawPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXMP4RawPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXMP4RawPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMP4RawPath->Text->Length == 0) {
-                fcgTXMP4RawPath->Text = String(use_default_exe_path).ToString();
+                fcgTXMP4RawPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXMKVMuxerPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMKVMuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMKVMuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXMKVMuxerPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXMKVMuxerPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMKVMuxerPath->Text->Length == 0) {
-                fcgTXMKVMuxerPath->Text = String(use_default_exe_path).ToString();
+                fcgTXMKVMuxerPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
         System::Void fcgTXMPGMuxerPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMPGMuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMPGMuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 fcgTXMPGMuxerPath->Text = L"";
             }
         }
     private:
         System::Void fcgTXMPGMuxerPath_Leave(System::Object^  sender, System::EventArgs^  e) {
             if (fcgTXMPGMuxerPath->Text->Length == 0) {
-                fcgTXMPGMuxerPath->Text = String(use_default_exe_path).ToString();
+                fcgTXMPGMuxerPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
-    private: 
+    private:
         System::Void fcgBTMP4MuxerPath_Click(System::Object^  sender, System::EventArgs^  e) {
             openExeFile(fcgTXMP4MuxerPath, LocalStg.MP4MuxerExeName);
         }
-    private: 
+    private:
         System::Void fcgBTTC2MP4Path_Click(System::Object^  sender, System::EventArgs^  e) {
             openExeFile(fcgTXTC2MP4Path, LocalStg.TC2MP4ExeName);
         }
@@ -2772,12 +2856,12 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         System::Void fcgBTMP4RawMuxerPath_Click(System::Object^  sender, System::EventArgs^  e) {
             openExeFile(fcgTXMP4RawPath, LocalStg.MP4RawExeName);
         }
-    private: 
+    private:
         System::Void fcgBTAudioEncoderPath_Click(System::Object^  sender, System::EventArgs^  e) {
             int index = fcgCXAudioEncoder->SelectedIndex;
             openExeFile(fcgTXAudioEncoderPath, LocalStg.audEncExeName[index]);
         }
-    private: 
+    private:
         System::Void fcgBTMKVMuxerPath_Click(System::Object^  sender, System::EventArgs^  e) {
             openExeFile(fcgTXMKVMuxerPath, LocalStg.MKVMuxerExeName);
         }
@@ -2797,15 +2881,15 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 TX->SelectionStart = TX->Text->Length;
             }
         }
-    private: 
+    private:
         System::Void fcgBTCustomAudioTempDir_Click(System::Object^  sender, System::EventArgs^  e) {
             openTempFolder(fcgTXCustomAudioTempDir);
         }
-    private: 
+    private:
         System::Void fcgBTMP4BoxTempDir_Click(System::Object^  sender, System::EventArgs^  e) {
             openTempFolder(fcgTXMP4BoxTempDir);
         }
-    private: 
+    private:
         System::Void fcgBTCustomTempDir_Click(System::Object^  sender, System::EventArgs^  e) {
             openTempFolder(fcgTXCustomTempDir);
         }
@@ -2853,17 +2937,19 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         }
     private:
         System::Void fcgBTBatBeforePath_Click(System::Object^  sender, System::EventArgs^  e) {
-            if (openAndSetFilePath(fcgTXBatBeforePath, L"バッチファイル", ".bat", LocalStg.LastBatDir))
+            if (openAndSetFilePath(fcgTXBatBeforePath, LOAD_CLI_STRING(AUO_CONFIG_BAT_FILE), ".bat", LocalStg.LastBatDir))
                 LocalStg.LastBatDir = Path::GetDirectoryName(fcgTXBatBeforePath->Text);
         }
     private:
         System::Void fcgBTBatAfterPath_Click(System::Object^  sender, System::EventArgs^  e) {
-            if (openAndSetFilePath(fcgTXBatAfterPath, L"バッチファイル", ".bat", LocalStg.LastBatDir))
+            if (openAndSetFilePath(fcgTXBatAfterPath, LOAD_CLI_STRING(AUO_CONFIG_BAT_FILE), ".bat", LocalStg.LastBatDir))
                 LocalStg.LastBatDir = Path::GetDirectoryName(fcgTXBatAfterPath->Text);
         }
     private:
         System::Void SetCXIndex(ComboBox^ CX, int index) {
-            CX->SelectedIndex = clamp(index, 0, CX->Items->Count - 1);
+            if (CX->Items->Count > 0) {
+                CX->SelectedIndex = clamp(index, 0, CX->Items->Count - 1);
+            }
         }
     private:
         System::Void SetNUValue(NumericUpDown^ NU, Decimal d) {
@@ -2891,7 +2977,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         System::Void frmConfig_Load(System::Object^  sender, System::EventArgs^  e) {
             InitForm();
         }
-    private: 
+    private:
         System::Void fcgBTOK_Click(System::Object^  sender, System::EventArgs^  e) {
             if (CheckLocalStg())
                 return;
@@ -2901,11 +2987,11 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             ZeroMemory(conf->oth.notes, sizeof(conf->oth.notes));
             this->Close();
         }
-    private: 
+    private:
         System::Void fcgBTCancel_Click(System::Object^  sender, System::EventArgs^  e) {
             this->Close();
         }
-    private: 
+    private:
         System::Void fcgBTDefault_Click(System::Object^  sender, System::EventArgs^  e) {
             CONF_GUIEX confDefault;
             init_CONF_GUIEX(&confDefault, FALSE);
@@ -2927,32 +3013,32 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
             FrmToConf(&check_change);
             ChangePresetNameDisplay(memcmp(&check_change, cnf_stgSelected, sizeof(CONF_GUIEX)) != 0);
         }
-    private: 
+    private:
         System::Void fcgTSSettings_Click(System::Object^  sender, System::EventArgs^  e) {
             if (EnableSettingsNoteChange(false))
                 fcgTSSettings->ShowDropDown();
         }
-    private: 
+    private:
         System::Void fcgBTTBQualityAdd_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
             timerChangeValue = 1;
             qualityTimer->Change(fcgTBQualityTimerLatency, fcgTBQualityTimerPeriod);
         }
-    private: 
+    private:
         System::Void fcgBTTBQualityAdd_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
             qualityTimer->Change(System::Threading::Timeout::Infinite, fcgTBQualityTimerPeriod);
         }
-    private: 
+    private:
         System::Void fcgBTTBQualitySubtract_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
             timerChangeValue = -1;
             qualityTimer->Change(fcgTBQualityTimerLatency, fcgTBQualityTimerPeriod);
         }
-    private: 
+    private:
         System::Void fcgBTTBQualitySubtract_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
             qualityTimer->Change(System::Threading::Timeout::Infinite, fcgTBQualityTimerPeriod);
         }
-    private: 
+    private:
         System::Void fcgTXffmpegOutPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXffmpegOutPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXffmpegOutPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.ffmpegOutPath = L"";
                 fcgTXffmpegOutPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -2961,9 +3047,10 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 fcgBTffmpegOutPath->ContextMenuStrip = (File::Exists(fcgTXffmpegOutPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
-    private: 
+    private:
         System::Void fcgTXAudioEncoderPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXAudioEncoderPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgCXAudioEncoder->SelectedIndex < 0) return;
+            if (fcgTXAudioEncoderPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.audEncPath[fcgCXAudioEncoder->SelectedIndex] = L"";
                 fcgTXAudioEncoderPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -2972,9 +3059,9 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 fcgBTAudioEncoderPath->ContextMenuStrip = (File::Exists(fcgTXAudioEncoderPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
-    private: 
+    private:
         System::Void fcgTXMP4MuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMP4MuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMP4MuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.MP4MuxerPath = L"";
                 fcgTXMP4MuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -2983,9 +3070,9 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 fcgBTMP4MuxerPath->ContextMenuStrip = (File::Exists(fcgTXMP4MuxerPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
-    private: 
+    private:
         System::Void fcgTXTC2MP4Path_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXTC2MP4Path->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXTC2MP4Path->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.TC2MP4Path = L"";
                 fcgTXTC2MP4Path->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -2996,7 +3083,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         }
     private:
         System::Void fcgTXMP4RawMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMP4RawPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMP4RawPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.MP4RawPath = L"";
                 fcgTXMP4RawPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -3005,9 +3092,9 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 fcgBTMP4RawPath->ContextMenuStrip = (File::Exists(fcgTXMP4RawPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
-    private: 
+    private:
         System::Void fcgTXMKVMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMKVMuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMKVMuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.MKVMuxerPath = L"";
                 fcgTXMKVMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -3018,7 +3105,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
         }
     private:
         System::Void fcgTXMPGMuxerPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXMPGMuxerPath->Text == String(use_default_exe_path).ToString()) {
+            if (fcgTXMPGMuxerPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.MPGMuxerPath = L"";
                 fcgTXMPGMuxerPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
@@ -3027,15 +3114,15 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                 fcgBTMPGMuxerPath->ContextMenuStrip = (File::Exists(fcgTXMPGMuxerPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
-    private: 
+    private:
         System::Void fcgTXMP4BoxTempDir_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             LocalStg.CustomMP4TmpDir = fcgTXMP4BoxTempDir->Text;
         }
-    private: 
+    private:
         System::Void fcgTXCustomAudioTempDir_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             LocalStg.CustomAudTmpDir = fcgTXCustomAudioTempDir->Text;
         }
-    private: 
+    private:
         System::Void fcgTXCustomTempDir_TextChanged(System::Object^  sender, System::EventArgs^  e) {
             LocalStg.CustomTmpDir = fcgTXCustomTempDir->Text;
         }
@@ -3126,7 +3213,7 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
                     return;
                 }
             }
-            MessageBox::Show(L"ヘルプ表示用のコマンドが設定されていません。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+            MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_HELP_CMD_UNSET), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
         }
 };
 }

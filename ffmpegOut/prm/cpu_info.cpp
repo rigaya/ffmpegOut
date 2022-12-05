@@ -1,9 +1,9 @@
 ﻿// -----------------------------------------------------------------------------------------
-// QSVEnc/NVEnc/VCEEnc by rigaya
+// x264guiEx/x265guiEx/svtAV1guiEx/ffmpegOut/QSVEnc/NVEnc/VCEEnc by rigaya
 // -----------------------------------------------------------------------------------------
 // The MIT License
 //
-// Copyright (c) 2011-2020 rigaya
+// Copyright (c) 2010-2022 rigaya
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -184,7 +184,7 @@ bool getCPUHybridMasks(cpu_info_t *info) {
 #else
     const auto threadCount = info->physical_cores;
 #endif
-#if defined(__x86__) || defined(__x86_64__) || defined(_M_X86) || defined(_M_X64)
+#if defined(__x86__) || defined(__x86_64__) || defined(_M_X86) || defined(_M_IX86) || defined(_M_X64)
     const auto hThread = GetCurrentThread();
     size_t maskOriginal = 0;
     for (int ith = 0; ith < threadCount; ith++) {
@@ -492,7 +492,7 @@ bool get_cpu_info(cpu_info_t *cpu_info) {
                 while (fgets(buffer, _countof(buffer), fp) != NULL) {
                     int value = 0;
                     if (sscanf_s(buffer, "%d", &value) == 1) {
-                        cacheinfo.associativity = (RGYCacheLevel)value;
+                        cacheinfo.associativity = value;
                     }
                 }
                 fclose(fp);
@@ -734,11 +734,11 @@ int getCPUInfo(TCHAR *buffer, size_t nSize
             _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(" [%.2fGHz]"), maxFrequency);
         }
 #endif //#if defined(_WIN32) || defined(_WIN64)
-        _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(" (%dC/%dT"), cpu_info.physical_cores, cpu_info.logical_cores);
+        _tcscpy_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(" ("));
         if (cpu_info.maskCoreP != 0 && cpu_info.maskCoreE != 0 && cpu_info.physical_cores <= 64) {
-            _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(",%dP+%dE"), cpu_info.physical_cores_p, cpu_info.physical_cores_e);
+            _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T("%dP+%dE,"), cpu_info.physical_cores_p, cpu_info.physical_cores_e);
         }
-        _tcscpy_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T(")"));
+        _stprintf_s(buffer + _tcslen(buffer), nSize - _tcslen(buffer), _T("%dC/%dT)"), cpu_info.physical_cores, cpu_info.logical_cores);
 #if ENCODER_QSV && !FOR_AUO
         if (pSession != nullptr) {
             int cpuGen = getCPUGen(pSession);

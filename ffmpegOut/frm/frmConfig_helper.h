@@ -32,6 +32,7 @@ using namespace System::IO;
 using namespace System::Collections::Generic;
 
 #include "auo_options.h"
+#include "auo_mes.h"
 
 namespace ffmpegOut {
 
@@ -300,34 +301,37 @@ const WCHAR * const DefaultTcFilePath = L"%{savfile}_tc.txt";
 
 typedef struct {
     WCHAR *string;
+    AuoMes mes;
     WCHAR *desc;
 } REPLACE_STRINGS;
 
 const REPLACE_STRINGS REPLACE_STRINGS_LIST[] = {
-    { L"%{vidpath}",          L"一時動画ファイル名(フルパス)" },
-    { L"%{audpath}",          L"一時音声ファイル名(フルパス)" },
-    { L"%{tmpdir}",           L"一時フォルダ名(最後の\\無し)" },
-    { L"%{tmpfile}",          L"一時ファイル名(フルパス・拡張子除く)" },
-    { L"%{tmpname}",          L"一時ファイル名(ファイル名のみ・拡張子除く)" },
-    { L"%{savpath}",          L"出力ファイル名(フルパス)" },
-    { L"%{savfile}",          L"出力ファイル名(フルパス・拡張子除く)" },
-    { L"%{savname}",          L"出力ファイル名(ファイル名のみ・拡張子除く)" },
-    { L"%{savdir}",           L"出力フォルダ名(最後の\\無し)" },
-    { L"%{aviutldir}",        L"Aviutl.exeのフォルダ名(最後の\\無し)" },
-    //{ L"%{chpath}",           L"チャプターファイル名(フルパス)" },
-    //{ L"%{tcpath}",           L"タイムコードファイル名(フルパス)" },
-    //{ L"%{muxout}",           L"muxで作成する一時ファイル名(フルパス)" },
-    //{ L"%{x264path}",         L"指定された x264.exe のパス" },
-    //{ L"%{x264_10path}",      L"指定された x264.exe(10bit版) のパス" },
-    //{ L"%{audencpath}",       L"実行された音声エンコーダのパス" },
-    //{ L"%{mp4muxerpath}",     L"mp4 muxerのパス" },
-    //{ L"%{mkvmuxerpath}",     L"mkv muxerのパス" },
-    { L"%{fps_scale}",        L"フレームレート(分母)" },
-    { L"%{fps_rate}",         L"フレームレート(分子)" },
-    { L"%{fps_rate_times_4}", L"フレームレート(分子)×4" },
-    //{ L"%{sar_x}",            L"サンプルアスペクト比 (横)" },
-    //{ L"%{sar_y}",            L"サンプルアスペクト比 (縦)" },
-    //{ L"%{dar_x}",            L"画面アスペクト比 (横)" },
-    //{ L"%{dar_y}",            L"画面アスペクト比 (縦)" },
-    { NULL, NULL }
+    { L"%{vidpath}",           AUO_CONFIG_CX_REPLACE_VID_PATH,         L"一時動画ファイル名(フルパス)" },
+    { L"%{audpath}",           AUO_CONFIG_CX_REPLACE_AUD_PATH,         L"一時音声ファイル名(フルパス)" },
+    { L"%{tmpdir}",            AUO_CONFIG_CX_REPLACE_TMPDIR,           L"一時フォルダ名(最後の\\無し)" },
+    { L"%{tmpfile}",           AUO_CONFIG_CX_REPLACE_TMPFILE,          L"一時ファイル名(フルパス・拡張子除く)" },
+    { L"%{tmpname}",           AUO_CONFIG_CX_REPLACE_TMPNAME,          L"一時ファイル名(ファイル名のみ・拡張子除く)" },
+    { L"%{savpath}",           AUO_CONFIG_CX_REPLACE_SAVPATH,          L"出力ファイル名(フルパス)" },
+    { L"%{savfile}",           AUO_CONFIG_CX_REPLACE_SAVFILE,          L"出力ファイル名(フルパス・拡張子除く)" },
+    { L"%{savname}",           AUO_CONFIG_CX_REPLACE_SAVNAME,          L"出力ファイル名(ファイル名のみ・拡張子除く)" },
+    { L"%{savdir}",            AUO_CONFIG_CX_REPLACE_SAVDIR,           L"出力フォルダ名(最後の\\無し)" },
+    { L"%{aviutldir}",         AUO_CONFIG_CX_REPLACE_AVIUTLDIR,        L"Aviutl.exeのフォルダ名(最後の\\無し)" },
+    //{ L"%{chpath}",            AUO_CONFIG_CX_REPLACE_CHPATH,           L"チャプターファイル名(フルパス)" },
+    //{ L"%{tcpath}",            AUO_CONFIG_CX_REPLACE_TCPATH,           L"タイムコードファイル名(フルパス)" },
+    //{ L"%{muxout}",            AUO_CONFIG_CX_REPLACE_MUXOUT,           L"muxで作成する一時ファイル名(フルパス)" },
+#if ENCODER_X264
+    { L"%{x264path}",          AUO_CONFIG_CX_REPLACE_X264PATH,         L"指定された x264.exe のパス" },
+#endif
+    //{ L"%{audencpath}",        AUO_CONFIG_CX_REPLACE_AUDENCPATH,       L"実行された音声エンコーダのパス" },
+    //{ L"%{mp4muxerpath}",      AUO_CONFIG_CX_REPLACE_MP4MUXERPATH,     L"mp4 muxerのパス" },
+    //{ L"%{mkvmuxerpath}",      AUO_CONFIG_CX_REPLACE_MKVMUXERPATH,     L"mkv muxerのパス" },
+    { L"%{fps_scale}",         AUO_CONFIG_CX_REPLACE_FPS_SCALE,        L"フレームレート(分母)" },
+    { L"%{fps_rate}",          AUO_CONFIG_CX_REPLACE_FPS_RATE,         L"フレームレート(分子)" },
+    { L"%{fps_rate_times_4}",  AUO_CONFIG_CX_REPLACE_FPS_RATE_TIMES_4, L"フレームレート(分子)×4" },
+    //{ L"%{sar_x}",             AUO_CONFIG_CX_REPLACE_SAR_X,            L"サンプルアスペクト比 (横)" },
+    //{ L"%{sar_y}",             AUO_CONFIG_CX_REPLACE_SAR_Y,            L"サンプルアスペクト比 (縦)" },
+    //{ L"%{dar_x}",             AUO_CONFIG_CX_REPLACE_DAR_X,            L"画面アスペクト比 (横)" },
+    //{ L"%{dar_y}",             AUO_CONFIG_CX_REPLACE_DAR_Y,            L"画面アスペクト比 (縦)" },
+
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };

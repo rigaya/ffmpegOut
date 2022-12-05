@@ -49,10 +49,11 @@
 #include "auo_encode.h"
 #include "exe_version.h"
 #include "cpu_info.h"
+#include "auo_mes.h"
 
-static void show_mux_info(const MUXER_SETTINGS *mux_stg, BOOL vidmux, BOOL audmux, BOOL tcmux, BOOL chapmux, const char *muxer_mode_name) {
-    char mes[1024];
-    static const char * const ON_OFF_INFO[] = { "off", " on" };
+static void show_mux_info(const MUXER_SETTINGS *mux_stg, BOOL vidmux, BOOL audmux, BOOL tcmux, BOOL chapmux, const wchar_t *muxer_mode_name) {
+    wchar_t mes[1024];
+    static const wchar_t * const ON_OFF_INFO[] = { L"off", L" on" };
 
     std::string ver_str = "";
     int version[4] = { 0 };
@@ -60,17 +61,19 @@ static void show_mux_info(const MUXER_SETTINGS *mux_stg, BOOL vidmux, BOOL audmu
         ver_str = " (" + ver_string(version) + ")";
     }
 
-    sprintf_s(mes, _countof(mes), "%s%s でmuxを行います。映像:%s, 音声:%s, tc:%s, chap:%s, 拡張モード:%s", 
+    swprintf_s(mes, _countof(mes), L"%s%s %s %s:%s, %s:%s, %s:%s, %s:%s, %s:%s", 
         mux_stg->dispname,
-        ver_str.c_str(),
-        ON_OFF_INFO[vidmux != 0],
-        ON_OFF_INFO[audmux != 0],
-        ON_OFF_INFO[tcmux != 0],
-        ON_OFF_INFO[chapmux != 0],
+        char_to_wstring(ver_str).c_str(),
+        g_auo_mes.get(AUO_MUX_RUN_START),
+        g_auo_mes.get(AUO_MUX_RUN_VIDEO), ON_OFF_INFO[vidmux != 0],
+        g_auo_mes.get(AUO_MUX_RUN_AUDIO), ON_OFF_INFO[audmux != 0],
+        g_auo_mes.get(AUO_MUX_RUN_TC),    ON_OFF_INFO[tcmux != 0],
+        g_auo_mes.get(AUO_MUX_RUN_CHAP),  ON_OFF_INFO[chapmux != 0],
+        g_auo_mes.get(AUO_MUX_RUN_EXT_MODE),
         muxer_mode_name);
     write_log_auo_line_fmt(LOG_INFO, mes);
 
-    sprintf_s(mes, _countof(mes), "%s で mux中...", mux_stg->dispname);
+    swprintf_s(mes, _countof(mes), L"%s %s", mux_stg->dispname, g_auo_mes.get(AUO_MUX_RUN));
     set_window_title(mes, PROGRESSBAR_MARQUEE);
 }
 
@@ -277,7 +280,7 @@ static AUO_RESULT build_mux_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf,
     //とりあえず必要なくてもチャプターファイル名を作る
     char chap_file[MAX_PATH_LEN];
     char chap_apple[MAX_PATH_LEN];
-    set_chap_filename(chap_file, _countof(chap_file), chap_apple, _countof(chap_apple), 
+    set_chap_filename(chap_file, _countof(chap_file), chap_apple, _countof(chap_apple),
         muxer_mode->chap_file, pe, sys_dat, conf, oip);
     replace(cmd, nSize, "%{ex_cmd}", exstr);
     if (!enable_chap_mux) {
@@ -306,8 +309,8 @@ static AUO_RESULT build_mux_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf,
                 chapter.overwrite_file(CHAP_TYPE_UNKNOWN, (sys_dat->exstg->s_local.chap_nero_convert_to_utf8 && CHAP_TYPE_NERO == chapter.file_chapter_type()));
 
                 //mp4系ならapple形式チャプター追加も考慮する
-                if (pe->muxer_to_be_used == MUXER_MP4 || 
-                    pe->muxer_to_be_used == MUXER_TC2MP4 || 
+                if (pe->muxer_to_be_used == MUXER_MP4 ||
+                    pe->muxer_to_be_used == MUXER_TC2MP4 ||
                     pe->muxer_to_be_used == MUXER_MP4_RAW) {
                     //apple形式チャプターファイルへの置換が行われたら、apple形式チャプターファイルを作成する
                     if (strstr(cmd, "%{chap_apple}")) {
@@ -363,7 +366,7 @@ static inline BOOL video_to_mux_is_raw(const PRM_ENC *pe, const SYSTEM_DATA *sys
 
 //audio_to_mux_is_rawのモード決定用
 enum {
-    MODE_ONE = 0,                
+    MODE_ONE = 0,
     MODE_ALL = 0x80000000,
     MASK_ALL = ~MODE_ALL,
     ONE = MODE_ONE | MASK_ALL,  //ひとつでもrawならTRUEを返す

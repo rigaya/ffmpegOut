@@ -31,16 +31,16 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>
+#include <string>
+#include "auo_version.h"
 
 const int   MAX_PATH_LEN          = 1024; //NTFSでは32768文字らしいが...いらんやろ
 const int   MAX_APPENDIX_LEN      = 63; //適当
 
-const int   MAX_CMD_LEN           = 8192; //コマンドラインの最大長はよくわからん
+const int   MAX_CMD_LEN           = 16 * 1024; //コマンドラインの最大長はよくわからん
 
 const DWORD AUDIO_BUFFER_DEFAULT  = 48000;
 const DWORD AUDIO_BUFFER_MAX      = AUDIO_BUFFER_DEFAULT * 30;
-
-static const char *ENCODER_NAME   = "ffmpeg";
 
 enum {
     VIDEO_OUTPUT_DISABLED = -2,
@@ -49,6 +49,13 @@ enum {
     VIDEO_OUTPUT_MKV      = 1,
     VIDEO_OUTPUT_MPEG2    = 3,
 };
+
+static const char    *ENCODER_NAME   =  "ffmpeg";
+static const wchar_t *ENCODER_NAME_W = L"ffmpeg";
+static const char    *ENOCDER_RAW_EXT = ".264";
+static const char    *ENCODER_APP_NAME = "ffmpeg";
+static const wchar_t *ENCODER_APP_NAME_W = L"ffmpeg";
+static const char    *ENCODER_REPLACE_MACRO = "%{ffmpegpath}";
 
 enum {
     MUXER_DISABLED = VIDEO_OUTPUT_DISABLED,
@@ -67,34 +74,19 @@ enum {
 };
 typedef DWORD AUO_RESULT;
 
-typedef struct {
-    WCHAR *text;
-    DWORD value;
-} PRIORITY_CLASS;
-
-const DWORD AVIUTLSYNC_PRIORITY_CLASS = 0;
-
-const PRIORITY_CLASS priority_table[] = {
-    {L"AviutlSync",       AVIUTLSYNC_PRIORITY_CLASS   },
-    {L"higher",           HIGH_PRIORITY_CLASS         },
-    {L"high",             ABOVE_NORMAL_PRIORITY_CLASS },
-    {L"normal",           NORMAL_PRIORITY_CLASS       },
-    {L"low",              BELOW_NORMAL_PRIORITY_CLASS },
-    {L"lower",            IDLE_PRIORITY_CLASS         },
-    {L"",                 NORMAL_PRIORITY_CLASS       },
-    {L"realtime(非推奨)", REALTIME_PRIORITY_CLASS     },
-    {NULL,                0                           }
-};
-
-typedef struct {
+typedef struct AUO_FONT_INFO {
     char   name[256]; //フォント名(family name)
     double size;      //フォントサイズ
     int    style;     //フォントスタイル
 } AUO_FONT_INFO;
 
-void write_log_line_fmt(int log_type_index, const char *format, ...);
-void write_log_auo_line_fmt(int log_type_index, const char *format, ... );
-void write_log_auo_enc_time(const char *mes, DWORD time);
+void write_log_line_fmt(int log_type_index, const wchar_t *format, ...);
+void write_log_auo_line_fmt(int log_type_index, const wchar_t *format, ...);
+void write_log_auo_enc_time(const wchar_t *mes, DWORD time);
+
+int load_lng(const char *lang);
+const char *get_auo_version_info();
+std::string get_last_out_stg_appendix();
 
 bool checkIfModuleLoaded(const wchar_t *moduleName);
 

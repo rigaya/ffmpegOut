@@ -91,15 +91,15 @@ static const char * const specify_csp[] = {
 };
 //文字列を引数にとるオプションの引数リスト
 //OUT_CSP_NV12, OUT_CSP_YUV444, OUT_CSP_RGB に合わせる
-const X264_OPTION_STR list_output_csp[] = {
-    { "nv12",    L"yuv420" },
-    { "yuyv422", L"yuv422" },
-    { "yuv444p", L"yuv444" },
-    { "p010le",      L"yuv420(16bit)" },
-    { "yuv444p16le", L"yuv444(16bit)" },
-    { "bgr24",   L"rgb"  },
-    { "bgra",   L"rgba"  },
-    { NULL, NULL }
+const ENC_OPTION_STR list_output_csp[] = {
+    { "nv12",        AUO_MES_UNKNOWN, L"yuv420" },
+    { "yuyv422",     AUO_MES_UNKNOWN, L"yuv422" },
+    { "yuv444p",     AUO_MES_UNKNOWN, L"yuv444" },
+    { "p010le",      AUO_MES_UNKNOWN, L"yuv420(16bit)" },
+    { "yuv444p16le", AUO_MES_UNKNOWN, L"yuv444(16bit)" },
+    { "bgr24",       AUO_MES_UNKNOWN, L"rgb"  },
+    { "bgra",        AUO_MES_UNKNOWN, L"rgba"  },
+    { NULL,          AUO_MES_UNKNOWN, NULL }
 };
 
 static bool csp_highbit_depth(int output_csp) {

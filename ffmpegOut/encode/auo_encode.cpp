@@ -28,7 +28,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>
-#include <Math.h>
+#include <cmath>
 #include <float.h>
 #include <stdio.h>
 #include <shlwapi.h>
@@ -38,6 +38,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <unordered_map>
 #include <memory>
 #include <functional>
 
@@ -48,8 +49,11 @@
 #include "auo_settings.h"
 #include "auo_system.h"
 #include "auo_pipe.h"
+#include "auo_mes.h"
+#include "auo_options.h"
 
 #include "auo_frm.h"
+#include "auo_video.h"
 #include "auo_encode.h"
 #include "auo_error.h"
 #include "auo_audio.h"
@@ -79,6 +83,7 @@ static void avoid_exsisting_tmp_file(char *buf, size_t size) {
     }
 }
 
+#if ENCODER_X264 || ENCODER_X265 || ENCODER_SVTAV1 || ENCODER_FFMPEG
 #pragma warning (push)
 #pragma warning (disable: 4244)
 #pragma warning (disable: 4996)
@@ -88,6 +93,7 @@ static inline std::string tolowercase(const std::string& str) {
     return str_copy;
 }
 #pragma warning (pop)
+#endif
 
 static std::vector<std::filesystem::path> find_exe_files(const char *target_dir) {
     std::vector<std::filesystem::path> ret;
@@ -99,6 +105,13 @@ static std::vector<std::filesystem::path> find_exe_files(const char *target_dir)
         }
     } catch (...) {}
     return ret;
+}
+
+static std::vector<std::filesystem::path> find_exe_files(const char *target_dir, const char *target_dir2) {
+    auto list1 = find_exe_files(target_dir);
+    auto list2 = find_exe_files(target_dir2);
+    list1.insert(list1.end(), list2.begin(), list2.end());
+    return list1;
 }
 
 static std::vector<std::filesystem::path> find_target_exe_files(const char *target_name, const std::vector<std::filesystem::path>& exe_files) {
@@ -224,8 +237,87 @@ static BOOL check_muxer_exist(MUXER_SETTINGS *muxer_stg, const char *aviutl_dir,
         info_use_exe_found(muxer_stg->dispname, muxer_stg->fullpath);
         return TRUE;
     }
-    error_no_exe_file(muxer_stg->filename, muxer_stg->fullpath);
+    error_no_exe_file(muxer_stg->dispname, muxer_stg->fullpath);
     return FALSE;
+}
+
+const MUXER_CMD_EX *get_muxer_mode(const CONF_GUIEX *conf, const SYSTEM_DATA *sys_dat, int muxer_to_be_used) {
+    int mode = -1;
+    switch (muxer_to_be_used) {
+    case MUXER_TC2MP4:
+    case MUXER_MP4:      mode = conf->mux.mp4_mode; break;
+    case MUXER_MKV:      mode = conf->mux.mkv_mode; break;
+    case MUXER_MPG:      mode = conf->mux.mpg_mode; break;
+    default: break;
+    }
+    return (mode >= 0) ? &sys_dat->exstg->s_mux[muxer_to_be_used].ex_cmd[mode] : nullptr;
+}
+
+static BOOL check_if_exe_is_mp4box(const char *exe_path, const char *version_arg) {
+    BOOL ret = FALSE;
+    char exe_message[8192] = { 0 };
+    if (   PathFileExists(exe_path)
+        && RP_SUCCESS == get_exe_message(exe_path, version_arg, exe_message, _countof(exe_message), AUO_PIPE_MUXED)
+        && (stristr(exe_message, "mp4box") || stristr(exe_message, "GPAC"))) {
+        ret = TRUE;
+    }
+    return ret;
+}
+
+static BOOL check_if_exe_is_lsmash(const char *exe_path, const char *version_arg) {
+    BOOL ret = FALSE;
+    char exe_message[8192] = { 0 };
+    if (   PathFileExists(exe_path)
+        && RP_SUCCESS == get_exe_message(exe_path, version_arg, exe_message, _countof(exe_message), AUO_PIPE_MUXED)
+        && stristr(exe_message, "L-SMASH")) {
+        ret = TRUE;
+    }
+    return ret;
+}
+
+static BOOL check_muxer_matched_with_ini(const MUXER_SETTINGS *mux_stg) {
+    BOOL ret = TRUE;
+    //不確定な場合は"0", mp4boxなら"-1", L-SMASHなら"1"
+    if (ENCODER_X264 || ENCODER_X265) {
+        bool mp4box_ini = stristr(mux_stg[MUXER_MP4].filename, "mp4box") != nullptr;
+        if (mp4box_ini) {
+            error_mp4box_ini();
+            ret = FALSE;
+        }
+    }
+    return ret;
+}
+
+bool is_afsvfr(const CONF_GUIEX *conf) {
+#if ENCODER_SVTAV1
+    return (conf->vid.afs != 0 && !conf->vid.afs_24fps);
+#else
+    return conf->vid.afs != 0;
+#endif
+}
+
+static BOOL check_amp(CONF_GUIEX *conf) {
+    BOOL check = TRUE;
+#if ENABLE_AMP
+    if (!conf->enc.use_auto_npass)
+        return check;
+    if (conf->vid.amp_check & AMPLIMIT_BITRATE_UPPER) {
+        //if (conf->x264.bitrate > conf->vid.amp_limit_bitrate_upper) {
+        //    check = FALSE; error_amp_bitrate_confliction();
+        //} else if (conf->vid.amp_limit_bitrate_upper <= 0.0)
+        //    conf->vid.amp_check &= ~AMPLIMIT_BITRATE; //フラグを折る
+        if (conf->vid.amp_limit_bitrate_upper <= 0.0)
+            conf->vid.amp_check &= ~AMPLIMIT_BITRATE_UPPER; //フラグを折る
+    }
+    if (conf->vid.amp_check & AMPLIMIT_FILE_SIZE) {
+        if (conf->vid.amp_limit_file_size <= 0.0)
+            conf->vid.amp_check &= ~AMPLIMIT_FILE_SIZE; //フラグを折る
+    }
+    if (conf->vid.amp_check && conf->vid.afs && AUDIO_DELAY_CUT_ADD_VIDEO == conf->aud.delay_cut) {
+        check = FALSE; error_amp_afs_audio_delay_confliction();
+    }
+#endif
+    return check;
 }
 
 static BOOL muxer_supports_audio_format(const int muxer_to_be_used, const AUDIO_SETTINGS *aud_stg) {
@@ -375,10 +467,10 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
     if (!PathIsDirectory(savedir)) {
         error_savdir_do_not_exist(oip->savefile, savedir);
         check = FALSE;
-        //出力フォルダにファイルを開けるかどうか
+    //出力フォルダにファイルを開けるかどうか
     } else if (!check_temp_file_open(savedir, auo_check_fileopen_path, true, true)) {
         check = FALSE;
-        //一時ファイルを開けるかどうか
+    //一時ファイルを開けるかどうか
     } else if (!check_temp_file_open(pe->temp_filename, auo_check_fileopen_path, false, false)) {
         check = FALSE;
     }
@@ -424,9 +516,9 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
     }
 
     if (conf->oth.out_audio_only)
-        write_log_auo_line(LOG_INFO, "音声のみ出力を行います。");
+        write_log_auo_line(LOG_INFO, g_auo_mes.get(AUO_ENCODE_AUDIO_ONLY));
 
-    const auto exeFiles = find_exe_files(defaultExeDir);
+    const auto exeFiles = find_exe_files(defaultExeDir, defaultExeDir2);
 
     //必要な実行ファイル
     //ffmpegout
@@ -442,11 +534,11 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
                 }
             }
             if (!PathFileExists(exstg->s_local.ffmpeg_path)) {
-                error_no_exe_file(ENCODER_NAME, exstg->s_local.ffmpeg_path);
+                error_no_exe_file(ENCODER_NAME_W, exstg->s_local.ffmpeg_path);
                 check = FALSE;
             }
         }
-        info_use_exe_found(ENCODER_NAME, exstg->s_local.ffmpeg_path);
+        info_use_exe_found(ENCODER_NAME_W, exstg->s_local.ffmpeg_path);
     }
 
     //音声エンコーダ
@@ -476,7 +568,7 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
                 error_invalid_ini_file();
                 check = FALSE;
             }
-#if 0
+#if !ENCODER_FFMPEG
             AUDIO_SETTINGS *aud_stg = &exstg->s_aud_int[cnf_aud->encoder];
             if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
                 AUDIO_SETTINGS *aud_default = nullptr;
@@ -552,15 +644,15 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
                     if (!PathFileExists(aud_stg->fullpath)) {
                         //fawの場合はfaw2aacがあればOKだが、それもなければエラー
                         if (!(cnf_aud->encoder == exstg->get_faw_index(conf->aud.use_internal) && check_if_faw2aac_exists())) {
-                            error_no_exe_file(aud_stg->filename, aud_stg->fullpath);
+                            error_no_exe_file(aud_stg->dispname, aud_stg->fullpath);
                             check = FALSE;
                         }
                     }
                 }
                 if (str_has_char(aud_stg->filename) && (cnf_aud->encoder != exstg->get_faw_index(conf->aud.use_internal) || !check_if_faw2aac_exists())) {
-                    info_use_exe_found("音声エンコーダ", aud_stg->fullpath);
+                    info_use_exe_found(aud_stg->dispname, aud_stg->fullpath);
                 }
-#if 0
+#if !ENCODER_FFMPEG
                 if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
                     AUDIO_SETTINGS *aud_default = nullptr;
                     if (default_audenc_cnf_avail) {
@@ -581,35 +673,36 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
 
     //muxer
     switch (pe->muxer_to_be_used) {
-        case MUXER_TC2MP4:
-            check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4], aviutl_dir, exstg->s_local.get_relative_path, exeFiles); //tc2mp4使用時は追加でmp4boxも必要
-            //下へフォールスルー
-        case MUXER_MP4:
-            check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
-            if (str_has_char(exstg->s_mux[MUXER_MP4_RAW].base_cmd)) {
-                check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4_RAW], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
-            }
-            //check &= check_muxer_matched_with_ini(exstg->s_mux);
-            break;
-        case MUXER_MKV:
-            check &= check_muxer_exist(&exstg->s_mux[pe->muxer_to_be_used], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
-            break;
-        default:
-            break;
+    case MUXER_TC2MP4:
+        check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4], aviutl_dir, exstg->s_local.get_relative_path, exeFiles); //tc2mp4使用時は追加でmp4boxも必要
+        //下へフォールスルー
+    case MUXER_MP4:
+        check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
+        if (str_has_char(exstg->s_mux[MUXER_MP4_RAW].base_cmd)) {
+            check &= check_muxer_exist(&exstg->s_mux[MUXER_MP4_RAW], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
+        }
+        //check &= check_muxer_matched_with_ini(exstg->s_mux);
+        break;
+    case MUXER_MKV:
+        check &= check_muxer_exist(&exstg->s_mux[pe->muxer_to_be_used], aviutl_dir, exstg->s_local.get_relative_path, exeFiles);
+        break;
+    default:
+        break;
     }
 
     return check;
 }
 
-void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int current_pass, int total_pass) {
-    char mes[MAX_PATH_LEN + 512];
-    char *newLine = (get_current_log_len(current_pass)) ? "\r\n\r\n" : ""; //必要なら行送り
-    static const char *SEPARATOR = "------------------------------------------------------------------------------------------------------------------------------";
-    if (total_pass < 2)
-        sprintf_s(mes, sizeof(mes), "%s%s\r\n[%s]\r\n%s", newLine, SEPARATOR, savefile, SEPARATOR);
+void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int current_pass, int total_pass, bool amp_crf_reenc) {
+    wchar_t mes[MAX_PATH_LEN + 512];
+    const wchar_t *newLine = (get_current_log_len(current_pass == 1 && !amp_crf_reenc)) ? L"\r\n\r\n" : L""; //必要なら行送り
+    static const wchar_t *SEPARATOR = L"------------------------------------------------------------------------------------------------------------------------------";
+    const std::wstring savefile_w = char_to_wstring(savefile);
+    if (total_pass < 2 || current_pass > total_pass)
+        swprintf_s(mes, L"%s%s\r\n[%s]\r\n%s", newLine, SEPARATOR, savefile_w.c_str(), SEPARATOR);
     else
-        sprintf_s(mes, sizeof(mes), "%s%s\r\n[%s] (%d / %d pass)\r\n%s", newLine, SEPARATOR, savefile, current_pass, total_pass, SEPARATOR);
-    
+        swprintf_s(mes, L"%s%s\r\n[%s] (%d / %d pass)\r\n%s", newLine, SEPARATOR, savefile_w.c_str(), current_pass, total_pass, SEPARATOR);
+
     show_log_window(sys_dat->aviutl_dir, sys_dat->exstg->s_local.disable_visual_styles);
     write_log_line(LOG_INFO, mes);
     
@@ -617,7 +710,8 @@ void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int curre
     getCPUInfo(cpu_info);
     DWORD buildNumber = 0;
     const TCHAR *osver = getOSVersion(&buildNumber);
-    write_log_auo_line_fmt(LOG_INFO, "%s %s / %s %s (%d) / %s", AUO_NAME_WITHOUT_EXT, AUO_VERSION_STR, osver, is_64bit_os() ? "x64" : "x86", buildNumber, cpu_info);
+    write_log_auo_line_fmt(LOG_INFO, L"%s %s / %s %s (%d) / %s",
+        AUO_NAME_WITHOUT_EXT_W, AUO_VERSION_STR_W, osver, is_64bit_os() ? L"x64" : L"x86", buildNumber, char_to_wstring(cpu_info).c_str());
 }
 
 static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, const SYSTEM_DATA *sys_dat) {
@@ -628,7 +722,7 @@ static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, con
         //システムの一時フォルダを取得
         if (GetTempPath(_countof(pe->temp_filename), pe->temp_filename) != NULL) {
             PathRemoveBackslash(pe->temp_filename);
-            write_log_auo_line_fmt(LOG_INFO, "一時フォルダ : %s", pe->temp_filename);
+            write_log_auo_line_fmt(LOG_INFO, L"%s : %s", g_auo_mes.get(AUO_ENCODE_TMP_FOLDER), char_to_wstring(pe->temp_filename).c_str());
         } else {
             warning_failed_getting_temp_path();
             tmp_dir_index = TMP_DIR_OUTPUT;
@@ -652,7 +746,7 @@ static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, con
             const auto auo_check_fileopen_path = find_auo_check_fileopen(defaultExeDir, defaultExeDir2);
 
             if (check_temp_file_open(pe->temp_filename, auo_check_fileopen_path, true, false)) {
-                write_log_auo_line_fmt(LOG_INFO, "一時フォルダ : %s", pe->temp_filename);
+                write_log_auo_line_fmt(LOG_INFO, L"%s : %s", g_auo_mes.get(AUO_ENCODE_TMP_FOLDER), char_to_wstring(pe->temp_filename).c_str());
             } else {
                 warning_unable_to_open_tempfile(sys_dat->exstg->s_local.custom_tmp_dir);
                 tmp_dir_index = TMP_DIR_OUTPUT;
@@ -750,7 +844,7 @@ void set_enc_prm(CONF_GUIEX *conf, PRM_ENC *pe, const OUTPUT_INFO *oip, const SY
         if (conf->aud.ext.aud_temp_dir) {
             if (DirectoryExistsOrCreate(sys_dat->exstg->s_local.custom_audio_tmp_dir)) {
                 cus_aud_tdir = sys_dat->exstg->s_local.custom_audio_tmp_dir;
-                write_log_auo_line_fmt(LOG_INFO, "音声一時フォルダ : %s", GetFullPathFrom(cus_aud_tdir, sys_dat->aviutl_dir).c_str());
+                write_log_auo_line_fmt(LOG_INFO, L"%s : %s", g_auo_mes.get(AUO_ENCODE_TMP_FOLDER_AUDIO), char_to_wstring(GetFullPathFrom(cus_aud_tdir, sys_dat->aviutl_dir)).c_str());
             } else {
                 warning_no_aud_temp_root(sys_dat->exstg->s_local.custom_audio_tmp_dir);
             }
@@ -801,11 +895,11 @@ BOOL fps_after_afs_is_24fps(const int frame_n, const PRM_ENC *pe) {
 int get_mux_excmd_mode(const CONF_GUIEX *conf, const PRM_ENC *pe) {
     int mode = 0;
     switch (pe->muxer_to_be_used) {
-        case MUXER_MKV:     mode = conf->mux.mkv_mode; break;
-        case MUXER_MPG:     mode = conf->mux.mpg_mode; break;
-        case MUXER_MP4:
-        case MUXER_TC2MP4: 
-        case MUXER_MP4_RAW: mode = conf->mux.mp4_mode; break;
+    case MUXER_MKV:      mode = conf->mux.mkv_mode; break;
+    case MUXER_MPG:      mode = conf->mux.mpg_mode; break;
+    case MUXER_MP4:
+    case MUXER_TC2MP4:
+    case MUXER_MP4_RAW:  mode = conf->mux.mp4_mode; break;
     }
     return mode;
 }
@@ -962,6 +1056,9 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
     replace(cmd, nSize, "%{fps_scale}", tmp);
     //アスペクト比
     //replace_aspect_ratio(cmd, nSize, conf, oip);
+    //%{pid}
+    sprintf_s(tmp, sizeof(tmp), "%d", GetCurrentProcessId());
+    replace(cmd, nSize, "%{pid}", tmp);
 
     if (conf->aud.use_internal) {
         replace(cmd, nSize, "%{audencpath}", "");
@@ -983,7 +1080,7 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
 // ret, erase    … これまでのエラーと一時ファイルを削除するかどうか。エラーがない場合にのみ削除できる
 // name          … 一時ファイルの種類の名前
 // must_exist    … trueのとき、移動するべきファイルが存在しないとエラーを返し、ファイルが存在しないことを伝える
-static BOOL move_temp_file(const char *appendix, const char *temp_filename, const char *savefile, DWORD ret, BOOL erase, const char *name, BOOL must_exist) {
+static BOOL move_temp_file(const char *appendix, const char *temp_filename, const char *savefile, DWORD ret, BOOL erase, const wchar_t *name, BOOL must_exist) {
     char move_from_tmp[MAX_PATH_LEN] = { 0 };
     if (appendix)
         apply_appendix(move_from_tmp, _countof(move_from_tmp), temp_filename, appendix);
@@ -991,7 +1088,7 @@ static BOOL move_temp_file(const char *appendix, const char *temp_filename, cons
         strcpy_s(move_from_tmp, temp_filename);
 
     char move_from[MAX_PATH_LEN] = { 0 };
-    if (strcmp(name, "出力") == 0) {
+    if (wcscmp(name, L"出力") == 0) {
         // 連番出力等の場合、1番が出ているかだけチェックする
         sprintf_s(move_from, move_from_tmp, 1);
         // ファイル名が変わっている(=連番出力等の場合)この後の処理をスキップ
@@ -1004,7 +1101,7 @@ static BOOL move_temp_file(const char *appendix, const char *temp_filename, cons
 
     if (!PathFileExists(move_from)) {
         if (must_exist)
-            write_log_auo_line_fmt(LOG_WARNING, "%sファイルが見つかりませんでした。", name);
+            write_log_auo_line_fmt(LOG_WARNING, L"%s%s", name, g_auo_mes.get(AUO_ENCODE_FILE_NOT_FOUND));
         return (must_exist) ? FALSE : TRUE;
     }
     if (ret == AUO_RESULT_SUCCESS && erase) {
@@ -1019,16 +1116,18 @@ static BOOL move_temp_file(const char *appendix, const char *temp_filename, cons
         if (PathFileExists(move_to))
             remove(move_to);
         if (rename(move_from, move_to))
-            write_log_auo_line_fmt(LOG_WARNING, "%sファイルの移動に失敗しました。", name);
+            write_log_auo_line_fmt(LOG_WARNING, L"%s%s", name, g_auo_mes.get(AUO_ENCODE_FILE_MOVE_FAILED));
     }
     return TRUE;
 }
 
 AUO_RESULT move_temporary_files(const CONF_GUIEX *conf, const PRM_ENC *pe, const SYSTEM_DATA *sys_dat, const OUTPUT_INFO *oip, DWORD ret) {
     //動画ファイル
-    if (!conf->oth.out_audio_only)
-        if (!move_temp_file(PathFindExtension((pe->muxer_to_be_used >= 0) ? oip->savefile : pe->temp_filename), pe->temp_filename, oip->savefile, ret, FALSE, "出力", !ret))
+    if (!conf->oth.out_audio_only) {
+        if (!move_temp_file(PathFindExtension((pe->muxer_to_be_used >= 0) ? oip->savefile : pe->temp_filename), pe->temp_filename, oip->savefile, ret, FALSE, L"出力", !ret)) {
             ret |= AUO_RESULT_ERROR;
+        }
+    }
     //動画のみファイル
     //if (str_has_char(pe->muxed_vid_filename) && PathFileExists(pe->muxed_vid_filename))
     //	remove(pe->muxed_vid_filename);
@@ -1036,14 +1135,14 @@ AUO_RESULT move_temporary_files(const CONF_GUIEX *conf, const PRM_ENC *pe, const
     if (pe->muxer_to_be_used >= 0) {
         char muxout_appendix[MAX_APPENDIX_LEN];
         get_muxout_appendix(muxout_appendix, _countof(muxout_appendix), sys_dat, pe);
-        move_temp_file(muxout_appendix, pe->temp_filename, oip->savefile, ret, FALSE, "mux後ファイル", FALSE);
+        move_temp_file(muxout_appendix, pe->temp_filename, oip->savefile, ret, FALSE, g_auo_mes.get(AUO_ENCODE_AFTER_MUX), FALSE);
     }
     /*
     //qpファイル
-    move_temp_file(pe->append.qp,   pe->temp_filename, oip->savefile, ret, !sys_dat->exstg->s_local.keep_qp_file, "qp", FALSE);
+    move_temp_file(pe->append.qp,   pe->temp_filename, oip->savefile, ret, !sys_dat->exstg->s_local.keep_qp_file, L"qp", FALSE);
     //tcファイル
-    BOOL erase_tc = conf->vid.afs && !conf->vid.auo_tcfile_out && pe->muxer_to_be_used != MUXER_DISABLED;
-    move_temp_file(pe->append.tc,   pe->temp_filename, oip->savefile, ret, erase_tc, "タイムコード", FALSE);
+    BOOL erase_tc = is_afsvfr(conf) && !conf->vid.auo_tcfile_out && pe->muxer_to_be_used != MUXER_DISABLED;
+    move_temp_file(pe->append.tc,   pe->temp_filename, oip->savefile, ret, erase_tc, g_auo_mes.get(AUO_ENCODE_TC_FILE), FALSE);
     //チャプターファイル
     if (pe->muxer_to_be_used >= 0 && sys_dat->exstg->s_local.auto_del_chap) {
         char chap_file[MAX_PATH_LEN];
@@ -1065,12 +1164,12 @@ AUO_RESULT move_temporary_files(const CONF_GUIEX *conf, const PRM_ENC *pe, const
     */
     //音声ファイル(wav)
     if (strcmp(pe->append.aud[0], pe->append.wav)) //「wav出力」ならここでは処理せず下のエンコード後ファイルとして扱う
-        move_temp_file(pe->append.wav,  pe->temp_filename, oip->savefile, ret, TRUE, "wav", FALSE);
+        move_temp_file(pe->append.wav,  pe->temp_filename, oip->savefile, ret, TRUE, L"wav", FALSE);
     //音声ファイル(エンコード後ファイル)
     char aud_tempfile[MAX_PATH_LEN];
     PathCombineLong(aud_tempfile, _countof(aud_tempfile), pe->aud_temp_dir, PathFindFileName(pe->temp_filename));
     for (int i_aud = 0; i_aud < pe->aud_count; i_aud++)
-        if (!move_temp_file(pe->append.aud[i_aud], aud_tempfile, oip->savefile, ret, !conf->oth.out_audio_only && pe->muxer_to_be_used != MUXER_DISABLED, "音声", conf->oth.out_audio_only))
+        if (!move_temp_file(pe->append.aud[i_aud], aud_tempfile, oip->savefile, ret, !conf->oth.out_audio_only && pe->muxer_to_be_used != MUXER_DISABLED, g_auo_mes.get(AUO_ENCODE_AUDIO_FILE), conf->oth.out_audio_only))
             ret |= AUO_RESULT_ERROR;
     return ret;
 }
@@ -1133,12 +1232,12 @@ AUO_RESULT getLogFilePath(char *log_file_path, size_t nSize, const PRM_ENC *pe, 
     return ret;
 }
 
-double get_duration(const OUTPUT_INFO *oip, const PRM_ENC *pe) {
+double get_duration(const CONF_GUIEX *conf, const SYSTEM_DATA *sys_dat, const PRM_ENC *pe, const OUTPUT_INFO *oip) {
     //Aviutlから再生時間情報を取得
     return ((double)(oip->n + pe->delay_cut_additional_vframe) * (double)oip->scale) / (double)oip->rate;
 }
 
-int ReadLogExe(PIPE_SET *pipes, const char *exename, LOG_CACHE *log_line_cache) {
+int ReadLogExe(PIPE_SET *pipes, const wchar_t *exename, LOG_CACHE *log_line_cache) {
     DWORD pipe_read = 0;
     if (pipes->stdOut.h_read) {
         if (!PeekNamedPipe(pipes->stdOut.h_read, NULL, 0, NULL, &pipe_read, NULL))
@@ -1153,23 +1252,23 @@ int ReadLogExe(PIPE_SET *pipes, const char *exename, LOG_CACHE *log_line_cache) 
     return (int)pipe_read;
 }
 
-void write_cached_lines(int log_level, const char *exename, LOG_CACHE *log_line_cache) {
-    static const char *const LOG_LEVEL_STR[] = { "info", "warning", "error" };
-    static const char *MESSAGE_FORMAT = "%s [%s]: %s";
-    char *buffer = NULL;
+void write_cached_lines(int log_level, const wchar_t *exename, LOG_CACHE *log_line_cache) {
+    static const wchar_t *const LOG_LEVEL_STR[] = { L"info", L"warning", L"error" };
+    static const wchar_t *MESSAGE_FORMAT = L"%s [%s]: %s";
+    wchar_t *buffer = NULL;
     int buffer_len = 0;
     const int log_level_idx = clamp(log_level, LOG_INFO, LOG_ERROR);
-    const int additional_length = strlen(exename) + strlen(LOG_LEVEL_STR[log_level_idx]) + strlen(MESSAGE_FORMAT) - strlen("%s") * 3 + 1;
+    const int additional_length = wcslen(exename) + wcslen(LOG_LEVEL_STR[log_level_idx]) + wcslen(MESSAGE_FORMAT) - wcslen(L"%s") * 3 + 1;
     for (int i = 0; i < log_line_cache->idx; i++) {
-        const int required_buffer_len = strlen(log_line_cache->lines[i]) + additional_length;
+        const int required_buffer_len = wcslen(log_line_cache->lines[i]) + additional_length;
         if (buffer_len < required_buffer_len) {
             if (buffer) free(buffer);
-            buffer = (char *)malloc(required_buffer_len * sizeof(buffer[0]));
+            buffer = (wchar_t *)malloc(required_buffer_len * sizeof(buffer[0]));
             buffer_len = required_buffer_len;
         }
         if (buffer) {
-            sprintf_s(buffer, buffer_len, MESSAGE_FORMAT, exename, LOG_LEVEL_STR[log_level_idx], log_line_cache->lines[i]);
-            write_log_line(log_level, buffer, true);
+            swprintf_s(buffer, buffer_len, MESSAGE_FORMAT, exename, LOG_LEVEL_STR[log_level_idx], log_line_cache->lines[i]);
+            write_log_line(log_level, buffer);
         }
     }
     if (buffer) free(buffer);

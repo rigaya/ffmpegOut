@@ -36,6 +36,8 @@
 #include <algorithm>
 #include <tlhelp32.h>
 #include <vector>
+#include <string>
+#include <regex>
 #include <filesystem>
 #include <tchar.h>
 
@@ -138,7 +140,6 @@ DWORD jpn_check(const void *str, DWORD size_in_byte) {
     return CODE_PAGE_UNSET;
 }
 
-
 DWORD get_code_page(const void *str, DWORD size_in_byte) {
     int ret = CODE_PAGE_UNSET;
     if ((ret = check_bom(str)) != CODE_PAGE_UNSET)
@@ -163,6 +164,75 @@ BOOL fix_ImulL_WesternEurope(UINT *code_page) {
     return TRUE;
 }
 
+//ひとつのコードページの表すutf-8文字を返す
+std::string cp_to_utf8(uint32_t codepoint) {
+    char ptr[7] = { 0 };
+    if (codepoint <= 0x7f) {
+        ptr[0] = (char)codepoint & 0x7f;
+    } else if (codepoint <= 0x7ff) {
+        ptr[0] = (char)(0xc0 | (codepoint >> 6));
+        ptr[1] = (char)(0x80 | (codepoint & 0x3f));
+    } else if (codepoint <= 0xffff) {
+        ptr[0] = (char)(0xe0 | (codepoint >> 12));
+        ptr[1] = (char)(0x80 | ((codepoint >> 6) & 0x3f));
+        ptr[2] = (char)(0x80 |  (codepoint       & 0x3f));
+    } else if (codepoint <= 0x1fffff) {
+        ptr[0] = (char)(0xf0 |  (codepoint >> 18));
+        ptr[1] = (char)(0x80 | ((codepoint >> 12) & 0x3f));
+        ptr[2] = (char)(0x80 | ((codepoint >>  6) & 0x3f));
+        ptr[3] = (char)(0x80 |  (codepoint        & 0x3f));
+    } else if (codepoint <= 0x3fffff) {
+        ptr[0] = (char)(0xf8 |  (codepoint >> 24));
+        ptr[1] = (char)(0x80 | ((codepoint >> 18) & 0x3f));
+        ptr[2] = (char)(0x80 | ((codepoint >> 12) & 0x3f));
+        ptr[3] = (char)(0x80 | ((codepoint >>  6) & 0x3f));
+        ptr[4] = (char)(0x80 |  (codepoint        & 0x3f));
+    } else if (codepoint <= 0x7fffff) {
+        ptr[0] = (char)(0xfc |  (codepoint >> 30));
+        ptr[1] = (char)(0x80 | ((codepoint >> 24) & 0x3f));
+        ptr[2] = (char)(0x80 | ((codepoint >> 18) & 0x3f));
+        ptr[3] = (char)(0x80 | ((codepoint >> 12) & 0x3f));
+        ptr[4] = (char)(0x80 | ((codepoint >>  6) & 0x3f));
+        ptr[5] = (char)(0x80 |  (codepoint        & 0x3f));
+    }
+    return std::string(ptr);
+}
+
+//複数のU+xxxxU+xxxxのような文字列について、codepageのリストを作成する
+std::vector<uint32_t> get_cp_list(const std::string& str_in) {
+    std::string str = str_in;
+    std::vector<uint32_t> cp_list;
+    std::regex re(R"(^\s*U\+([0-9A-Fa-f]{2,})(.*))");
+    std::smatch match;
+    while (regex_match(str, match, re) && match.size() == 3) {
+        cp_list.push_back(std::stoi(match[1], nullptr, 16));
+        str = match[2];
+    }
+    return cp_list;
+}
+
+//code pageを記述している'U+xxxx'を含むUTF-8文字列をcode page部分を文字列に置換して返す
+std::string conv_cp_part_to_utf8(const std::string& string_utf8_with_cp) {
+    std::string string_utf8 = string_utf8_with_cp;
+    //まず 'U+****'の部分を抽出
+    std::regex re1(R"((.+)'(U\+[U\+0-9A-Fa-f\s]{2,}[0-9A-Fa-f]{2,})'(.+))");
+    std::smatch match1;
+    while (regex_match(string_utf8, match1, re1)) {
+        if (match1.size() != 4) {
+            break;
+        }
+        std::string str_next = match1[1];
+        //'U+****'の部分をcodepageに変換し、さらにUTF-8に変換する
+        for (auto cp : get_cp_list(match1[2])) {
+            str_next += cp_to_utf8(cp);
+        }
+        str_next += match1[3];
+        string_utf8 = str_next;
+    }
+    return string_utf8;
+}
+
+#if ENCODER_X264 || ENCODER_X265 || ENCODER_SVTAV1 || ENCODER_FFMPEG
 std::string GetFullPathFrom(const char *path, const char *baseDir) {
     if (auto p = std::filesystem::path(path); p.is_absolute()) {
         return path;
@@ -180,6 +250,7 @@ std::wstring GetFullPathFrom(const wchar_t *path, const wchar_t *baseDir) {
     const auto p = (baseDir) ? std::filesystem::path(baseDir).append(path) : std::filesystem::absolute(std::filesystem::path(path));
     return p.lexically_normal().wstring();
 }
+#endif
 
 static inline BOOL is_space_or_crlf(int c) {
     return (c == ' ' || c == '\r' || c == '\n');
@@ -214,9 +285,12 @@ BOOL del_arg(char *cmd, char *target_arg, int del_arg_delta) {
 
     //次の値を検索
     if (del_arg_delta) {
-        do {
+        while (cmd <= ptr + del_arg_delta && ptr + del_arg_delta < cmd_fin) {
             ptr += del_arg_delta;
-        } while (is_space_or_crlf(*ptr));
+            if (!is_space_or_crlf(*ptr)) {
+                break;
+            }
+        }
 
         BOOL dQB = FALSE;
         while (cmd < ptr && ptr < cmd_fin) {
@@ -234,129 +308,10 @@ BOOL del_arg(char *cmd, char *target_arg, int del_arg_delta) {
     return TRUE;
 }
 
-static const int ThreadQuerySetWin32StartAddress = 9;
-typedef int (WINAPI *typeNtQueryInformationThread)(HANDLE, int, PVOID, ULONG, PULONG);
-
-static void *GetThreadBeginAddress(DWORD TargetProcessId) {
-    HMODULE hNtDll = NULL;
-    typeNtQueryInformationThread NtQueryInformationThread = NULL;
-    HANDLE hThread = NULL;
-    ULONG length = 0;
-    void *BeginAddress = NULL;
-
-    if (   NULL != (hNtDll = LoadLibrary("ntdll.dll"))
-        && NULL != (NtQueryInformationThread = (typeNtQueryInformationThread)GetProcAddress(hNtDll, "NtQueryInformationThread"))
-        && NULL != (hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, TargetProcessId)) ) {
-        NtQueryInformationThread(hThread, ThreadQuerySetWin32StartAddress, &BeginAddress, sizeof(BeginAddress), &length );
-    }
-    if (hNtDll)
-        FreeLibrary(hNtDll);
-    if (hThread)
-        CloseHandle(hThread);
-    return BeginAddress;
-}
-
-static inline std::vector<DWORD> GetThreadList(DWORD TargetProcessId) {
-    std::vector<DWORD> ThreadList;
-    HANDLE hSnapshot;
-
-    if (INVALID_HANDLE_VALUE != (hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0x00))) {
-        THREADENTRY32 te32 = { 0 };
-        te32.dwSize = sizeof(THREADENTRY32);
-
-        if (Thread32First(hSnapshot, &te32)) {
-            do {
-                if (te32.th32OwnerProcessID == TargetProcessId)
-                    ThreadList.push_back(te32.th32ThreadID);
-            } while (Thread32Next(hSnapshot, &te32));
-        }
-        CloseHandle(hSnapshot);
-    }
-    return ThreadList;
-}
-
-static inline std::vector<MODULEENTRY32> GetModuleList(DWORD TargetProcessId) {
-    std::vector<MODULEENTRY32> ModuleList;
-    HANDLE hSnapshot;
-
-    if (INVALID_HANDLE_VALUE != (hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, TargetProcessId))) {
-        MODULEENTRY32 me32 = { 0 };
-        me32.dwSize = sizeof(MODULEENTRY32);
-
-        if (Module32First(hSnapshot, &me32)) {
-            do {
-                ModuleList.push_back(me32);
-            } while (Module32Next(hSnapshot, &me32));
-        }
-        CloseHandle(hSnapshot);
-    }
-    return ModuleList;
-}
-
-static BOOL SetThreadPriorityFromThreadId(DWORD TargetThreadId, int ThreadPriority) {
-    HANDLE hThread = OpenThread(THREAD_SET_INFORMATION, FALSE, TargetThreadId);
-    if (hThread == NULL)
-        return FALSE;
-    BOOL ret = SetThreadPriority(hThread, ThreadPriority);
-    CloseHandle(hThread);
-    return ret;
-}
-
-BOOL SetThreadPriorityForModule(DWORD TargetProcessId, const char *TargetModule, int ThreadPriority) {
-    BOOL ret = TRUE;
-    std::vector<DWORD> thread_list = GetThreadList(TargetProcessId);
-    std::vector<MODULEENTRY32> module_list = GetModuleList(TargetProcessId);
-    for (auto thread_id : thread_list) {
-        void *thread_address = GetThreadBeginAddress(thread_id);
-        if (!thread_address) {
-            ret = FALSE;
-        } else {
-            for (auto i_module : module_list) {
-                if (   check_range(thread_address, i_module.modBaseAddr, i_module.modBaseAddr + i_module.modBaseSize - 1)
-                    && (NULL == TargetModule || NULL == _strnicmp(TargetModule, i_module.szModule, strlen(TargetModule)))) {
-                    ret &= !!SetThreadPriorityFromThreadId(thread_id, ThreadPriority);
-                    break;
-                }
-            }
-        }
-    }
-    return ret;
-}
-
-static BOOL SetThreadAffinityFromThreadId(DWORD TargetThreadId, DWORD_PTR ThreadAffinityMask) {
-    HANDLE hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, TargetThreadId);
-    if (hThread == NULL)
-        return FALSE;
-    DWORD_PTR ret = SetThreadAffinityMask(hThread, ThreadAffinityMask);
-    CloseHandle(hThread);
-    return (ret != 0);
-}
-
-BOOL SetThreadAffinityForModule(DWORD TargetProcessId, const char *TargetModule, DWORD_PTR ThreadAffinityMask) {
-    BOOL ret = TRUE;
-    std::vector<DWORD> thread_list = GetThreadList(TargetProcessId);
-    std::vector<MODULEENTRY32> module_list = GetModuleList(TargetProcessId);
-    for (auto thread_id : thread_list) {
-        void *thread_address = GetThreadBeginAddress(thread_id);
-        if (!thread_address) {
-            ret = FALSE;
-        } else {
-            for (auto i_module : module_list) {
-                if (   check_range(thread_address, i_module.modBaseAddr, i_module.modBaseAddr + i_module.modBaseSize - 1)
-                    && (NULL == TargetModule || NULL == _strnicmp(TargetModule, i_module.szModule, strlen(TargetModule)))) {
-                    ret &= !!SetThreadAffinityFromThreadId(thread_id, ThreadAffinityMask);
-                    break;
-                }
-            }
-        }
-    }
-    return ret;
-}
-
-typedef BOOL(WINAPI *LPFN_GLPI)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+typedef BOOL (WINAPI *LPFN_GLPI)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
 
 static DWORD CountSetBits(ULONG_PTR bitMask) {
-    DWORD LSHIFT = sizeof(ULONG_PTR) * 8 - 1;
+    DWORD LSHIFT = sizeof(ULONG_PTR)*8 - 1;
     DWORD bitSetCount = 0;
     for (ULONG_PTR bitTest = (ULONG_PTR)1 << LSHIFT; bitTest; bitTest >>= 1)
         bitSetCount += ((bitMask & bitTest) != 0);
@@ -373,7 +328,7 @@ static int getRealWindowsVersion(DWORD *major, DWORD *minor, DWORD *build) {
     HMODULE hModule = NULL;
     RtlGetVersion_FUNC func = NULL;
     int ret = 1;
-    if (NULL != (hModule = LoadLibrary(_T("ntdll.dll")))
+    if (   NULL != (hModule = LoadLibrary(_T("ntdll.dll")))
         && NULL != (func = (RtlGetVersion_FUNC)GetProcAddress(hModule, "RtlGetVersion"))) {
         func(&osver);
         *major = osver.dwMajorVersion;
@@ -441,10 +396,10 @@ const TCHAR *getOSVersion(DWORD *buildNumber) {
         case 6:
             switch (infoex.dwMinorVersion) {
             case 0:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows Vista") : _T("Windows Server 2008");    break;
-            case 1:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 7") : _T("Windows Server 2008 R2"); break;
-            case 2:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 8") : _T("Windows Server 2012");    break;
-            case 3:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 8.1") : _T("Windows Server 2012 R2"); break;
-            case 4:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 10") : _T("Windows Server 2016");    break;
+            case 1:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 7")     : _T("Windows Server 2008 R2"); break;
+            case 2:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 8")     : _T("Windows Server 2012");    break;
+            case 3:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 8.1")   : _T("Windows Server 2012 R2"); break;
+            case 4:  ptr = (infoex.wProductType == VER_NT_WORKSTATION) ? _T("Windows 10")    : _T("Windows Server 2016");    break;
             default:
                 if (5 <= infoex.dwMinorVersion) {
                     ptr = _T("Later than Windows 10");
@@ -470,3 +425,4 @@ const TCHAR *getOSVersion(DWORD *buildNumber) {
     return ptr;
 }
 #pragma warning(pop)
+

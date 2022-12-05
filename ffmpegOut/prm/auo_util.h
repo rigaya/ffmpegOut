@@ -69,14 +69,30 @@ static const BYTE UTF16_BE_BOM[] = { 0xFE, 0xFF };
 
 //SIMD
 enum {
-    AUO_SIMD_NONE  = 0x0000,
-    AUO_SIMD_SSE2  = 0x0001,
-    AUO_SIMD_SSE3  = 0x0002, //使用していない
-    AUO_SIMD_SSSE3 = 0x0004,
-    AUO_SIMD_SSE41 = 0x0008,
-    AUO_SIMD_SSE42 = 0x0010, //使用していない
-    AUO_SIMD_AVX   = 0x0020,
-    AUO_SIMD_AVX2  = 0x0040, //使用していない
+    AUO_SIMD_NONE            = 0x000000,
+    AUO_SIMD_SSE2            = 0x000001,
+    AUO_SIMD_SSE3            = 0x000002,
+    AUO_SIMD_SSSE3           = 0x000004,
+    AUO_SIMD_SSE41           = 0x000008,
+    AUO_SIMD_SSE42           = 0x000010,
+    AUO_SIMD_POPCNT          = 0x000020,
+    AUO_SIMD_AVX             = 0x000040,
+    AUO_SIMD_AVX2            = 0x000080,
+    AUO_SIMD_BMI1            = 0x000100,
+    AUO_SIMD_BMI2            = 0x000200,
+    AUO_SIMD_AVX512F         = 0x000400,
+    AUO_SIMD_AVX512DQ        = 0x000800,
+    AUO_SIMD_AVX512IFMA      = 0x001000,
+    AUO_SIMD_AVX512PF        = 0x002000,
+    AUO_SIMD_AVX512ER        = 0x004000,
+    AUO_SIMD_AVX512CD        = 0x008000,
+    AUO_SIMD_AVX512BW        = 0x010000,
+    AUO_SIMD_AVX512VL        = 0x020000,
+    AUO_SIMD_AVX512VBMI      = 0x040000,
+    AUO_SIMD_AVX512VBMI2     = 0x080000,
+    AUO_SIMD_AVX512VNNI      = 0x100000,
+    AUO_SIMD_AVX512BITALG    = 0x200000,
+    AUO_SIMD_AVX512VPOPCNTDQ = 0x400000,
 };
 
 //関数マクロ
@@ -358,9 +374,10 @@ static inline int countchr(const WCHAR *str, int ch) {
 }
 
 //文字列の末尾についている '\r' '\n' ' ' を削除する
-static inline size_t deleteCRLFSpace_at_End(WCHAR *str) {
-    WCHAR *pw = str + wcslen(str) - 1;
-    WCHAR * const qw = pw;
+static inline size_t deleteCRLFSpace_at_End(WCHAR* str) {
+    if (str == nullptr || wcslen(str) == 0) return 0;
+    WCHAR* pw = str + wcslen(str) - 1;
+    WCHAR* const qw = pw;
     while ((*pw == L'\n' || *pw == L'\r' || *pw == L' ') && pw >= str) {
         *pw = L'\0';
         pw--;
@@ -368,9 +385,10 @@ static inline size_t deleteCRLFSpace_at_End(WCHAR *str) {
     return qw - pw;
 }
 
-static inline size_t deleteCRLFSpace_at_End(char *str) {
-    char *pw = str + strlen(str) - 1;
-    char *qw = pw;
+static inline size_t deleteCRLFSpace_at_End(char* str) {
+    if (str == nullptr || strlen(str) == 0) return 0;
+    char* pw = str + strlen(str) - 1;
+    char* qw = pw;
     while ((*pw == '\n' || *pw == '\r' || *pw == ' ') && pw >= str) {
         *pw = '\0';
         pw--;
@@ -390,6 +408,14 @@ static inline BOOL str_has_char(const WCHAR *str) {
     for (; !ret && *str != L'\0'; str++)
         ret = (*str != ' ');
     return ret;
+}
+
+static void *find_data(const void *data_to_search, size_t data_to_search_len, const void *data_to_find, size_t data_to_find_len) {
+    const BYTE *search_fin = (const BYTE *)data_to_search + (data_to_search_len - data_to_find_len);
+    for (const BYTE *ptr = (const BYTE *)data_to_search; ptr < search_fin; ptr++)
+        if (0 == memcmp(ptr, data_to_find, data_to_find_len))
+            return (void *)ptr;
+    return NULL;
 }
 
 static DWORD cpu_core_count() {
@@ -466,31 +492,52 @@ static BOOL check_avx2() {
     return FALSE;
 }
 
+#if ENCODER_X264 || ENCODER_X265 || ENCODER_SVTAV1 || ENCODER_FFMPEG
 static DWORD get_availableSIMD() {
     int CPUInfo[4];
     __cpuid(CPUInfo, 1);
     DWORD simd = AUO_SIMD_NONE;
-    if  (CPUInfo[3] & 0x04000000)
-        simd |= AUO_SIMD_SSE2;
-    if  (CPUInfo[2] & 0x00000001)
-        simd |= AUO_SIMD_SSE3;
-    if  (CPUInfo[2] & 0x00000200)
-        simd |= AUO_SIMD_SSSE3;
-    if  (CPUInfo[2] & 0x00080000)
-        simd |= AUO_SIMD_SSE41;
-    if  (CPUInfo[2] & 0x00100000)
-        simd |= AUO_SIMD_SSE42;
-    UINT64 XGETBV = 0;
+    if (CPUInfo[3] & 0x04000000) simd |= AUO_SIMD_SSE2;
+    if (CPUInfo[2] & 0x00000001) simd |= AUO_SIMD_SSE3;
+    if (CPUInfo[2] & 0x00000200) simd |= AUO_SIMD_SSSE3;
+    if (CPUInfo[2] & 0x00080000) simd |= AUO_SIMD_SSE41;
+    if (CPUInfo[2] & 0x00100000) simd |= AUO_SIMD_SSE42;
+    if (CPUInfo[2] & 0x00800000) simd |= AUO_SIMD_POPCNT;
+    uint64_t xgetbv = 0;
     if ((CPUInfo[2] & 0x18000000) == 0x18000000) {
-        XGETBV = _xgetbv(0);
-        if ((XGETBV & 0x06) == 0x06)
+        xgetbv = _xgetbv(0);
+        if ((xgetbv & 0x06) == 0x06)
             simd |= AUO_SIMD_AVX;
     }
     __cpuid(CPUInfo, 7);
-    if ((simd & AUO_SIMD_AVX) && (CPUInfo[1] & 0x00000020))
+    if (!!(simd & AUO_SIMD_AVX) && (CPUInfo[1] & 0x00000020)) {
         simd |= AUO_SIMD_AVX2;
+    }
+    if (!!(simd & AUO_SIMD_AVX) && ((xgetbv >> 5) & 7) == 7) {
+        if (CPUInfo[1] & (1u << 3)) simd |= AUO_SIMD_BMI1;
+        if (CPUInfo[1] & (1u << 8)) simd |= AUO_SIMD_BMI2;
+        if (CPUInfo[1] & (1u << 16)) simd |= AUO_SIMD_AVX512F;
+        if (!!(simd & AUO_SIMD_AVX512F)) {
+            if (CPUInfo[1] & (1u << 17)) simd |= AUO_SIMD_AVX512DQ;
+            if (CPUInfo[1] & (1u << 21)) simd |= AUO_SIMD_AVX512IFMA;
+            if (CPUInfo[1] & (1u << 26)) simd |= AUO_SIMD_AVX512PF;
+            if (CPUInfo[1] & (1u << 27)) simd |= AUO_SIMD_AVX512ER;
+            if (CPUInfo[1] & (1u << 28)) simd |= AUO_SIMD_AVX512CD;
+            if (CPUInfo[1] & (1u << 30)) simd |= AUO_SIMD_AVX512BW;
+            if (CPUInfo[1] & (1u << 31)) simd |= AUO_SIMD_AVX512VL;
+            if (CPUInfo[2] & (1u <<  1)) simd |= AUO_SIMD_AVX512VBMI;
+            if (CPUInfo[2] & (1u <<  6)) simd |= AUO_SIMD_AVX512VBMI2;
+            if (CPUInfo[2] & (1u << 11)) simd |= AUO_SIMD_AVX512VNNI;
+            if (CPUInfo[2] & (1u << 12)) simd |= AUO_SIMD_AVX512BITALG;
+            if (CPUInfo[2] & (1u << 14)) simd |= AUO_SIMD_AVX512VPOPCNTDQ;
+        }
+    }
     return simd;
 }
+
+std::string GetFullPathFrom(const char *path, const char *baseDir);
+std::wstring GetFullPathFrom(const wchar_t *path, const wchar_t *baseDir);
+#endif
 
 static BOOL check_OS_Win7orLater() {
 #if (_MSC_VER >= 1800)
@@ -502,9 +549,6 @@ static BOOL check_OS_Win7orLater() {
     return ((osvi.dwPlatformId == VER_PLATFORM_WIN32_NT) && ((osvi.dwMajorVersion == 6 && osvi.dwMinorVersion >= 1) || osvi.dwMajorVersion > 6));
 #endif
 }
-
-std::string GetFullPathFrom(const char *path, const char *baseDir);
-std::wstring GetFullPathFrom(const wchar_t *path, const wchar_t *baseDir);
 
 //文字列の置換に必要な領域を計算する
 static size_t calc_replace_mem_required(char *str, const char *old_str, const char *new_str) {
@@ -527,6 +571,18 @@ static size_t calc_replace_mem_required(WCHAR *str, const WCHAR *old_str, const 
         size += move_len;
     return size;
 }
+static inline void insert(char *str, size_t nSize, const char *target_str, const char *new_str) {
+    char *fin = str + strlen(str) + 1;//null文字まで
+    const size_t new_len = strlen(new_str);
+    if (strlen(str) + new_len + 1 >= nSize) {
+        return;
+    }
+    auto pos = strstr(str, target_str);
+    if (pos != nullptr) {
+        memmove(pos + new_len, pos, (fin - pos) * sizeof(str[0]));
+        memcpy(pos, new_str, new_len * sizeof(str[0]));
+    }
+}
 //文字列の置換 str内で置き換える 置換を実行した回数を返す
 static inline int replace(char *str, size_t nSize, const char *old_str, const char *new_str) {
     char *c = str;
@@ -537,7 +593,7 @@ static inline int replace(char *str, size_t nSize, const char *old_str, const ch
     const size_t old_len = strlen(old_str);
     const size_t new_len = strlen(new_str);
     const int move_len = (int)(new_len - old_len);
-    if (old_len) {
+    if (old_len && strlen(str) >= old_len) {
         while ((p = strstr(c, old_str)) != NULL) {
             if (move_len) {
                 if (fin + move_len > limit)
@@ -560,7 +616,7 @@ static inline int replace(WCHAR *str, size_t nSize, const WCHAR *old_str, const 
     const size_t old_len = wcslen(old_str);
     const size_t new_len = wcslen(new_str);
     const int move_len = (int)(new_len - old_len);
-    if (old_len) {
+    if (old_len && wcslen(str) >= old_len) {
         while ((p = wcsstr(c, old_str)) != NULL) {
             if (move_len) {
                 if (fin + move_len > limit)
@@ -1071,18 +1127,22 @@ DWORD jpn_check(const void *str, DWORD size_in_byte);
 //西ヨーロッパ言語 なら Shift-JIS にしてしまう
 BOOL fix_ImulL_WesternEurope(UINT *code_page);
 
+//ひとつのコードページの表すutf-8文字を返す
+std::string cp_to_utf8(uint32_t codepoint);
+
+//複数のU+xxxxU+xxxxのような文字列について、codepageのリストを作成する
+std::vector<uint32_t> get_cp_list(const std::string& str);
+
+//code pageを記述している'U+xxxx'を含むUTF-8文字列をcode page部分を文字列に置換して返す
+std::string conv_cp_part_to_utf8(const std::string& string_utf8_with_cp);
+
 //cmd中のtarget_argを抜き出し削除する
 //del_valueが+1ならその後の値を削除する、-1ならその前の値を削除する
 //値を削除できたらTRUEを返す
 BOOL del_arg(char *cmd, char *target_arg, int del_arg_delta);
 
-//TargetProcessIdに指定したプロセスのスレッドのうち、
-//スレッドのModuleがTargetModuleに指定した文字列に一致した場合(_strnicmpによる比較)
-//スレッド優先度をThreadPriorityに設定する
-//TargetModuleがNULLならTargetProcessIdの全スレッドに適用
-BOOL SetThreadPriorityForModule(DWORD TargetProcessId, const char *TargetModule, int ThreadPriority);
-BOOL SetThreadAffinityForModule(DWORD TargetProcessId, const char *TargetModule, DWORD_PTR ThreadAffinityMask);
+const TCHAR *getOSVersion(DWORD *buildNumber = nullptr);
 
-const TCHAR *getOSVersion(DWORD *buildNumber);
+std::string find_latest_videnc_for_frm();
 
 #endif //_AUO_UTIL_H_

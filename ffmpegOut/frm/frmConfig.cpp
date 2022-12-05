@@ -59,15 +59,15 @@ System::Boolean frmSaveNewStg::checkStgFileName(String^ stgName) {
     String^ fileName;
     if (stgName->Length == 0)
         return false;
-    
+
     if (!ValidiateFileName(stgName)) {
-        MessageBox::Show(L"ファイル名に使用できない文字が含まれています。\n保存できません。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+        MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_INVALID_CHAR), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
         return false;
     }
     if (String::Compare(Path::GetExtension(stgName), L".stg", true))
         stgName += L".stg";
     if (File::Exists(fileName = Path::Combine(fsnCXFolderBrowser->GetSelectedFolder(), stgName)))
-        if (MessageBox::Show(stgName + L" はすでに存在します。上書きしますか?", L"上書き確認", MessageBoxButtons::YesNo, MessageBoxIcon::Question)
+        if (MessageBox::Show(stgName + LOAD_CLI_STRING(AUO_CONFIG_ALREADY_EXISTS), LOAD_CLI_STRING(AUO_CONFIG_OVERWRITE_CHECK), MessageBoxButtons::YesNo, MessageBoxIcon::Question)
             != System::Windows::Forms::DialogResult::Yes)
             return false;
     StgFileName = fileName;
@@ -164,7 +164,6 @@ System::Void frmBitrateCalculator::SetAllMouseMove(Control ^top, const AuoTheme 
     }
 }
 
-
 /// -------------------------------------------------
 ///     frmConfig 関数  (frmBitrateCalculator関連)
 /// -------------------------------------------------
@@ -243,7 +242,7 @@ System::Boolean frmConfig::CheckLocalStg() {
     if (LocalStg.ffmpegOutPath->Length > 0
         && !File::Exists(LocalStg.ffmpegOutPath)) {
         error = true;
-        err += L"指定された ffmpeg は存在しません。\n [ " + LocalStg.ffmpegOutPath + L" ]\n";
+        err += LOAD_CLI_STRING(AUO_CONFIG_VID_ENC_NOT_EXIST) + L"\n [ " + LocalStg.ffmpegOutPath + L" ]\n";
     }
     //音声エンコーダのチェック (実行ファイル名がない場合はチェックしない)
     if (LocalStg.audEncExeName[fcgCXAudioEncoder->SelectedIndex]->Length) {
@@ -254,30 +253,30 @@ System::Boolean frmConfig::CheckLocalStg() {
                 || !check_if_faw2aac_exists()) ) {
             //音声実行ファイルがない かつ
             //選択された音声がfawでない または fawであってもfaw2aacがない
-            if (!error) err += L"\n\n";
+            if (error) err += L"\n\n";
             error = true;
-            err += L"指定された 音声エンコーダ は存在しません。\n [ " + AudioEncoderPath + L" ]\n";
+            err += LOAD_CLI_STRING(AUO_CONFIG_AUD_ENC_NOT_EXIST) + L"\n [ " + AudioEncoderPath + L" ]\n";
         }
     }
     //FAWのチェック
     if (fcgCBFAWCheck->Checked) {
         if (sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked) == FAW_INDEX_ERROR) {
-            if (!error) err += L"\n\n";
+            if (error) err += L"\n\n";
             error = true;
-            err += L"FAWCheckが選択されましたが、ffmpegOut.ini から\n"
-                + L"FAW の設定を読み込めませんでした。\n"
-                + L"ffmpegOut.ini を確認してください。\n";
+            err += LOAD_CLI_STRING(AUO_CONFIG_FAW_STG_NOT_FOUND_IN_INI1) + L"\n"
+                +  LOAD_CLI_STRING(AUO_CONFIG_FAW_STG_NOT_FOUND_IN_INI2) + L"\n"
+                +  LOAD_CLI_STRING(AUO_CONFIG_FAW_STG_NOT_FOUND_IN_INI3);
         } else if (!File::Exists(LocalStg.audEncPath[sys_dat->exstg->get_faw_index(fcgCBAudioUseInternal->Checked)])
                    && !check_if_faw2aac_exists()) {
             //fawの実行ファイルが存在しない かつ faw2aacも存在しない
-            if (!error) err += L"\n\n";
+            if (error) err += L"\n\n";
             error = true;
-            err += L"FAWCheckが選択されましたが、FAW(fawcl)へのパスが正しく指定されていません。\n"
-                +  L"一度設定画面でFAW(fawcl)へのパスを指定してください。\n";
+            err += LOAD_CLI_STRING(AUO_CONFIG_FAW_PATH_UNSET1) + L"\n"
+                +  LOAD_CLI_STRING(AUO_CONFIG_FAW_PATH_UNSET2);
         }
     }
-    if (error) 
-        MessageBox::Show(this, err, L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+    if (error)
+        MessageBox::Show(this, err, LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
     return error;
 }
 
@@ -301,8 +300,8 @@ System::Void frmConfig::SaveLocalStg() {
 }
 
 System::Void frmConfig::SetLocalStg() {
-    fcgLBffmpegOutPath->Text       = L"ffmpeg.exe の指定";
-    fcgTXffmpegOutPath->Text       = LocalStg.ffmpegOutPath;
+    fcgLBffmpegOutPath->Text       = System::String(ENCODER_NAME).ToString() + L".exe" + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgTXffmpegOutPath->Text       = System::String(ENCODER_NAME).ToString() + L".exe" + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
     fcgTXMP4MuxerPath->Text       = LocalStg.MP4MuxerPath;
     fcgTXMKVMuxerPath->Text       = LocalStg.MKVMuxerPath;
     fcgTXTC2MP4Path->Text         = LocalStg.TC2MP4Path;
@@ -311,11 +310,12 @@ System::Void frmConfig::SetLocalStg() {
     fcgTXCustomAudioTempDir->Text = LocalStg.CustomAudTmpDir;
     fcgTXCustomTempDir->Text      = LocalStg.CustomTmpDir;
     fcgTXMP4BoxTempDir->Text      = LocalStg.CustomMP4TmpDir;
-    fcgLBMP4MuxerPath->Text       = LocalStg.MP4MuxerExeName + L" の指定";
-    fcgLBMKVMuxerPath->Text       = LocalStg.MKVMuxerExeName + L" の指定";
-    fcgLBTC2MP4Path->Text         = LocalStg.TC2MP4ExeName   + L" の指定";
-    fcgLBMPGMuxerPath->Text       = LocalStg.MPGMuxerExeName + L" の指定";
-    fcgLBMP4RawPath->Text         = LocalStg.MP4RawExeName + L" の指定";
+    fcgLBMP4MuxerPath->Text       = LocalStg.MP4MuxerExeName + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgLBMKVMuxerPath->Text       = LocalStg.MKVMuxerExeName + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgLBTC2MP4Path->Text         = LocalStg.TC2MP4ExeName   + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgLBMPGMuxerPath->Text       = LocalStg.MPGMuxerExeName + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgLBMP4RawPath->Text         = LocalStg.MP4RawExeName   + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+
 
     fcgTXffmpegOutPath->SelectionStart       = fcgTXffmpegOutPath->Text->Length;
     fcgTXMP4MuxerPath->SelectionStart       = fcgTXMP4MuxerPath->Text->Length;
@@ -357,7 +357,7 @@ System::Boolean frmConfig::EnableSettingsNoteChange(bool Enable) {
         fcgTSLSettingsNotes->Visible == !Enable)
         return true;
     if (CountStringBytes(fcgTSTSettingsNotes->Text) > fcgTSTSettingsNotes->MaxLength - 1) {
-        MessageBox::Show(this, L"入力された文字数が多すぎます。減らしてください。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+        MessageBox::Show(this, LOAD_CLI_STRING(AUO_CONFIG_TEXT_LIMIT_LENGTH), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
         fcgTSTSettingsNotes->Focus();
         fcgTSTSettingsNotes->SelectionStart = fcgTSTSettingsNotes->Text->Length;
         return false;
@@ -367,7 +367,7 @@ System::Boolean frmConfig::EnableSettingsNoteChange(bool Enable) {
     if (Enable) {
         fcgTSTSettingsNotes->Text = fcgTSLSettingsNotes->Text;
         fcgTSTSettingsNotes->Focus();
-        bool isDefaultNote = String::Compare(fcgTSTSettingsNotes->Text, String(DefaultStgNotes).ToString()) == 0;
+        bool isDefaultNote = fcgTSLSettingsNotes->Overflow != ToolStripItemOverflow::Never;
         fcgTSTSettingsNotes->Select((isDefaultNote) ? 0 : fcgTSTSettingsNotes->Text->Length, fcgTSTSettingsNotes->Text->Length);
     } else {
         SetfcgTSLSettingsNotes(fcgTSTSettingsNotes->Text);
@@ -375,6 +375,9 @@ System::Boolean frmConfig::EnableSettingsNoteChange(bool Enable) {
     }
     return true;
 }
+
+
+///////////////////  メモ関連  ///////////////////////////////////////////////
 System::Void frmConfig::fcgTSLSettingsNotes_DoubleClick(System::Object^  sender, System::EventArgs^  e) {
     EnableSettingsNoteChange(true);
 }
@@ -389,6 +392,8 @@ System::Void frmConfig::fcgTSTSettingsNotes_TextChanged(System::Object^  sender,
     SetfcgTSLSettingsNotes(fcgTSTSettingsNotes->Text);
     CheckOtherChanges(nullptr, nullptr);
 }
+
+//////////////////// 追加コマンド関連 /////////////////////////////////////////
 System::Void frmConfig::fcgCXCmdExInsert_FontChanged(System::Object^  sender, System::EventArgs^  e) {
     InitCXCmdExInsert();
 }
@@ -396,7 +401,7 @@ System::Void frmConfig::fcgCXCmdExInsert_SelectedIndexChanged(System::Object^  s
     String^ insertStr;
     if (       0 == fcgCXCmdExInsert->SelectedIndex) {
         //何もしない
-    } else if (1 == fcgCXCmdExInsert->SelectedIndex) {            
+    } else if (1 == fcgCXCmdExInsert->SelectedIndex) {
         //WinXPにおいて、OpenFileDialogはCurrentDirctoryを勝手に変更しやがるので、
         //一度保存し、あとから再適用する
         String^ CurrentDir = Directory::GetCurrentDirectory();
@@ -435,8 +440,8 @@ System::Void frmConfig::AdjustCXDropDownWidth(ComboBox^ CX) {
 System::Void frmConfig::InitCXCmdExInsert() {
     fcgCXCmdExInsert->BeginUpdate();
     fcgCXCmdExInsert->Items->Clear();
-    fcgCXCmdExInsert->Items->Add(L"文字列を挿入...");
-    fcgCXCmdExInsert->Items->Add(L"ファイル フルパス...");
+    fcgCXCmdExInsert->Items->Add(LOAD_CLI_STRING(AUO_CONFIG_INSERT_STRING));
+    fcgCXCmdExInsert->Items->Add(LOAD_CLI_STRING(AUO_CONFIG_FILE_FULL_PATH));
     System::Drawing::Graphics^ ds = fcgCXCmdExInsert->CreateGraphics();
     float max_width_of_string = 0;
     for (int i = 0; REPLACE_STRINGS_LIST[i].desc; i++)
@@ -447,7 +452,11 @@ System::Void frmConfig::InitCXCmdExInsert() {
         AppenStr += L" … ";
         for (float current_width = 0.0; current_width < max_width_of_string; AppenStr = AppenStr->Insert(length_of_string, L" "))
             current_width = ds->MeasureString(AppenStr, fcgCXCmdExInsert->Font).Width;
-        AppenStr += String(REPLACE_STRINGS_LIST[i].desc).ToString();
+        String^ descStr = LOAD_CLI_STRING(REPLACE_STRINGS_LIST[i].mes);
+        if (descStr->Length == 0) {
+            descStr = String(REPLACE_STRINGS_LIST[i].desc).ToString();
+        }
+        AppenStr += descStr;
         fcgCXCmdExInsert->Items->Add(AppenStr);
     }
     delete ds;
@@ -491,7 +500,7 @@ System::Void frmConfig::setAudioDisplay() {
     AUDIO_SETTINGS *astg = &sys_dat->exstg->s_aud_ext[index];
     //～の指定
     if (str_has_char(astg->filename)) {
-        fcgLBAudioEncoderPath->Text = String(astg->filename).ToString() + L" の指定";
+        fcgLBAudioEncoderPath->Text = String(astg->filename).ToString() + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
         fcgTXAudioEncoderPath->Enabled = true;
         fcgTXAudioEncoderPath->Text = LocalStg.audEncPath[index];
         fcgBTAudioEncoderPath->Enabled = true;
@@ -549,8 +558,16 @@ System::Void frmConfig::AudioEncodeModeChanged() {
         const int items_to_set = _countof(AUDIO_DELAY_CUT_MODE) - 1 - ((delay_cut_edts_available) ? 0 : 1);
         fcgCXAudioDelayCut->BeginUpdate();
         fcgCXAudioDelayCut->Items->Clear();
-        for (int i = 0; i < items_to_set; i++)
-            fcgCXAudioDelayCut->Items->Add(String(AUDIO_DELAY_CUT_MODE[i]).ToString());
+        for (int i = 0; i < items_to_set; i++) {
+            String^ string = nullptr;
+            if (AUDIO_DELAY_CUT_MODE[i].mes != AUO_MES_UNKNOWN) {
+                string = LOAD_CLI_STRING(AUDIO_DELAY_CUT_MODE[i].mes);
+            }
+            if (string == nullptr || string->Length == 0) {
+                string = String(AUDIO_DELAY_CUT_MODE[i].desc).ToString();
+            }
+            fcgCXAudioDelayCut->Items->Add(string);
+        }
         fcgCXAudioDelayCut->EndUpdate();
         fcgCXAudioDelayCut->SelectedIndex = (current_idx >= items_to_set) ? 0 : current_idx;
     } else {
@@ -621,7 +638,7 @@ System::Void frmConfig::UncheckAllDropDownItem(ToolStripItem^ mItem) {
 System::Void frmConfig::CheckTSSettingsDropDownItem(ToolStripMenuItem^ mItem) {
     UncheckAllDropDownItem(fcgTSSettings);
     CheckedStgMenuItem = mItem;
-    fcgTSSettings->Text = (mItem == nullptr) ? L"プロファイル" : mItem->Text;
+    fcgTSSettings->Text = (mItem == nullptr) ? LOAD_CLI_STRING(AUO_CONFIG_PROFILE) : mItem->Text;
     if (mItem != nullptr)
         mItem->Checked = true;
     fcgTSBSave->Enabled = false;
@@ -639,8 +656,8 @@ ToolStripMenuItem^ frmConfig::fcgTSSettingsSearchItem(String^ stgPath, ToolStrip
         if (item != nullptr)
             return item;
         item = dynamic_cast<ToolStripMenuItem^>(DropDownItem->DropDownItems[i]);
-        if (item      != nullptr && 
-            item->Tag != nullptr && 
+        if (item      != nullptr &&
+            item->Tag != nullptr &&
             0 == String::Compare(item->Tag->ToString(), stgPath, true))
             return item;
     }
@@ -652,7 +669,7 @@ ToolStripMenuItem^ frmConfig::fcgTSSettingsSearchItem(String^ stgPath) {
 }
 
 System::Void frmConfig::SaveToStgFile(String^ stgName) {
-    size_t nameLen = CountStringBytes(stgName) + 1; 
+    size_t nameLen = CountStringBytes(stgName) + 1;
     char *stg_name = (char *)malloc(nameLen);
     GetCHARfromString(stg_name, nameLen, stgName);
     init_CONF_GUIEX(cnf_stgSelected, FALSE);
@@ -664,10 +681,10 @@ System::Void frmConfig::SaveToStgFile(String^ stgName) {
     free(stg_name);
     switch (result) {
         case CONF_ERROR_FILE_OPEN:
-            MessageBox::Show(L"設定ファイルオープンに失敗しました。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+            MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_OPEN_STG_FILE), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
             return;
         case CONF_ERROR_INVALID_FILENAME:
-            MessageBox::Show(L"ファイル名に使用できない文字が含まれています。\n保存できません。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+            MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_INVALID_CHAR), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
             return;
         default:
             break;
@@ -697,8 +714,8 @@ System::Void frmConfig::fcgTSBSaveNew_Click(System::Object^  sender, System::Eve
 
 System::Void frmConfig::DeleteStgFile(ToolStripMenuItem^ mItem) {
     if (System::Windows::Forms::DialogResult::OK ==
-        MessageBox::Show(L"設定ファイル " + mItem->Text + L" を削除してよろしいですか?",
-        L"エラー", MessageBoxButtons::OKCancel, MessageBoxIcon::Exclamation)) 
+        MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ASK_STG_FILE_DELETE) + L"[" + mItem->Text + L"]",
+        LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OKCancel, MessageBoxIcon::Exclamation))
     {
         File::Delete(mItem->Tag->ToString());
         RebuildStgFileDropDown(nullptr);
@@ -721,9 +738,9 @@ System::Void frmConfig::fcgTSSettings_DropDownItemClicked(System::Object^  sende
     char stg_path[MAX_PATH_LEN];
     GetCHARfromString(stg_path, sizeof(stg_path), ClickedMenuItem->Tag->ToString());
     if (guiEx_config::load_guiEx_conf(&load_stg, stg_path) == CONF_ERROR_FILE_OPEN) {
-        if (MessageBox::Show(L"設定ファイルオープンに失敗しました。\n"
-                           + L"このファイルを削除しますか?",
-                           L"エラー", MessageBoxButtons::YesNo, MessageBoxIcon::Error)
+        if (MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_OPEN_STG_FILE) + L"\n"
+                           + LOAD_CLI_STRING(AUO_CONFIG_ASK_STG_FILE_DELETE),
+                           LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::YesNo, MessageBoxIcon::Error)
                            == System::Windows::Forms::DialogResult::Yes)
             DeleteStgFile(ClickedMenuItem);
         return;
@@ -760,6 +777,80 @@ System::Void frmConfig::RebuildStgFileDropDown(String^ stgDir) {
     RebuildStgFileDropDown(fcgTSSettings, Path::GetFullPath(CurrentStgDir));
 }
 
+///////////////   言語ファイル関連   //////////////////////
+
+System::Void frmConfig::CheckTSLanguageDropDownItem(ToolStripMenuItem^ mItem) {
+    UncheckAllDropDownItem(fcgTSLanguage);
+    fcgTSLanguage->Text = (mItem == nullptr) ? LOAD_CLI_STRING(AuofcgTSSettings) : mItem->Text;
+    if (mItem != nullptr)
+        mItem->Checked = true;
+}
+System::Void frmConfig::SetSelectedLanguage(const char *language_text) {
+    for (int i = 0; i < fcgTSLanguage->DropDownItems->Count; i++) {
+        ToolStripMenuItem^ item = dynamic_cast<ToolStripMenuItem^>(fcgTSLanguage->DropDownItems[i]);
+        char item_text[MAX_PATH_LEN];
+        GetCHARfromString(item_text, sizeof(item_text), item->Tag->ToString());
+        if (strncmp(item_text, language_text, strlen(language_text)) == 0) {
+            CheckTSLanguageDropDownItem(item);
+            break;
+        }
+    }
+}
+
+System::Void frmConfig::SaveSelectedLanguage(const char *language_text) {
+    sys_dat->exstg->set_and_save_lang(language_text);
+}
+
+System::Void frmConfig::fcgTSLanguage_DropDownItemClicked(System::Object^  sender, System::Windows::Forms::ToolStripItemClickedEventArgs^  e) {
+    ToolStripMenuItem^ ClickedMenuItem = dynamic_cast<ToolStripMenuItem^>(e->ClickedItem);
+    if (ClickedMenuItem == nullptr)
+        return;
+    if (ClickedMenuItem->Tag == nullptr || ClickedMenuItem->Tag->ToString()->Length == 0)
+        return;
+
+    char language_text[MAX_PATH_LEN];
+    GetCHARfromString(language_text, sizeof(language_text), ClickedMenuItem->Tag->ToString());
+    SaveSelectedLanguage(language_text);
+    load_lng(language_text);
+    overwrite_aviutl_ini_auo_info();
+    LoadLangText();
+    CheckTSLanguageDropDownItem(ClickedMenuItem);
+}
+
+System::Void frmConfig::InitLangList() {
+    if (list_lng != nullptr) {
+        delete list_lng;
+    }
+#define ENABLE_LNG_FILE_DETECT 1
+#if ENABLE_LNG_FILE_DETECT
+    auto lnglist = find_lng_files();
+    list_lng = new std::vector<std::string>();
+    for (const auto& lang : lnglist) {
+        list_lng->push_back(lang);
+    }
+#endif
+
+    fcgTSLanguage->DropDownItems->Clear();
+
+    for (const auto& auo_lang : list_auo_languages) {
+        String^ label = String(auo_lang.code).ToString() + L" (" + String(auo_lang.name).ToString() + L")";
+        ToolStripMenuItem^ mItem = gcnew ToolStripMenuItem(label);
+        mItem->DropDownItemClicked += gcnew System::Windows::Forms::ToolStripItemClickedEventHandler(this, &frmConfig::fcgTSLanguage_DropDownItemClicked);
+        mItem->Tag = String(auo_lang.code).ToString();
+        fcgTSLanguage->DropDownItems->Add(mItem);
+    }
+#if ENABLE_LNG_FILE_DETECT
+    for (size_t i = 0; i < list_lng->size(); i++) {
+        auto filename = String(PathFindFileNameA((*list_lng)[i].c_str())).ToString();
+        ToolStripMenuItem^ mItem = gcnew ToolStripMenuItem(filename);
+        mItem->DropDownItemClicked += gcnew System::Windows::Forms::ToolStripItemClickedEventHandler(this, &frmConfig::fcgTSLanguage_DropDownItemClicked);
+        mItem->Tag = filename;
+        fcgTSLanguage->DropDownItems->Add(mItem);
+    }
+#endif
+    SetSelectedLanguage(sys_dat->exstg->get_lang());
+}
+
 //////////////   初期化関連     ////////////////
 System::Void frmConfig::InitData(CONF_GUIEX *set_config, const SYSTEM_DATA *system_data) {
     if (set_config->size_all != CONF_INITIALIZED) {
@@ -781,13 +872,13 @@ System::Void frmConfig::InitComboBox() {
     setComboBox(fcgCXAudioEncTiming, audio_enc_timing_desc);
     setComboBox(fcgCXAudioDelayCut,  AUDIO_DELAY_CUT_MODE);
 
+    InitCXCmdExInsert();
+
     setMuxerCmdExNames(fcgCXMP4CmdEx, MUXER_MP4);
     setMuxerCmdExNames(fcgCXMKVCmdEx, MUXER_MKV);
     setMuxerCmdExNames(fcgCXMPGCmdEx, MUXER_MPG);
 
     setAudioEncoderNames();
-
-    InitCXCmdExInsert();
 
     setPriorityList(fcgCXffmpegOutPriority);
     setPriorityList(fcgCXMuxPriority);
@@ -896,22 +987,12 @@ System::Void frmConfig::AdjustLocation() {
 System::Void frmConfig::InitForm() {
     //UIテーマ切り替え
     CheckTheme();
-    //ローカル設定のロード
-    LoadLocalStg();
-    //ローカル設定の反映
-    SetLocalStg();
+    //言語設定ファイルのロード
+    InitLangList();
     //設定ファイル集の初期化
     InitStgFileList();
-    //コンボボックスの値を設定
-    InitComboBox();
-    //タイトル表示
-    this->Text = String(AUO_FULL_NAME).ToString();
-    //バージョン情報,コンパイル日時
-    fcgLBVersion->Text     = String(AUO_VERSION_NAME).ToString();
-    fcgLBVersionDate->Text = L"build " + String(__DATE__).ToString() + L" " + String(__TIME__).ToString();
-    //ツールチップ
-    SetHelpToolTips();
-    ActivateToolTip(sys_dat->exstg->s_local.disable_tooltip_help == FALSE);
+    //言語表示
+    LoadLangText();
     //パラメータセット
     ConfToFrm(conf);
     //イベントセット
@@ -920,14 +1001,9 @@ System::Void frmConfig::InitForm() {
     //フォームの変更可不可を更新
     fcgChangeMuxerVisible(nullptr, nullptr);
     fcgCBAudioUseExt_CheckedChanged(nullptr, nullptr);
-    fcgTXffmpegOutPath_Leave(nullptr, nullptr);
-    fcgTXAudioEncoderPath_Leave(nullptr, nullptr);
-    fcgTXMP4MuxerPath_Leave(nullptr, nullptr);
-    fcgTXTC2MP4Path_Leave(nullptr, nullptr);
-    fcgTXMP4RawPath_Leave(nullptr, nullptr);
-    fcgTXMKVMuxerPath_Leave(nullptr, nullptr);
-    fcgTXMPGMuxerPath_Leave(nullptr, nullptr);
+
     EnableSettingsNoteChange(false);
+    ExeTXPathLeave();
     //表示位置の調整
     AdjustLocation();
     //キー設定
@@ -935,6 +1011,36 @@ System::Void frmConfig::InitForm() {
     //フォントの設定
     if (str_has_char(sys_dat->exstg->s_local.conf_font.name))
         SetFontFamilyToForm(this, gcnew FontFamily(String(sys_dat->exstg->s_local.conf_font.name).ToString()), this->Font->FontFamily);
+}
+
+System::Void frmConfig::LoadLangText() {
+    //一度ウィンドウの再描画を完全に抑止する
+    SendMessage(reinterpret_cast<HWND>(this->Handle.ToPointer()), WM_SETREDRAW, 0, 0);
+    //空白時にグレーで入れる文字列を言語変更のため一度空白に戻す
+    ExeTXPathEnter();
+    //言語更新開始
+
+    //ローカル設定のロード(ini変更を反映)
+    LoadLocalStg();
+    //ローカル設定の反映
+    SetLocalStg();
+    //コンボボックスの値を設定
+    InitComboBox();
+    //ツールチップ
+    SetHelpToolTips();
+    ActivateToolTip(sys_dat->exstg->s_local.disable_tooltip_help == FALSE);
+    { //タイトル表示,バージョン情報,コンパイル日時
+        auto auo_full_name = g_auo_mes.get(AUO_GUIEX_FULL_NAME);
+        if (auo_full_name == nullptr || wcslen(auo_full_name) == 0) auo_full_name = AUO_FULL_NAME_W;
+        this->Text = String(auo_full_name).ToString();
+        fcgLBVersion->Text = String(auo_full_name).ToString() + L" " + String(AUO_VERSION_STR_W).ToString();
+        fcgLBVersionDate->Text = L"build " + String(__DATE__).ToString() + L" " + String(__TIME__).ToString();
+    }
+    //空白時にグレーで入れる文字列を言語に即して復活させる
+    ExeTXPathLeave();
+    //一度ウィンドウの再描画を再開し、強制的に再描画させる
+    SendMessage(reinterpret_cast<HWND>(this->Handle.ToPointer()), WM_SETREDRAW, 1, 0);
+    this->Refresh();
 }
 
 /////////////         データ <-> GUI     /////////////
@@ -1069,7 +1175,7 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
 
 System::Void frmConfig::GetfcgTSLSettingsNotes(char *notes, int nSize) {
     ZeroMemory(notes, nSize);
-    if (fcgTSLSettingsNotes->ForeColor == Color::FromArgb(StgNotesColor[0][0], StgNotesColor[0][1], StgNotesColor[0][2]))
+    if (fcgTSLSettingsNotes->Overflow != ToolStripItemOverflow::Never)
         GetCHARfromString(notes, nSize, fcgTSLSettingsNotes->Text);
 }
 
@@ -1077,19 +1183,23 @@ System::Void frmConfig::SetfcgTSLSettingsNotes(const char *notes) {
     if (str_has_char(notes)) {
         fcgTSLSettingsNotes->ForeColor = Color::FromArgb(StgNotesColor[0][0], StgNotesColor[0][1], StgNotesColor[0][2]);
         fcgTSLSettingsNotes->Text = String(notes).ToString();
+        fcgTSLSettingsNotes->Overflow = ToolStripItemOverflow::AsNeeded;
     } else {
         fcgTSLSettingsNotes->ForeColor = Color::FromArgb(StgNotesColor[1][0], StgNotesColor[1][1], StgNotesColor[1][2]);
-        fcgTSLSettingsNotes->Text = String(DefaultStgNotes).ToString();
+        fcgTSLSettingsNotes->Text = LOAD_CLI_STRING(AuofcgTSTSettingsNotes);
+        fcgTSLSettingsNotes->Overflow = ToolStripItemOverflow::Never;
     }
 }
 
 System::Void frmConfig::SetfcgTSLSettingsNotes(String^ notes) {
-    if (notes->Length && String::Compare(notes, String(DefaultStgNotes).ToString()) != 0) {
+    if (notes->Length && fcgTSLSettingsNotes->Overflow != ToolStripItemOverflow::Never) {
         fcgTSLSettingsNotes->ForeColor = Color::FromArgb(StgNotesColor[0][0], StgNotesColor[0][1], StgNotesColor[0][2]);
         fcgTSLSettingsNotes->Text = notes;
+        fcgTSLSettingsNotes->Overflow = ToolStripItemOverflow::AsNeeded;
     } else {
         fcgTSLSettingsNotes->ForeColor = Color::FromArgb(StgNotesColor[1][0], StgNotesColor[1][1], StgNotesColor[1][2]);
-        fcgTSLSettingsNotes->Text = String(DefaultStgNotes).ToString();
+        fcgTSLSettingsNotes->Text = LOAD_CLI_STRING(AuofcgTSTSettingsNotes);
+        fcgTSLSettingsNotes->Overflow = ToolStripItemOverflow::Never;
     }
 }
 
@@ -1445,7 +1555,7 @@ System::Void frmConfig::SetHelpToolTips() {
 }
 System::Void frmConfig::ShowExehelp(String^ ExePath, String^ args) {
     if (!File::Exists(ExePath)) {
-        MessageBox::Show(L"指定された実行ファイルが存在しません。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+        MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_EXE_NOT_FOUND), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
     } else {
         char exe_path[MAX_PATH_LEN];
         char file_path[MAX_PATH_LEN];
@@ -1461,6 +1571,8 @@ System::Void frmConfig::ShowExehelp(String^ ExePath, String^ args) {
                     sw = gcnew StreamWriter(String(file_path).ToString(), true, System::Text::Encoding::GetEncoding("shift_jis"));
                     sw->WriteLine();
                     sw->WriteLine();
+                } catch (...) {
+                    //ファイルオープンに失敗…初回のget_exe_message_to_fileでエラーとなるため、おそらく起こらない
                 } finally {
                     if (sw != nullptr) { sw->Close(); }
                 }
@@ -1468,14 +1580,14 @@ System::Void frmConfig::ShowExehelp(String^ ExePath, String^ args) {
             GetCHARfromString(cmd, sizeof(cmd), arg_list[i]);
             if (get_exe_message_to_file(exe_path, cmd, file_path, AUO_PIPE_MUXED, 5) != RP_SUCCESS) {
                 File::Delete(String(file_path).ToString());
-                MessageBox::Show(L"helpの取得に失敗しました。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+                MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_GET_HELP), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
                 return;
             }
         }
         try {
             System::Diagnostics::Process::Start(String(file_path).ToString());
         } catch (...) {
-            MessageBox::Show(L"helpを開く際に不明なエラーが発生しました。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+            MessageBox::Show(LOAD_CLI_STRING(AUO_CONFIG_ERR_OPEN_HELP), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
         }
     }
 }

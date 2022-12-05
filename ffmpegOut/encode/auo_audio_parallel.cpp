@@ -36,7 +36,6 @@
 #include "auo_system.h"
 #include "auo_audio.h"
 #include "auo_frm.h"
-#include "auo_encode.h"
 
 typedef struct {
     CONF_GUIEX *_conf;

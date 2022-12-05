@@ -28,6 +28,7 @@
 #pragma once
 
 #include "auo_settings.h"
+#include "auo_mes.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -37,7 +38,7 @@ using namespace System::Data;
 using namespace System::Drawing;
 
 
-namespace ffmpegOut {
+namespace AUO_NAME_R {
 
     /// <summary>
     /// frmNewFolderName の概要
@@ -71,10 +72,12 @@ namespace ffmpegOut {
             {
                 delete components;
             }
+            if (dwStgReader != nullptr)
+                delete dwStgReader;
         }
     private: System::Windows::Forms::TextBox^  fnfTXNewFolderName;
     private: System::Windows::Forms::Button^  fnfBTOK;
-    protected: 
+    protected:
     private: System::Windows::Forms::Button^  fnfBTCancel;
 
     private:
@@ -94,9 +97,9 @@ namespace ffmpegOut {
             this->fnfBTCancel = (gcnew System::Windows::Forms::Button());
             this->fnfTXNewFolderName = (gcnew System::Windows::Forms::TextBox());
             this->SuspendLayout();
-            // 
+            //
             // fnfBTOK
-            // 
+            //
             this->fnfBTOK->Location = System::Drawing::Point(239, 61);
             this->fnfBTOK->Name = L"fnfBTOK";
             this->fnfBTOK->Size = System::Drawing::Size(75, 32);
@@ -104,9 +107,9 @@ namespace ffmpegOut {
             this->fnfBTOK->Text = L"OK";
             this->fnfBTOK->UseVisualStyleBackColor = true;
             this->fnfBTOK->Click += gcnew System::EventHandler(this, &frmNewFolderName::fnfBTOK_Click);
-            // 
+            //
             // fnfBTCancel
-            // 
+            //
             this->fnfBTCancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
             this->fnfBTCancel->Location = System::Drawing::Point(155, 61);
             this->fnfBTCancel->Name = L"fnfBTCancel";
@@ -115,16 +118,16 @@ namespace ffmpegOut {
             this->fnfBTCancel->Text = L"キャンセル";
             this->fnfBTCancel->UseVisualStyleBackColor = true;
             this->fnfBTCancel->Click += gcnew System::EventHandler(this, &frmNewFolderName::fnfBTCancel_Click);
-            // 
+            //
             // fnfTXNewFolderName
-            // 
+            //
             this->fnfTXNewFolderName->Location = System::Drawing::Point(24, 23);
             this->fnfTXNewFolderName->Name = L"fnfTXNewFolderName";
             this->fnfTXNewFolderName->Size = System::Drawing::Size(290, 23);
             this->fnfTXNewFolderName->TabIndex = 8;
-            // 
+            //
             // frmNewFolderName
-            // 
+            //
             this->AcceptButton = this->fnfBTOK;
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
@@ -133,7 +136,7 @@ namespace ffmpegOut {
             this->Controls->Add(this->fnfTXNewFolderName);
             this->Controls->Add(this->fnfBTOK);
             this->Controls->Add(this->fnfBTCancel);
-            this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(0)));
             this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedDialog;
             this->KeyPreview = true;
@@ -153,11 +156,18 @@ namespace ffmpegOut {
         String^ NewFolder;
         AuoTheme themeMode;
         const DarkenWindowStgReader *dwStgReader;
+    private:
+        System::Void LoadLangText() {
+            LOAD_CLI_MAIN_TEXT(fnfMain);
+            LOAD_CLI_TEXT(fnfBTOK);
+            LOAD_CLI_TEXT(fnfBTCancel);
+        }
     private: 
         System::Void frmNewFolderName_Load(System::Object^  sender, System::EventArgs^  e) {
             NewFolder = L"";
             fnfTXNewFolderName->Select();
-            
+
+            LoadLangText();
             //フォントの設定
             guiEx_settings exstg;
             exstg.load_encode_stg();
@@ -167,7 +177,7 @@ namespace ffmpegOut {
     private:
         System::Void fnfBTOK_Click(System::Object^  sender, System::EventArgs^  e) {
             if (!ValidiateFileName(fnfTXNewFolderName->Text)) {
-                MessageBox::Show(L"フォルダ名に使用できない文字が含まれています。", L"エラー", MessageBoxButtons::OK, MessageBoxIcon::Error);
+                MessageBox::Show(LOAD_CLI_STRING(AUO_NEW_FOLDER_NAME_ERR_FOLDER_PATH), LOAD_CLI_STRING(AUO_GUIEX_ERROR), MessageBoxButtons::OK, MessageBoxIcon::Error);
                 return;
             }
             NewFolder = fnfTXNewFolderName->Text;

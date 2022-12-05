@@ -73,6 +73,19 @@ static __forceinline __m128i _mm_packus_epi32_simd(__m128i a, __m128i b) {
 #endif
 }
 
+static __forceinline __m128i _mm_min_epu16_simd(__m128i a, __m128i b) {
+#if USE_SSE41
+    return _mm_min_epu16(a, b);
+#else
+    alignas(64) static const DWORD VAL[4] = { 0x80008000, 0x80008000, 0x80008000, 0x80008000 };
+#define LOAD_16BIT_0x8000 _mm_load_si128((__m128i *)VAL)
+    __m128i a1 = _mm_xor_si128(a, LOAD_16BIT_0x8000);
+    __m128i b1 = _mm_xor_si128(b, LOAD_16BIT_0x8000);
+    __m128i m1 = _mm_min_epi16(a1, b1);
+    return _mm_xor_si128(m1, LOAD_16BIT_0x8000);
+#endif
+}
+
 static __forceinline void separate_low_up(__m128i& x0_return_lower, __m128i& x1_return_upper) {
     __m128i x4, x5;
     const __m128i xMaskLowByte = _mm_srli_epi16(_mm_cmpeq_epi8(_mm_setzero_si128(), _mm_setzero_si128()), 8);
@@ -117,7 +130,7 @@ static __forceinline void convert_yuy2_to_nv12_simd(void *frame, CONVERT_CF_DATA
             //-----------1行目---------------
             x0 = _mm_loadu_si128((const __m128i *)(p+ 0));
             x1 = _mm_loadu_si128((const __m128i *)(p+16));
-            
+
             separate_low_up(x0, x1);
             x3 = x1;
 
@@ -127,7 +140,7 @@ static __forceinline void convert_yuy2_to_nv12_simd(void *frame, CONVERT_CF_DATA
             //-----------2行目---------------
             x0 = _mm_loadu_si128((const __m128i *)(pw+ 0));
             x1 = _mm_loadu_si128((const __m128i *)(pw+16));
-            
+
             separate_low_up(x0, x1);
 
             _mm_store_switch_si128((__m128i *)(Y + width + x), x0);
@@ -185,7 +198,7 @@ static __forceinline void convert_yuy2_to_nv12_i_simd(void *frame, CONVERT_CF_DA
                 //-----------    1+i行目   ---------------
                 x0 = _mm_loadu_si128((const __m128i *)(p+ 0));
                 x1 = _mm_loadu_si128((const __m128i *)(p+16));
-            
+
                 separate_low_up(x0, x1);
                 x3 = x1;
 
@@ -195,7 +208,7 @@ static __forceinline void convert_yuy2_to_nv12_i_simd(void *frame, CONVERT_CF_DA
                 //-----------3+i行目---------------
                 x0 = _mm_loadu_si128((const __m128i *)(pw+ 0));
                 x1 = _mm_loadu_si128((const __m128i *)(pw+16));
-            
+
                 separate_low_up(x0, x1);
 
                 _mm_store_switch_si128((__m128i *)(Y + (width<<1) + x), x0);
@@ -228,7 +241,7 @@ static void convert_yuy2_to_yv12_simd(void *frame, CONVERT_CF_DATA *pixel_data, 
 
             x0 = _mm_loadu_si128((const __m128i *)(p+ 0));
             x1 = _mm_loadu_si128((const __m128i *)(p+16));
-            
+
             separate_low_up(x0, x1);
             x3 = x1;
 
@@ -236,7 +249,7 @@ static void convert_yuy2_to_yv12_simd(void *frame, CONVERT_CF_DATA *pixel_data, 
 
             x0 = _mm_loadu_si128((const __m128i *)(p+32));
             x1 = _mm_loadu_si128((const __m128i *)(p+48));
-            
+
             separate_low_up(x0, x1);
             x6 = x1;
 
@@ -244,7 +257,7 @@ static void convert_yuy2_to_yv12_simd(void *frame, CONVERT_CF_DATA *pixel_data, 
 
             x0 = _mm_loadu_si128((const __m128i *)(pw+ 0));
             x1 = _mm_loadu_si128((const __m128i *)(pw+16));
-            
+
             separate_low_up(x0, x1);
 
             _mm_store_switch_si128((__m128i *)(Y + width + x), x0);
@@ -253,16 +266,16 @@ static void convert_yuy2_to_yv12_simd(void *frame, CONVERT_CF_DATA *pixel_data, 
 
             x0 = _mm_loadu_si128((const __m128i *)(pw+32));
             x1 = _mm_loadu_si128((const __m128i *)(pw+48));
-            
+
             separate_low_up(x0, x1);
 
             _mm_store_switch_si128((__m128i *)(Y + width + x + 16), x0);
 
             x0 = x3;
             x1 = _mm_avg_epu8(x1, x6);
-            
+
             separate_low_up(x0, x1);
-            
+
             _mm_store_switch_si128((__m128i *)(U + (x>>1)), x0);
             _mm_store_switch_si128((__m128i *)(V + (x>>1)), x1);
         }
@@ -297,7 +310,7 @@ static __forceinline void convert_yuy2_to_yv12_i_simd(void *frame, CONVERT_CF_DA
 
                 x0 = _mm_loadu_si128((const __m128i *)(p+32));
                 x1 = _mm_loadu_si128((const __m128i *)(p+48));
-            
+
                 separate_low_up(x0, x1);
                 x6 = x1;
 
@@ -307,25 +320,25 @@ static __forceinline void convert_yuy2_to_yv12_i_simd(void *frame, CONVERT_CF_DA
                 //-----------3+i行目---------------
                 x0 = _mm_loadu_si128((const __m128i *)(pw+ 0));
                 x1 = _mm_loadu_si128((const __m128i *)(pw+16));
-            
+
                 separate_low_up(x0, x1);
 
                 _mm_store_switch_si128((__m128i *)(Y + (width<<1) + x), x0);
-                
+
                 x3 = yuv422_to_420_i_interpolate(x3, x1, i);
 
-                x0 = _mm_loadu_si128((const __m128i *)(pw+ 0));
-                x1 = _mm_loadu_si128((const __m128i *)(pw+16));
-            
+                x0 = _mm_loadu_si128((const __m128i *)(pw+32));
+                x1 = _mm_loadu_si128((const __m128i *)(pw+48));
+
                 separate_low_up(x0, x1);
 
                 _mm_store_switch_si128((__m128i *)(Y + (width<<1) + x + 16), x0);
-                
+
                 x0 = x3;
                 x1 = yuv422_to_420_i_interpolate(x6, x1, i);
-            
+
                 separate_low_up(x0, x1);
-            
+
                 _mm_store_switch_si128((__m128i *)(U + (x>>1)), x0);
                 _mm_store_switch_si128((__m128i *)(V + (x>>1)), x1);
             }
@@ -343,7 +356,7 @@ static void convert_yuy2_to_nv16_simd(void *pixel, CONVERT_CF_DATA *pixel_data, 
     for (; p < p_fin; p += 32, dst_Y += 16, dst_C += 16) {
         x0 = _mm_loadu_si128((__m128i *)(p+ 0));
         x1 = _mm_loadu_si128((__m128i *)(p+16));
-        
+
         separate_low_up(x0, x1);
 
         _mm_store_switch_si128((__m128i *)dst_Y, x0);
@@ -386,7 +399,7 @@ static __forceinline void gather_y_uv_from_yc48(__m128i& x0, __m128i& x1, __m128
 #endif //USE_SSE41
 }
 
-static __forceinline __m128i convert_y_range_from_yc48(__m128i x0, const __m128i& xC_Y_MA_16, int Y_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one) {
+static __forceinline __m128i convert_y_range_from_yc48(__m128i x0, const __m128i& xC_Y_MA_16, int Y_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one, const __m128i& xC_max) {
     __m128i x7;
     x7 = _mm_unpackhi_epi16(x0, xC_pw_one);
     x0 = _mm_unpacklo_epi16(x0, xC_pw_one);
@@ -400,9 +413,11 @@ static __forceinline __m128i convert_y_range_from_yc48(__m128i x0, const __m128i
 
     x0 = _mm_packus_epi32_simd(x0, x7);
 
+    x0 = _mm_min_epu16_simd(x0, xC_max);
+
     return x0;
 }
-static __forceinline __m128i convert_uv_range_after_adding_offset(__m128i x0, const __m128i& xC_UV_MA_16, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one) {
+static __forceinline __m128i convert_uv_range_after_adding_offset(__m128i x0, const __m128i& xC_UV_MA_16, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one, const __m128i& xC_max) {
     __m128i x1;
     x1 = _mm_unpackhi_epi16(x0, xC_pw_one);
     x0 = _mm_unpacklo_epi16(x0, xC_pw_one);
@@ -416,20 +431,22 @@ static __forceinline __m128i convert_uv_range_after_adding_offset(__m128i x0, co
 
     x0 = _mm_packus_epi32_simd(x0, x1);
 
+    x0 = _mm_min_epu16_simd(x0, xC_max);
+
     return x0;
 }
-static __forceinline __m128i convert_uv_range_from_yc48(__m128i x0, const __m128i& xC_UV_OFFSET_x1, const __m128i& xC_UV_MA_16, int UV_RSH_16, __m128i xC_YCC, const __m128i& xC_pw_one) {
+static __forceinline __m128i convert_uv_range_from_yc48(__m128i x0, const __m128i& xC_UV_OFFSET_x1, const __m128i& xC_UV_MA_16, int UV_RSH_16, __m128i xC_YCC, const __m128i& xC_pw_one, const __m128i& xC_max) {
     x0 = _mm_add_epi16(x0, xC_UV_OFFSET_x1);
 
-    return convert_uv_range_after_adding_offset(x0, xC_UV_MA_16, UV_RSH_16, xC_YCC, xC_pw_one);
+    return convert_uv_range_after_adding_offset(x0, xC_UV_MA_16, UV_RSH_16, xC_YCC, xC_pw_one, xC_max);
 }
-static __forceinline __m128i convert_uv_range_from_yc48_yuv420p(__m128i x0, __m128i x1, const __m128i& xC_UV_OFFSET_x2, const __m128i& xC_UV_MA_16, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one) {
+static __forceinline __m128i convert_uv_range_from_yc48_yuv420p(__m128i x0, __m128i x1, const __m128i& xC_UV_OFFSET_x2, const __m128i& xC_UV_MA_16, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one, const __m128i& xC_max) {
     x0 = _mm_add_epi16(x0, x1);
     x0 = _mm_add_epi16(x0, xC_UV_OFFSET_x2);
 
-    return convert_uv_range_after_adding_offset(x0, xC_UV_MA_16, UV_RSH_16, xC_YCC, xC_pw_one);
+    return convert_uv_range_after_adding_offset(x0, xC_UV_MA_16, UV_RSH_16, xC_YCC, xC_pw_one, xC_max);
 }
-static __forceinline __m128i convert_uv_range_from_yc48_420i(__m128i x0, __m128i x1, const __m128i& xC_UV_OFFSET_x1, const __m128i& xC_UV_MA_16_0, const __m128i& xC_UV_MA_16_1, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one) {
+static __forceinline __m128i convert_uv_range_from_yc48_420i(__m128i x0, __m128i x1, const __m128i& xC_UV_OFFSET_x1, const __m128i& xC_UV_MA_16_0, const __m128i& xC_UV_MA_16_1, int UV_RSH_16, const __m128i& xC_YCC, const __m128i& xC_pw_one, const __m128i& xC_max) {
     __m128i x2, x3, x6, x7;
     x0 = _mm_add_epi16(x0, xC_UV_OFFSET_x1);
     x1 = _mm_add_epi16(x1, xC_UV_OFFSET_x1);
@@ -452,18 +469,21 @@ static __forceinline __m128i convert_uv_range_from_yc48_420i(__m128i x0, __m128i
 
     x0 = _mm_packus_epi32_simd(x0, x7);
 
+    x0 = _mm_min_epu16_simd(x0, xC_max);
+
     return x0;
 }
 
 template <BOOL aligned_store>
-static __forceinline void convert_yc48_to_nv12_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+static __forceinline void convert_yc48_to_nv12_highbit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height, const int LSFT_YCC, const __m128i &xC_Y_L_MA, const int Y_L_RSH, const __m128i &xC_UV_L_MA_420P, int UV_L_RSH_420P, int bitdepthMax) {
     int x, y;
     short *dst_Y = (short *)pixel_data->data[0];
     short *dst_C = (short *)pixel_data->data[1];
     short *ycp, *ycpw;
     short *Y = NULL, *C = NULL;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
-    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
+    const __m128i xC_max = _mm_set1_epi16((short)bitdepthMax);
+    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC);
     __m128i x0, x1, x2, x3;
     for (y = 0; y < height; y += 2) {
         ycp = (short*)pixel + width * y * 3;
@@ -478,16 +498,16 @@ static __forceinline void convert_yc48_to_nv12_16bit_simd(void *pixel, CONVERT_C
             gather_y_uv_from_yc48(x1, x2, x3);
             x0 = x2;
 
-            _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+            _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
             x1 = _mm_loadu_si128((__m128i *)(ycpw +  0));
             x2 = _mm_loadu_si128((__m128i *)(ycpw +  8));
             x3 = _mm_loadu_si128((__m128i *)(ycpw + 16));
             gather_y_uv_from_yc48(x1, x2, x3);
 
-            _mm_store_switch_si128((__m128i *)(Y + x + width), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+            _mm_store_switch_si128((__m128i *)(Y + x + width), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
-            x0 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_16_420P, UV_L_RSH_16_420P, xC_YCC, xC_pw_one);
+            x0 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_420P, UV_L_RSH_420P, xC_YCC, xC_pw_one, xC_max);
 
             _mm_store_switch_si128((__m128i *)(C + x), x0);
         }
@@ -495,14 +515,25 @@ static __forceinline void convert_yc48_to_nv12_16bit_simd(void *pixel, CONVERT_C
 }
 
 template <BOOL aligned_store>
-static __forceinline void convert_yc48_to_nv12_i_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+static __forceinline void convert_yc48_to_nv12_10bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_nv12_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_10, xC_Y_L_MA_10, Y_L_RSH_10, xC_UV_L_MA_10_420P, UV_L_RSH_10_420P, LIMIT_10);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_nv12_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_nv12_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_16, xC_Y_L_MA_16, Y_L_RSH_16, xC_UV_L_MA_16_420P, UV_L_RSH_16_420P, LIMIT_10);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_nv12_i_highbit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height, const int LSFT_YCC, const __m128i &xC_Y_L_MA, const int Y_L_RSH, const __m128i xC_UV_L_MA_420I[2], int UV_L_RSH_420I, int bitdepthMax) {
     int x, y, i;
     short *dst_Y = (short *)pixel_data->data[0];
     short *dst_C = (short *)pixel_data->data[1];
     short *ycp, *ycpw;
     short *Y = NULL, *C = NULL;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
-    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
+    const __m128i xC_max = _mm_set1_epi16((short)bitdepthMax);
+    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC);
     __m128i x0, x1, x2, x3;
     for (y = 0; y < height; y += 4) {
         for (i = 0; i < 2; i++) {
@@ -517,22 +548,32 @@ static __forceinline void convert_yc48_to_nv12_i_16bit_simd(void *pixel, CONVERT
                 _mm_prefetch((const char *)ycpw, _MM_HINT_T1);
                 gather_y_uv_from_yc48(x1, x2, x3);
                 x0 = x2;
-                _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
                 x1 = _mm_loadu_si128((__m128i *)(ycpw +  0));
                 x2 = _mm_loadu_si128((__m128i *)(ycpw +  8));
                 x3 = _mm_loadu_si128((__m128i *)(ycpw + 16));
                 gather_y_uv_from_yc48(x1, x2, x3);
-                _mm_store_switch_si128((__m128i *)(Y + x + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
-                _mm_store_switch_si128((__m128i *)(C + x), convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_420I(i), xC_UV_L_MA_16_420I((i+1)&0x01), UV_L_RSH_16_420I, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(C + x), convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_420I[2*i], xC_UV_L_MA_420I[((i+1)&0x01)*2], UV_L_RSH_420I, xC_YCC, xC_pw_one, xC_max));
             }
         }
     }
 }
 
 template <BOOL aligned_store>
-static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+static __forceinline void convert_yc48_to_nv12_i_10bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_nv12_i_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_10, xC_Y_L_MA_10, Y_L_RSH_10, (const __m128i *)Array_UV_L_MA_10_420I, UV_L_RSH_10_420I, LIMIT_10);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_nv12_i_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_nv12_i_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_16, xC_Y_L_MA_16, Y_L_RSH_16, (const __m128i *)Array_UV_L_MA_16_420I, UV_L_RSH_16_420I, LIMIT_16);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_yv12_highbit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height, const int LSFT_YCC, const __m128i &xC_Y_L_MA, const int Y_L_RSH, const __m128i &xC_UV_L_MA_420P, int UV_L_RSH_420P, int bitdepthMax) {
     int x, y;
     short *dst_Y = (short *)pixel_data->data[0];
     short *dst_U = (short *)pixel_data->data[1];
@@ -540,7 +581,8 @@ static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_C
     short *ycp, *ycpw;
     short *Y = NULL, *U = NULL, *V = NULL;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
-    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
+    const __m128i xC_max = _mm_set1_epi16((short)bitdepthMax);
+    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC);
     __m128i x0, x1, x2, x3, x4;
     for (y = 0; y < height; y += 2) {
         ycp = (short*)pixel + width * y * 3;
@@ -556,17 +598,17 @@ static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_C
             gather_y_uv_from_yc48(x1, x2, x3);
             x0 = x2;
 
-            _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+            _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
             x1 = _mm_loadu_si128((__m128i *)(ycpw +  0));
             x2 = _mm_loadu_si128((__m128i *)(ycpw +  8));
             x3 = _mm_loadu_si128((__m128i *)(ycpw + 16));
             gather_y_uv_from_yc48(x1, x2, x3);
 
-            _mm_store_switch_si128((__m128i *)(Y + x + width), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
-            
-            x4 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_16_420P, UV_L_RSH_16_420P, xC_YCC, xC_pw_one);
-            
+            _mm_store_switch_si128((__m128i *)(Y + x + width), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
+
+            x4 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_420P, UV_L_RSH_420P, xC_YCC, xC_pw_one, xC_max);
+
             x1 = _mm_loadu_si128((__m128i *)(ycp + 24));
             x2 = _mm_loadu_si128((__m128i *)(ycp + 32));
             x3 = _mm_loadu_si128((__m128i *)(ycp + 40));
@@ -574,19 +616,19 @@ static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_C
             gather_y_uv_from_yc48(x1, x2, x3);
             x0 = x2;
 
-            _mm_store_switch_si128((__m128i *)(Y + x + 8), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+            _mm_store_switch_si128((__m128i *)(Y + x + 8), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
             x1 = _mm_loadu_si128((__m128i *)(ycpw + 24));
             x2 = _mm_loadu_si128((__m128i *)(ycpw + 32));
             x3 = _mm_loadu_si128((__m128i *)(ycpw + 40));
             gather_y_uv_from_yc48(x1, x2, x3);
 
-            _mm_store_switch_si128((__m128i *)(Y + x + 8 + width), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+            _mm_store_switch_si128((__m128i *)(Y + x + 8 + width), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
-            x0 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_16_420P, UV_L_RSH_16_420P, xC_YCC, xC_pw_one);
+            x0 = convert_uv_range_from_yc48_yuv420p(x0, x2, _mm_set1_epi16(UV_OFFSET_x2), xC_UV_L_MA_420P, UV_L_RSH_420P, xC_YCC, xC_pw_one, xC_max);
 
             separate_low_up_16bit(x4, x0);
-            
+
             _mm_store_switch_si128((__m128i *)(U + (x>>1)), x4);
             _mm_store_switch_si128((__m128i *)(V + (x>>1)), x0);
         }
@@ -594,7 +636,17 @@ static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_C
 }
 
 template <BOOL aligned_store>
-static __forceinline void convert_yc48_to_yv12_i_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+static __forceinline void convert_yc48_to_yv12_10bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_yv12_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_10, xC_Y_L_MA_10, Y_L_RSH_10, xC_UV_L_MA_10_420P, UV_L_RSH_10_420P, LIMIT_10);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_yv12_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_yv12_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_16, xC_Y_L_MA_16, Y_L_RSH_16, xC_UV_L_MA_16_420P, UV_L_RSH_16_420P, LIMIT_16);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_yv12_i_highbit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height, const int LSFT_YCC, const __m128i &xC_Y_L_MA, const int Y_L_RSH, const __m128i xC_UV_L_MA_420I[2], int UV_L_RSH_420I, int bitdepthMax) {
     int x, y, i;
     short *dst_Y = (short *)pixel_data->data[0];
     short *dst_U = (short *)pixel_data->data[1];
@@ -602,7 +654,8 @@ static __forceinline void convert_yc48_to_yv12_i_16bit_simd(void *pixel, CONVERT
     short *ycp, *ycpw;
     short *Y = NULL, *U = NULL, *V = NULL;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
-    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
+    const __m128i xC_max = _mm_set1_epi16((short)bitdepthMax);
+    const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC);
     __m128i x0, x1, x2, x3, x4;
     for (y = 0; y < height; y += 4) {
         for (i = 0; i < 2; i++) {
@@ -618,39 +671,49 @@ static __forceinline void convert_yc48_to_yv12_i_16bit_simd(void *pixel, CONVERT
                 _mm_prefetch((const char *)ycpw, _MM_HINT_T1);
                 gather_y_uv_from_yc48(x1, x2, x3);
                 x0 = x2;
-                _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
                 x1 = _mm_loadu_si128((__m128i *)(ycpw +  0));
                 x2 = _mm_loadu_si128((__m128i *)(ycpw +  8));
                 x3 = _mm_loadu_si128((__m128i *)(ycpw + 16));
                 gather_y_uv_from_yc48(x1, x2, x3);
-                _mm_store_switch_si128((__m128i *)(Y + x + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
-                x4 = convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_420I(i), xC_UV_L_MA_16_420I((i+1)&0x01), UV_L_RSH_16_420I, xC_YCC, xC_pw_one);
-                
+                x4 = convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_420I[2*i], xC_UV_L_MA_420I[((i+1)&0x01)*2], UV_L_RSH_420I, xC_YCC, xC_pw_one, xC_max);
+
                 x1 = _mm_loadu_si128((__m128i *)(ycp + 24));
                 x2 = _mm_loadu_si128((__m128i *)(ycp + 32));
                 x3 = _mm_loadu_si128((__m128i *)(ycp + 40));
                 _mm_prefetch((const char *)ycpw, _MM_HINT_T1);
                 gather_y_uv_from_yc48(x1, x2, x3);
                 x0 = x2;
-                _mm_store_switch_si128((__m128i *)(Y + x + 8), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x + 8), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
                 x1 = _mm_loadu_si128((__m128i *)(ycpw + 24));
                 x2 = _mm_loadu_si128((__m128i *)(ycpw + 32));
                 x3 = _mm_loadu_si128((__m128i *)(ycpw + 40));
                 gather_y_uv_from_yc48(x1, x2, x3);
-                _mm_store_switch_si128((__m128i *)(Y + x + 8 + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA_16, Y_L_RSH_16, xC_YCC, xC_pw_one));
+                _mm_store_switch_si128((__m128i *)(Y + x + 8 + width*2), convert_y_range_from_yc48(x1, xC_Y_L_MA, Y_L_RSH, xC_YCC, xC_pw_one, xC_max));
 
-                x0 = convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_420I(i), xC_UV_L_MA_16_420I((i+1)&0x01), UV_L_RSH_16_420I, xC_YCC, xC_pw_one);
-                 
+                x0 = convert_uv_range_from_yc48_420i(x0, x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_420I[2*i], xC_UV_L_MA_420I[((i+1)&0x01)*2], UV_L_RSH_420I, xC_YCC, xC_pw_one, xC_max);
+
                 separate_low_up_16bit(x4, x0);
-                
+
                 _mm_store_switch_si128((__m128i *)(U + x), x4);
                 _mm_store_switch_si128((__m128i *)(V + x), x0);
             }
         }
     }
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_yv12_i_10bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_yv12_i_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_10, xC_Y_L_MA_10, Y_L_RSH_10, (const __m128i *)Array_UV_L_MA_10_420I, UV_L_RSH_10_420I, LIMIT_10);
+}
+
+template <BOOL aligned_store>
+static __forceinline void convert_yc48_to_yv12_i_16bit_simd(void *pixel, CONVERT_CF_DATA *pixel_data, const int width, const int height) {
+    convert_yc48_to_yv12_i_highbit_simd<aligned_store>(pixel, pixel_data, width, height, LSFT_YCC_16, xC_Y_L_MA_16, Y_L_RSH_16, (const __m128i *)Array_UV_L_MA_16_420I, UV_L_RSH_16_420I, LIMIT_16);
 }
 
 template <BOOL aligned_store>
@@ -660,6 +723,7 @@ static __forceinline void convert_yc48_to_nv16_16bit_simd(void *pixel, CONVERT_C
     short *ycp = (short *)pixel;
     short * const ycp_fin = ycp + width * height * 3;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
+    const __m128i xC_max = _mm_set1_epi16(*(short*)&LIMIT_16);
     const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
     __m128i x1, x2, x3;
     for (; ycp < ycp_fin; ycp += 24, dst_Y += 8, dst_C += 8) {
@@ -667,8 +731,8 @@ static __forceinline void convert_yc48_to_nv16_16bit_simd(void *pixel, CONVERT_C
         x2 = _mm_loadu_si128((__m128i *)(ycp +  8));
         x3 = _mm_loadu_si128((__m128i *)(ycp + 16));
         gather_y_uv_from_yc48(x1, x2, x3);
-        _mm_store_switch_si128((__m128i *)dst_Y, convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one));
-        _mm_store_switch_si128((__m128i *)dst_C, convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one));
+        _mm_store_switch_si128((__m128i *)dst_Y, convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one, xC_max));
+        _mm_store_switch_si128((__m128i *)dst_C, convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max));
     }
 }
 
@@ -700,7 +764,7 @@ static __forceinline void gather_y_u_v_from_yc48(__m128i& x0, __m128i& x1, __m12
 
     x6 = _mm_unpacklo_epi16(x5, x5);    //11663300
     x7 = _mm_unpackhi_epi16(x5, x5);    //55227744
-    
+
     static const _declspec(align(16)) USHORT maskY_shuffle[8] = { 0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000 };
     xMask = _mm_load_si128((__m128i*)maskY_shuffle);
     x5 = select_by_mask(x7, x6, xMask);                 //51627340
@@ -711,7 +775,7 @@ static __forceinline void gather_y_u_v_from_yc48(__m128i& x0, __m128i& x1, __m12
 
     //select uv
     xMask = _mm_srli_si128(_mm_cmpeq_epi8(xMask, xMask), 8); //0x00000000, 0x00000000, 0xffffffff, 0xffffffff
-    x6 = select_by_mask(_mm_srli_si128(x1, 2), _mm_srli_si128(x2, 2), xMask); //x  x v4 u4 v6 u6 x  x 
+    x6 = select_by_mask(_mm_srli_si128(x1, 2), _mm_srli_si128(x2, 2), xMask); //x  x v4 u4 v6 u6 x  x
     x7 = select_by_mask(x0, x1, xMask);               //x  x  v1 u1 v3 u3 x  x
     xMask = _mm_slli_si128(xMask, 4);                 //0x00000000, 0xffffffff, 0xffffffff, 0x00000000
     x0 = _mm_alignr_epi8_simd(x1, x0, 2);             //v2 u2  x  x  x  x v0 u0
@@ -743,6 +807,7 @@ static __forceinline void convert_yc48_to_yuv444_simd(void *pixel, CONVERT_CF_DA
     short *ycp;
     short *const ycp_fin = (short *)pixel + width * height * 3;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
+    const __m128i xC_max = _mm_set1_epi16(*(short*)&LIMIT_16);
     const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
     __m128i x1, x2, x3, xY, xU, xV;
     for (ycp = (short *)pixel; ycp < ycp_fin; ycp += 48, Y += 16, U += 16, V += 16) {
@@ -751,9 +816,9 @@ static __forceinline void convert_yc48_to_yuv444_simd(void *pixel, CONVERT_CF_DA
         x3 = _mm_loadu_si128((__m128i *)(ycp + 16));
         gather_y_u_v_from_yc48(x1, x2, x3);
 
-        x1 = convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one);
-        x2 = convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one);
-        x3 = convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one);
+        x1 = convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one, xC_max);
+        x2 = convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max);
+        x3 = convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max);
         xY = _mm_srli_epi16(x1, 8);
         xU = _mm_srli_epi16(x2, 8);
         xV = _mm_srli_epi16(x3, 8);
@@ -763,9 +828,9 @@ static __forceinline void convert_yc48_to_yuv444_simd(void *pixel, CONVERT_CF_DA
         x3 = _mm_loadu_si128((__m128i *)(ycp + 40));
         gather_y_u_v_from_yc48(x1, x2, x3);
 
-        x1 = convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one);
-        x2 = convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one);
-        x3 = convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one);
+        x1 = convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one, xC_max);
+        x2 = convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max);
+        x3 = convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max);
         x1 = _mm_srli_epi16(x1, 8);
         x2 = _mm_srli_epi16(x2, 8);
         x3 = _mm_srli_epi16(x3, 8);
@@ -787,6 +852,7 @@ static __forceinline void convert_yc48_to_yuv444_16bit_simd(void *pixel, CONVERT
     short *ycp;
     short *const ycp_fin = (short *)pixel + width * height * 3;
     const __m128i xC_pw_one = _mm_set1_epi16(1);
+    const __m128i xC_max = _mm_set1_epi16(*(short*)&LIMIT_16);
     const __m128i xC_YCC = _mm_set1_epi32(1<<LSFT_YCC_16);
     __m128i x1, x2, x3;
     for (ycp = (short *)pixel; ycp < ycp_fin; ycp += 24, Y += 8, U += 8, V += 8) {
@@ -794,9 +860,9 @@ static __forceinline void convert_yc48_to_yuv444_16bit_simd(void *pixel, CONVERT
         x2 = _mm_loadu_si128((__m128i *)(ycp +  8));
         x3 = _mm_loadu_si128((__m128i *)(ycp + 16));
         gather_y_u_v_from_yc48(x1, x2, x3);
-        _mm_store_switch_si128((__m128i *)Y, convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one));
-        _mm_store_switch_si128((__m128i *)U, convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one));
-        _mm_store_switch_si128((__m128i *)V, convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one));
+        _mm_store_switch_si128((__m128i *)Y, convert_y_range_from_yc48( x1,                                xC_Y_L_MA_16,      Y_L_RSH_16,     xC_YCC, xC_pw_one, xC_max));
+        _mm_store_switch_si128((__m128i *)U, convert_uv_range_from_yc48(x2, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max));
+        _mm_store_switch_si128((__m128i *)V, convert_uv_range_from_yc48(x3, _mm_set1_epi16(UV_OFFSET_x1), xC_UV_L_MA_16_444, UV_L_RSH_16_444, xC_YCC, xC_pw_one, xC_max));
     }
 }
 
@@ -821,16 +887,16 @@ static __forceinline void convert_lw48_to_nv12_16bit_simd(void *pixel, CONVERT_C
             x0 = x2;
 
             _mm_store_switch_si128((__m128i*)dst_y, x1);
-        
+
             x1 = _mm_load_si128((__m128i *)(ycp_w +  0));
             x2 = _mm_load_si128((__m128i *)(ycp_w + 16));
             x3 = _mm_load_si128((__m128i *)(ycp_w + 32));
             gather_y_uv_from_yc48(x1, x2, x3);
-        
+
             _mm_store_switch_si128((__m128i*)(dst_y + width), x1);
-        
+
             x0 = _mm_avg_epu16(x0, x2);
-        
+
             _mm_store_switch_si128((__m128i*)dst_c, x0);
         }
     }
@@ -856,12 +922,12 @@ static __forceinline void convert_lw48_to_nv12_i_16bit_simd(void *pixel, CONVERT
                 x0 = x2;
 
                 _mm_store_switch_si128((__m128i*)dst_y, x1);
-        
+
                 x1 = _mm_load_si128((__m128i *)(ycp_w +  0));
                 x2 = _mm_load_si128((__m128i *)(ycp_w + 16));
                 x3 = _mm_load_si128((__m128i *)(ycp_w + 32));
                 gather_y_uv_from_yc48(x1, x2, x3);
-        
+
                 _mm_store_switch_si128((__m128i*)(dst_y + width*2), x1);
 
                 x1 = _mm_unpacklo_epi16(x0, x2);
@@ -871,7 +937,7 @@ static __forceinline void convert_lw48_to_nv12_i_16bit_simd(void *pixel, CONVERT
                 x1 = _mm_srli_epi32(x1, 2);
                 x0 = _mm_srli_epi32(x0, 2);
                 x1 = _mm_packus_epi32_simd(x1, x0);
-        
+
                 _mm_store_switch_si128((__m128i*)dst_c, x1);
             }
         }

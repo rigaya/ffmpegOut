@@ -30,6 +30,7 @@
 #include "auo_frm.h"
 #include "auo_util.h"
 #include "auo_settings.h"
+#include "auo_mes.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -43,7 +44,7 @@ using namespace System::Drawing;
 #pragma warning( push )
 #pragma warning( disable: 4100 )
 
-namespace ffmpegOut {
+namespace AUO_NAME_R {
 
     /// <summary>
     /// frmBitrateCalculator の概要
@@ -195,22 +196,22 @@ namespace ffmpegOut {
             this->fbcLBMovieFrameRate = (gcnew System::Windows::Forms::Label());
             this->fbcBTChangeLengthMode = (gcnew System::Windows::Forms::Button());
             this->fbcGroupBoxVideoLength = (gcnew System::Windows::Forms::GroupBox());
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthHour))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthMin))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthSec))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateVideo))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateAudio))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateSum))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthHour))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthMin))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthSec))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateVideo))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateAudio))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateSum))->BeginInit();
             this->fbcPNMovieTime->SuspendLayout();
             this->fbcPNMovieFrames->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUMovieFrames))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUMovieFrames))->BeginInit();
             this->fbcGroupBoxVideoLength->SuspendLayout();
             this->SuspendLayout();
             // 
             // fbcNULengthHour
             // 
             this->fbcNULengthHour->Location = System::Drawing::Point(75, 9);
-            this->fbcNULengthHour->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {120, 0, 0, 0});
+            this->fbcNULengthHour->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 120, 0, 0, 0 });
             this->fbcNULengthHour->Name = L"fbcNULengthHour";
             this->fbcNULengthHour->Size = System::Drawing::Size(55, 21);
             this->fbcNULengthHour->TabIndex = 0;
@@ -220,7 +221,7 @@ namespace ffmpegOut {
             // fbcNULengthMin
             // 
             this->fbcNULengthMin->Location = System::Drawing::Point(166, 9);
-            this->fbcNULengthMin->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {59, 0, 0, 0});
+            this->fbcNULengthMin->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 59, 0, 0, 0 });
             this->fbcNULengthMin->Name = L"fbcNULengthMin";
             this->fbcNULengthMin->Size = System::Drawing::Size(55, 21);
             this->fbcNULengthMin->TabIndex = 1;
@@ -230,7 +231,7 @@ namespace ffmpegOut {
             // fbcNULengthSec
             // 
             this->fbcNULengthSec->Location = System::Drawing::Point(248, 9);
-            this->fbcNULengthSec->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {59, 0, 0, 0});
+            this->fbcNULengthSec->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 59, 0, 0, 0 });
             this->fbcNULengthSec->Name = L"fbcNULengthSec";
             this->fbcNULengthSec->Size = System::Drawing::Size(55, 21);
             this->fbcNULengthSec->TabIndex = 2;
@@ -303,7 +304,7 @@ namespace ffmpegOut {
             // fbcNUBitrateVideo
             // 
             this->fbcNUBitrateVideo->Location = System::Drawing::Point(132, 123);
-            this->fbcNUBitrateVideo->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {128000, 0, 0, 0});
+            this->fbcNUBitrateVideo->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 65536000, 0, 0, 0 });
             this->fbcNUBitrateVideo->Name = L"fbcNUBitrateVideo";
             this->fbcNUBitrateVideo->Size = System::Drawing::Size(65, 21);
             this->fbcNUBitrateVideo->TabIndex = 4;
@@ -313,7 +314,7 @@ namespace ffmpegOut {
             // fbcNUBitrateAudio
             // 
             this->fbcNUBitrateAudio->Location = System::Drawing::Point(132, 156);
-            this->fbcNUBitrateAudio->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1536, 0, 0, 0});
+            this->fbcNUBitrateAudio->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 13824, 0, 0, 0 });
             this->fbcNUBitrateAudio->Name = L"fbcNUBitrateAudio";
             this->fbcNUBitrateAudio->Size = System::Drawing::Size(65, 21);
             this->fbcNUBitrateAudio->TabIndex = 5;
@@ -355,7 +356,6 @@ namespace ffmpegOut {
             this->fbcBTVBApply->TabIndex = 8;
             this->fbcBTVBApply->Text = L"映像ビットレートを反映";
             this->fbcBTVBApply->UseVisualStyleBackColor = true;
-            this->fbcBTVBApply->Enabled = false;
             // 
             // fbcBTABApply
             // 
@@ -388,7 +388,7 @@ namespace ffmpegOut {
             // fbcNUBitrateSum
             // 
             this->fbcNUBitrateSum->Location = System::Drawing::Point(132, 187);
-            this->fbcNUBitrateSum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {128000, 0, 0, 0});
+            this->fbcNUBitrateSum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 65536000, 0, 0, 0 });
             this->fbcNUBitrateSum->Name = L"fbcNUBitrateSum";
             this->fbcNUBitrateSum->Size = System::Drawing::Size(65, 21);
             this->fbcNUBitrateSum->TabIndex = 6;
@@ -466,7 +466,7 @@ namespace ffmpegOut {
             // fbcNUMovieFrames
             // 
             this->fbcNUMovieFrames->Location = System::Drawing::Point(87, 9);
-            this->fbcNUMovieFrames->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1280000, 0, 0, 0});
+            this->fbcNUMovieFrames->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1280000, 0, 0, 0 });
             this->fbcNUMovieFrames->Name = L"fbcNUMovieFrames";
             this->fbcNUMovieFrames->Size = System::Drawing::Size(72, 21);
             this->fbcNUMovieFrames->TabIndex = 7;
@@ -534,7 +534,7 @@ namespace ffmpegOut {
             this->Controls->Add(this->fbcLBMovieSize);
             this->Controls->Add(this->fbcLBAudioBitrate);
             this->Controls->Add(this->fbcLBVideoBitrate);
-            this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            this->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(0)));
             this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedDialog;
             this->KeyPreview = true;
@@ -543,20 +543,20 @@ namespace ffmpegOut {
             this->Name = L"frmBitrateCalculator";
             this->ShowIcon = false;
             this->Text = L"簡易ビットレート計算機";
-            this->Load += gcnew System::EventHandler(this, &frmBitrateCalculator::frmBitrateCalculator_Load);
             this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &frmBitrateCalculator::frmBitrateCalculator_FormClosing);
+            this->Load += gcnew System::EventHandler(this, &frmBitrateCalculator::frmBitrateCalculator_Load);
             this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &frmBitrateCalculator::frmBitrateCalculator_KeyDown);
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthHour))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthMin))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNULengthSec))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateVideo))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateAudio))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUBitrateSum))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthHour))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthMin))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNULengthSec))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateVideo))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateAudio))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUBitrateSum))->EndInit();
             this->fbcPNMovieTime->ResumeLayout(false);
             this->fbcPNMovieTime->PerformLayout();
             this->fbcPNMovieFrames->ResumeLayout(false);
             this->fbcPNMovieFrames->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->fbcNUMovieFrames))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize ^>(this->fbcNUMovieFrames))->EndInit();
             this->fbcGroupBoxVideoLength->ResumeLayout(false);
             this->ResumeLayout(false);
             this->PerformLayout();
@@ -575,12 +575,36 @@ namespace ffmpegOut {
         System::Void SetAllMouseMove(Control ^top, const AuoTheme themeTo);
         System::Void fbcMouseEnter_SetColor(System::Object^  sender, System::EventArgs^  e);
         System::Void fbcMouseLeave_SetColor(System::Object^  sender, System::EventArgs^  e);
+    private:
+        System::Void LoadLangText() {
+            LOAD_CLI_MAIN_TEXT(fbcMain);
+            LOAD_CLI_TEXT(label1);
+            LOAD_CLI_TEXT(label2);
+            LOAD_CLI_TEXT(label3);
+            LOAD_CLI_TEXT(label4);
+            LOAD_CLI_TEXT(fbcLBVideoBitrate);
+            LOAD_CLI_TEXT(fbcLBAudioBitrate);
+            LOAD_CLI_TEXT(fbcLBMovieSize);
+            LOAD_CLI_TEXT(fbcLBVideoBitrateKbps);
+            LOAD_CLI_TEXT(fbcLBAudioBitrateKbps);
+            LOAD_CLI_TEXT(label10);
+            LOAD_CLI_TEXT(fbcBTVBApply);
+            LOAD_CLI_TEXT(fbcBTABApply);
+            LOAD_CLI_TEXT(fbcLBMovieBitrateKbps);
+            LOAD_CLI_TEXT(fbcLBMovieBitrate);
+            LOAD_CLI_TEXT(fbcRBCalcRate);
+            LOAD_CLI_TEXT(fbcRBCalcSize);
+            //LOAD_CLI_TEXT(fbcTXMovieFrameRate);
+            LOAD_CLI_TEXT(fbcLBFrames);
+            LOAD_CLI_TEXT(fbcLBMovieFrameRate);
+            LOAD_CLI_TEXT(fbcBTChangeLengthMode);
+        }
     public:
         System::Void Init(int VideoBitrate, int AudioBitrate, bool BTVBEnable, bool BTABEnable, int ab_max, const AuoTheme theme, const DarkenWindowStgReader *dwStg);
     private:
         System::Void fbcChangeTimeSetMode(bool use_frames) {
             fbcPNMovieFrames->Visible = use_frames;
-            fbcBTChangeLengthMode->Text = (use_frames) ? L"時間指定に変更" : L"フレーム数指定に変更";
+            fbcBTChangeLengthMode->Text = (use_frames) ? LOAD_CLI_STRING(AUO_FBC_LENGTH_MODE_TO_TIME) : LOAD_CLI_STRING(AUO_FBC_LENGTH_MODE_TO_FRAME_NUMBER);
         }
     private: 
         System::Void frmBitrateCalculator_Load(System::Object^  sender, System::EventArgs^  e) {
@@ -589,6 +613,7 @@ namespace ffmpegOut {
             LastStr = L"";
             SetNUValue(fbcNUBitrateSum, fbcNUBitrateAudio->Value + fbcNUBitrateVideo->Value);
             fbcNULength_TextChanged(nullptr, nullptr);
+            LoadLangText();
             //フォントの設定
             guiEx_settings exstg;
             exstg.load_encode_stg();

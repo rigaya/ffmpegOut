@@ -35,9 +35,10 @@ using namespace System::Data;
 using namespace System::Drawing;
 
 #include "auo_settings.h"
+#include "auo_mes.h"
 
 
-namespace ffmpegOut {
+namespace AUO_NAME_R {
 
     /// <summary>
     /// frmSetTransparency の概要
@@ -121,9 +122,9 @@ namespace ffmpegOut {
             this->SuspendLayout();
             // 
             // fstBTDefault
-            // 
+            //
             this->fstBTDefault->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-            this->fstBTDefault->Location = System::Drawing::Point(12, 76);
+            this->fstBTDefault->Location = System::Drawing::Point(12, 74);
             this->fstBTDefault->Name = L"fstBTDefault";
             this->fstBTDefault->Size = System::Drawing::Size(80, 31);
             this->fstBTDefault->TabIndex = 2;
@@ -134,7 +135,7 @@ namespace ffmpegOut {
             // fstBTOK
             // 
             this->fstBTOK->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-            this->fstBTOK->Location = System::Drawing::Point(159, 76);
+            this->fstBTOK->Location = System::Drawing::Point(154, 74);
             this->fstBTOK->Name = L"fstBTOK";
             this->fstBTOK->Size = System::Drawing::Size(80, 31);
             this->fstBTOK->TabIndex = 3;
@@ -146,7 +147,7 @@ namespace ffmpegOut {
             // 
             this->fstBTCancel->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
             this->fstBTCancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
-            this->fstBTCancel->Location = System::Drawing::Point(245, 76);
+            this->fstBTCancel->Location = System::Drawing::Point(240, 74);
             this->fstBTCancel->Name = L"fstBTCancel";
             this->fstBTCancel->Size = System::Drawing::Size(80, 31);
             this->fstBTCancel->TabIndex = 4;
@@ -186,11 +187,11 @@ namespace ffmpegOut {
             // 
             // frmSetTransparency
             // 
-            this->AcceptButton = this->fstBTOK;
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
+            this->AcceptButton = this->fstBTOK;
             this->CancelButton = this->fstBTCancel;
-            this->ClientSize = System::Drawing::Size(337, 117);
+            this->ClientSize = System::Drawing::Size(332, 115);
             this->Controls->Add(this->fstLBTransparency);
             this->Controls->Add(this->fstNUTransparency);
             this->Controls->Add(this->fstTBTransparency);
@@ -224,8 +225,17 @@ namespace ffmpegOut {
         System::Void fstSetLastTransparency();
         System::Void setTransparency(int value);
         System::Void frmSetTransparency_FormClosed(System::Object^  sender, System::Windows::Forms::FormClosedEventArgs^  e);
+    private:
+        System::Void LoadLangText() {
+            LOAD_CLI_TEXT(fstBTDefault);
+            LOAD_CLI_TEXT(fstBTOK);
+            LOAD_CLI_TEXT(fstBTCancel);
+            LOAD_CLI_TEXT(fstLBTransparency);
+            LOAD_CLI_MAIN_TEXT(fstMain);
+        }
     private: 
         System::Void frmSetTransparency_Load(System::Object^  sender, System::EventArgs^  e) {
+            LoadLangText();
             fstSetLastTransparency();
             setTransparency(last_transparency);
         }

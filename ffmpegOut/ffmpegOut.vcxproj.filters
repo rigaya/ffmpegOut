@@ -72,9 +72,6 @@
     <ClCompile Include="encode\convert.cpp">
       <Filter>ソース ファイル\encode</Filter>
     </ClCompile>
-    <ClCompile Include="encode\convert_avx.cpp">
-      <Filter>ソース ファイル\encode</Filter>
-    </ClCompile>
     <ClCompile Include="encode\fawcheck.cpp">
       <Filter>ソース ファイル\encode</Filter>
     </ClCompile>
@@ -111,6 +108,18 @@
     <ClCompile Include="encode\convert_avx2.cpp">
       <Filter>ソース ファイル\encode</Filter>
     </ClCompile>
+    <ClCompile Include="encode\exe_version.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="prm\cpu_info.cpp">
+      <Filter>ソース ファイル\prm</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\convert_avx.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="encode\convert_avx512.cpp">
+      <Filter>ソース ファイル\encode</Filter>
+    </ClCompile>
     <ClCompile Include="encode\convert_sse2.cpp">
       <Filter>ソース ファイル\encode</Filter>
     </ClCompile>
@@ -120,11 +129,8 @@
     <ClCompile Include="encode\convert_ssse3.cpp">
       <Filter>ソース ファイル\encode</Filter>
     </ClCompile>
-    <ClCompile Include="encode\exe_version.cpp">
-      <Filter>ソース ファイル\encode</Filter>
-    </ClCompile>
-    <ClCompile Include="prm\cpu_info.cpp">
-      <Filter>ソース ファイル\prm</Filter>
+    <ClCompile Include="frm\auo_mes.cpp">
+      <Filter>ソース ファイル\frm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -132,6 +138,9 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="ffmpegOut.ini">
+      <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="ffmpegOut.ja.lng">
       <Filter>ソース ファイル</Filter>
     </None>
   </ItemGroup>

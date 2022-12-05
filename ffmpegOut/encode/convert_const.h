@@ -116,10 +116,17 @@ static const int UV_L_YCC_16      = UV_L_YCC_8<<8;
 
 ALIGN32_CONST_ARRAY short Array_Y_L_MA_8[16]        = { Y_L_MUL,  Y_L_ADD_8,       Y_L_MUL,   Y_L_ADD_8,        Y_L_MUL,  Y_L_ADD_8,        Y_L_MUL,  Y_L_ADD_8,       Y_L_MUL,  Y_L_ADD_8,       Y_L_MUL,   Y_L_ADD_8,        Y_L_MUL,  Y_L_ADD_8,        Y_L_MUL,  Y_L_ADD_8       };
 ALIGN32_CONST_ARRAY short Array_UV_L_MA_8_420P[16]  = {UV_L_MUL, UV_L_ADD_8_420P, UV_L_MUL,  UV_L_ADD_8_420P,  UV_L_MUL, UV_L_ADD_8_420P,  UV_L_MUL, UV_L_ADD_8_420P, UV_L_MUL, UV_L_ADD_8_420P, UV_L_MUL,  UV_L_ADD_8_420P,  UV_L_MUL, UV_L_ADD_8_420P,  UV_L_MUL, UV_L_ADD_8_420P  };
-ALIGN32_CONST_ARRAY short Array_UV_L_MA_8_420I[2][16]  = { 
-    {UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3,  UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3,  UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3  }, 
+ALIGN32_CONST_ARRAY short Array_UV_L_MA_8_420I[2][16]  = {
+    {UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3,  UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3, UV_L_ADD_8_444 * 3, UV_L_MUL * 3,  UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3,  UV_L_MUL * 3, UV_L_ADD_8_444 * 3  },
     {UV_L_MUL,     UV_L_ADD_8_444,     UV_L_MUL,      UV_L_ADD_8_444,      UV_L_MUL,     UV_L_ADD_8_444,      UV_L_MUL,     UV_L_ADD_8_444,     UV_L_MUL,     UV_L_ADD_8_444,     UV_L_MUL,      UV_L_ADD_8_444,      UV_L_MUL,     UV_L_ADD_8_444,      UV_L_MUL,     UV_L_ADD_8_444      } };
 ALIGN32_CONST_ARRAY short Array_UV_L_MA_8_444[16]   = {UV_L_MUL, UV_L_ADD_8_444,  UV_L_MUL,  UV_L_ADD_8_444,   UV_L_MUL, UV_L_ADD_8_444,   UV_L_MUL, UV_L_ADD_8_444,   UV_L_MUL, UV_L_ADD_8_444,  UV_L_MUL,  UV_L_ADD_8_444,   UV_L_MUL, UV_L_ADD_8_444,   UV_L_MUL, UV_L_ADD_8_444};
+
+ALIGN32_CONST_ARRAY short Array_Y_L_MA_10[16]       = { Y_L_MUL,  Y_L_ADD_10,      Y_L_MUL,   Y_L_ADD_10,       Y_L_MUL,  Y_L_ADD_10,       Y_L_MUL,  Y_L_ADD_10,       Y_L_MUL,  Y_L_ADD_10,      Y_L_MUL,   Y_L_ADD_10,       Y_L_MUL,  Y_L_ADD_10,       Y_L_MUL,  Y_L_ADD_10 };
+ALIGN32_CONST_ARRAY short Array_UV_L_MA_10_420P[16] = {UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P, UV_L_MUL, UV_L_ADD_10_420P };
+ALIGN32_CONST_ARRAY short Array_UV_L_MA_10_420I[2][16] =  {
+    {UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3, UV_L_MUL * 3, UV_L_ADD_10_444 * 3 },
+    {UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444,     UV_L_MUL,     UV_L_ADD_10_444     } };
+ALIGN32_CONST_ARRAY short Array_UV_L_MA_10_444[16]  = {UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444,  UV_L_MUL, UV_L_ADD_10_444  };
 ALIGN32_CONST_ARRAY short Array_Y_L_MA_16[16]       = { Y_L_MUL,  Y_L_ADD_16,      Y_L_MUL,   Y_L_ADD_16,       Y_L_MUL,  Y_L_ADD_16,       Y_L_MUL,  Y_L_ADD_16,       Y_L_MUL,  Y_L_ADD_16,      Y_L_MUL,   Y_L_ADD_16,       Y_L_MUL,  Y_L_ADD_16,       Y_L_MUL,  Y_L_ADD_16 };
 ALIGN32_CONST_ARRAY short Array_UV_L_MA_16_420P[16] = {UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P, UV_L_MUL, UV_L_ADD_16_420P };
 ALIGN32_CONST_ARRAY short Array_UV_L_MA_16_420I[2][16] =  {
@@ -140,23 +147,62 @@ ALIGN32_CONST_ARRAY short Array_MASK_YCP2UV[2][16] = {
      0, 0, 0, -1, -1,  0,  0, 0,
 };
 ALIGN32_CONST_ARRAY BYTE  Array_SUFFLE_YCP_Y[32] = {
-    0, 1, 6, 7, 12, 13, 2, 3, 8, 9, 14, 15, 4, 5, 10, 11, 
+    0, 1, 6, 7, 12, 13, 2, 3, 8, 9, 14, 15, 4, 5, 10, 11,
     0, 1, 6, 7, 12, 13, 2, 3, 8, 9, 14, 15, 4, 5, 10, 11
 };
 ALIGN32_CONST_ARRAY BYTE  Array_SUFFLE_YCP_C[16] = {
     2, 3, 4, 5, 14, 15, 1, 2, 10, 11, 12, 13, 6, 7, 8, 9
 };
 
-ALIGN32_CONST_ARRAY BYTE  Array_INTERLACE_WEIGHT[2][32] = { 
+ALIGN32_CONST_ARRAY BYTE  Array_INTERLACE_WEIGHT[2][32] = {
     {1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3},
     {3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1}
 };
-#ifdef _INCLUDED_IMM //AVX2
+
+#ifdef __AVX512BW__
+
+#define INT_SHORT2(i) (((unsigned int)(i) << 16) | (unsigned int)(i))
+#define INT_CHAR4(i)  (((unsigned int)(i) << 24) |((unsigned int)(i) << 16) |((unsigned int)(i) << 8) | (unsigned int)(i))
+
+#define _mm512_broadcast_int(x) (_mm512_broadcastd_epi32(_mm_cvtsi32_si128(x)))
+#define _mm512_broadcast_short(x) (_mm512_broadcastd_epi32(_mm_cvtsi32_si128(((((unsigned int)(x) << 16) | (unsigned int)(x))))))
+#define _mm512_broadcast_char(x) (_mm512_broadcastd_epi32(_mm_cvtsi32_si128((((unsigned int)(x) << 24) | ((unsigned int)(x) << 16) | ((unsigned int)(x) << 8) | (unsigned int)(x)))))
+
+#define zC_Y_L_MA_8           _mm512_broadcast_int(*(const int*) Array_Y_L_MA_8)
+#define zC_UV_L_MA_8_420P     _mm512_broadcast_int(*(const int*)Array_UV_L_MA_8_420P)
+#define zC_UV_L_MA_8_420I(i)  _mm512_broadcast_int(*(const int*)Array_UV_L_MA_8_420I[i])
+#define zC_UV_L_MA_8_444      _mm512_broadcast_int(*(const int*)Array_UV_L_MA_8_444)
+#define  zC_Y_L_MA_10         _mm512_broadcast_int(*(const int*) Array_Y_L_MA_10)
+#define zC_UV_L_MA_10_420P    _mm512_broadcast_int(*(const int*)Array_UV_L_MA_10_420P)
+#define zC_UV_L_MA_10_420I(i) _mm512_broadcast_int(*(const int*)Array_UV_L_MA_10_420I[i])
+#define zC_UV_L_MA_10_444     _mm512_broadcast_int(*(const int*)Array_UV_L_MA_10_444)
+#define  zC_Y_F_MA_10         _mm512_broadcast_int(*(const int*) Array_Y_F_MA_10)
+#define zC_UV_F_MA_10_420P    _mm512_broadcast_int(*(const int*)Array_UV_F_MA_10_420P)
+#define zC_UV_F_MA_10_420I(i) _mm512_broadcast_int(*(const int*)Array_UV_F_MA_10_420I[i])
+#define zC_UV_F_MA_10_444     _mm512_broadcast_int(*(const int*)Array_UV_F_MA_10_444)
+#define  zC_Y_L_MA_16         _mm512_broadcast_int(*(const int*) Array_Y_L_MA_16)
+#define zC_UV_L_MA_16_420P    _mm512_broadcast_int(*(const int*)Array_UV_L_MA_16_420P)
+#define zC_UV_L_MA_16_420I(i) _mm512_broadcast_int(*(const int*)Array_UV_L_MA_16_420I[i])
+#define zC_UV_L_MA_16_444     _mm512_broadcast_int(*(const int*)Array_UV_L_MA_16_444)
+#define  zC_Y_F_MA_16         _mm512_broadcast_int(*(const int*) Array_Y_F_MA_16)
+#define zC_UV_F_MA_16_420P    _mm512_broadcast_int(*(const int*)Array_UV_F_MA_16_420P)
+#define zC_UV_F_MA_16_420I(i) _mm512_broadcast_int(*(const int*)Array_UV_F_MA_16_420I[i])
+#define zC_UV_F_MA_16_444     _mm512_broadcast_int(*(const int*)Array_UV_F_MA_16_444)
+
+#elif defined(__AVX2__) //AVX2
 
 #define yC_Y_L_MA_8           _mm256_load_si256((__m256i*) Array_Y_L_MA_8)
 #define yC_UV_L_MA_8_420P     _mm256_load_si256((__m256i*)Array_UV_L_MA_8_420P)
 #define yC_UV_L_MA_8_420I(i)  _mm256_load_si256((__m256i*)Array_UV_L_MA_8_420I[i])
 #define yC_UV_L_MA_8_444      _mm256_load_si256((__m256i*)Array_UV_L_MA_8_444)
+#define  yC_Y_L_MA_10         _mm256_load_si256((__m256i*) Array_Y_L_MA_10)
+#define yC_UV_L_MA_10_420P    _mm256_load_si256((__m256i*)Array_UV_L_MA_10_420P)
+#define yC_UV_L_MA_10_420I(i) _mm256_load_si256((__m256i*)Array_UV_L_MA_10_420I[i])
+#define yC_UV_L_MA_10_444     _mm256_load_si256((__m256i*)Array_UV_L_MA_10_444)
+#define  yC_Y_F_MA_10         _mm256_load_si256((__m256i*) Array_Y_F_MA_10)
+#define yC_UV_F_MA_10_420P    _mm256_load_si256((__m256i*)Array_UV_F_MA_10_420P)
+#define yC_UV_F_MA_10_420I(i) _mm256_load_si256((__m256i*)Array_UV_F_MA_10_420I[i])
+#define yC_UV_F_MA_10_444     _mm256_load_si256((__m256i*)Array_UV_F_MA_10_444)
 #define  yC_Y_L_MA_16         _mm256_load_si256((__m256i*) Array_Y_L_MA_16)
 #define yC_UV_L_MA_16_420P    _mm256_load_si256((__m256i*)Array_UV_L_MA_16_420P)
 #define yC_UV_L_MA_16_420I(i) _mm256_load_si256((__m256i*)Array_UV_L_MA_16_420I[i])
@@ -178,6 +224,10 @@ ALIGN32_CONST_ARRAY BYTE  Array_INTERLACE_WEIGHT[2][32] = {
 #define xC_UV_L_MA_8_420P     _mm_load_si128((__m128i*)Array_UV_L_MA_8_420P)
 #define xC_UV_L_MA_8_420I(i)  _mm_load_si128((__m128i*)Array_UV_L_MA_8_420I[i])
 #define xC_UV_L_MA_8_444      _mm_load_si128((__m128i*)Array_UV_L_MA_8_444)
+#define  xC_Y_L_MA_10         _mm_load_si128((__m128i*) Array_Y_L_MA_10)
+#define xC_UV_L_MA_10_420P    _mm_load_si128((__m128i*)Array_UV_L_MA_10_420P)
+#define xC_UV_L_MA_10_420I(i) _mm_load_si128((__m128i*)Array_UV_L_MA_10_420I[i])
+#define xC_UV_L_MA_10_444     _mm_load_si128((__m128i*)Array_UV_L_MA_10_444)
 #define  xC_Y_L_MA_16         _mm_load_si128((__m128i*) Array_Y_L_MA_16)
 #define xC_UV_L_MA_16_420P    _mm_load_si128((__m128i*)Array_UV_L_MA_16_420P)
 #define xC_UV_L_MA_16_420I(i) _mm_load_si128((__m128i*)Array_UV_L_MA_16_420I[i])
