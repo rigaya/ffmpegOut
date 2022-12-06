@@ -300,8 +300,8 @@ System::Void frmConfig::SaveLocalStg() {
 }
 
 System::Void frmConfig::SetLocalStg() {
-    fcgLBffmpegOutPath->Text       = System::String(ENCODER_NAME).ToString() + L".exe" + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
-    fcgTXffmpegOutPath->Text       = System::String(ENCODER_NAME).ToString() + L".exe" + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgLBVideoEncoderPath->Text   = System::String(ENCODER_NAME).ToString() + L".exe" + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
+    fcgTXVideoEncoderPath->Text   = LocalStg.ffmpegOutPath;
     fcgTXMP4MuxerPath->Text       = LocalStg.MP4MuxerPath;
     fcgTXMKVMuxerPath->Text       = LocalStg.MKVMuxerPath;
     fcgTXTC2MP4Path->Text         = LocalStg.TC2MP4Path;
@@ -317,7 +317,7 @@ System::Void frmConfig::SetLocalStg() {
     fcgLBMP4RawPath->Text         = LocalStg.MP4RawExeName   + LOAD_CLI_STRING(AUO_CONFIG_SPECIFY_EXE_PATH);
 
 
-    fcgTXffmpegOutPath->SelectionStart       = fcgTXffmpegOutPath->Text->Length;
+    fcgTXVideoEncoderPath->SelectionStart   = fcgTXVideoEncoderPath->Text->Length;
     fcgTXMP4MuxerPath->SelectionStart       = fcgTXMP4MuxerPath->Text->Length;
     fcgTXTC2MP4Path->SelectionStart         = fcgTXTC2MP4Path->Text->Length;
     fcgTXMKVMuxerPath->SelectionStart       = fcgTXMKVMuxerPath->Text->Length;
@@ -894,7 +894,7 @@ System::Void frmConfig::SetTXMaxLenAll() {
     //MaxLengthに最大文字数をセットし、それをもとにバイト数計算を行うイベントをセットする。
     SetTXMaxLen(fcgTXCmdEx,                sizeof(conf->vid.cmdex) - 1);
     SetTXMaxLen(fcgTXInCmd,                sizeof(conf->vid.incmd) - 1);
-    SetTXMaxLen(fcgTXffmpegOutPath,        sizeof(sys_dat->exstg->s_local.ffmpeg_path) - 1);
+    SetTXMaxLen(fcgTXVideoEncoderPath,        sizeof(sys_dat->exstg->s_local.ffmpeg_path) - 1);
     SetTXMaxLen(fcgTXAudioEncoderPath,     sizeof(sys_dat->exstg->s_aud_ext[0].fullpath) - 1);
     SetTXMaxLen(fcgTXMP4MuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MP4].fullpath) - 1);
     SetTXMaxLen(fcgTXMKVMuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MKV].fullpath) - 1);
@@ -1019,6 +1019,89 @@ System::Void frmConfig::LoadLangText() {
     //空白時にグレーで入れる文字列を言語変更のため一度空白に戻す
     ExeTXPathEnter();
     //言語更新開始
+    LOAD_CLI_TEXT(fcgtabPageExSettings);
+    LOAD_CLI_TEXT(fcgCBAuoTcfileout);
+    LOAD_CLI_TEXT(fcgCBAudioInput);
+    LOAD_CLI_TEXT(fcgCB2passEnc);
+    LOAD_CLI_TEXT(fcgLBOutputExt);
+    LOAD_CLI_TEXT(fcgLBOutputCsp);
+    LOAD_CLI_TEXT(fcgLBInterlaced);
+    LOAD_CLI_TEXT(fcgBTVideoEncoderPath);
+    LOAD_CLI_TEXT(fcgLBVideoEncoderPath);
+    LOAD_CLI_TEXT(fcgLBTempDir);
+    LOAD_CLI_TEXT(fcgBTCustomTempDir);
+    LOAD_CLI_TEXT(fcggroupBoxCmdEx);
+    LOAD_CLI_TEXT(fcgLBInCmd);
+    LOAD_CLI_TEXT(fcgLBffmpegOutPriority);
+    LOAD_CLI_TEXT(fcggroupBoxAudio);
+    LOAD_CLI_TEXT(fcgCBAudioUseInternal);
+    LOAD_CLI_TEXT(fcgCBFAWCheck);
+    LOAD_CLI_TEXT(fcgLBAudioBitrateInternal);
+    LOAD_CLI_TEXT(fcgLBAudioEncModeInternal);
+    LOAD_CLI_TEXT(fcgLBAudioDelayCut);
+    LOAD_CLI_TEXT(fcgBTCustomAudioTempDir);
+    LOAD_CLI_TEXT(fcgCBAudioUsePipe);
+    LOAD_CLI_TEXT(fcgLBAudioBitrate);
+    LOAD_CLI_TEXT(fcgLBAudioTemp);
+    LOAD_CLI_TEXT(fcgBTAudioEncoderPath);
+    LOAD_CLI_TEXT(fcgCBAudio2pass);
+    LOAD_CLI_TEXT(fcgLBAudioEncoder);
+    LOAD_CLI_TEXT(fcgLBAudioPriority);
+    LOAD_CLI_TEXT(fcgLBAudioEncoderPath);
+    LOAD_CLI_TEXT(fcgLBAudioEncMode);
+    LOAD_CLI_TEXT(fcgCBAudioEncTiming);
+    LOAD_CLI_TEXT(fcgtoolStripSettings);
+    LOAD_CLI_TEXT(fcgTSBSave);
+    LOAD_CLI_TEXT(fcgTSBSaveNew);
+    LOAD_CLI_TEXT(fcgTSBDelete);
+    LOAD_CLI_TEXT(fcgTSSettings);
+    LOAD_CLI_TEXT(fcgTSExeFileshelp);
+    LOAD_CLI_TEXT(fcgTSBCMDOnly);
+    LOAD_CLI_TEXT(fcgTSBBitrateCalc);
+    LOAD_CLI_TEXT(fcgTSBOtherSettings);
+    LOAD_CLI_TEXT(fcgTSLSettingsNotes);
+    LOAD_CLI_TEXT(fcgTSTSettingsNotes);
+    LOAD_CLI_TEXT(fcgtabPageMP4);
+    LOAD_CLI_TEXT(fcgBTMP4RawPath);
+    LOAD_CLI_TEXT(fcgLBMP4RawPath);
+    LOAD_CLI_TEXT(fcgCBMP4MuxApple);
+    LOAD_CLI_TEXT(fcgBTMP4BoxTempDir);
+    LOAD_CLI_TEXT(fcgLBMP4BoxTempDir);
+    LOAD_CLI_TEXT(fcgBTTC2MP4Path);
+    LOAD_CLI_TEXT(fcgBTMP4MuxerPath);
+    LOAD_CLI_TEXT(fcgLBTC2MP4Path);
+    LOAD_CLI_TEXT(fcgLBMP4MuxerPath);
+    LOAD_CLI_TEXT(fcgLBMP4CmdEx);
+    LOAD_CLI_TEXT(fcgCBMP4MuxerExt);
+    LOAD_CLI_TEXT(fcgtabPageMKV);
+    LOAD_CLI_TEXT(fcgBTMKVMuxerPath);
+    LOAD_CLI_TEXT(fcgLBMKVMuxerPath);
+    LOAD_CLI_TEXT(fcgLBMKVMuxerCmdEx);
+    LOAD_CLI_TEXT(fcgCBMKVMuxerExt);
+    LOAD_CLI_TEXT(fcgtabPageMPG);
+    LOAD_CLI_TEXT(fcgBTMPGMuxerPath);
+    LOAD_CLI_TEXT(fcgLBMPGMuxerPath);
+    LOAD_CLI_TEXT(fcgLBMPGMuxerCmdEx);
+    LOAD_CLI_TEXT(fcgCBMPGMuxerExt);
+    LOAD_CLI_TEXT(fcgtabPageMux);
+    LOAD_CLI_TEXT(fcgLBMuxPriority);
+    LOAD_CLI_TEXT(fcgCBMuxMinimize);
+    LOAD_CLI_TEXT(fcgtabPageBat);
+    LOAD_CLI_TEXT(fcgLBBatAfterString);
+    LOAD_CLI_TEXT(fcgLBBatBeforeString);
+    LOAD_CLI_TEXT(fcgBTBatBeforePath);
+    LOAD_CLI_TEXT(fcgLBBatBeforePath);
+    LOAD_CLI_TEXT(fcgCBWaitForBatBefore);
+    LOAD_CLI_TEXT(fcgCBRunBatBefore);
+    LOAD_CLI_TEXT(fcgBTBatAfterPath);
+    LOAD_CLI_TEXT(fcgLBBatAfterPath);
+    LOAD_CLI_TEXT(fcgCBWaitForBatAfter);
+    LOAD_CLI_TEXT(fcgCBRunBatAfter);
+    LOAD_CLI_TEXT(fcgBTCancel);
+    LOAD_CLI_TEXT(fcgBTOK);
+    LOAD_CLI_TEXT(fcgBTDefault);
+    LOAD_CLI_TEXT(fcgLBVersionDate);
+    LOAD_CLI_TEXT(fcgLBVersion);
 
     //ローカル設定のロード(ini変更を反映)
     LoadLocalStg();
@@ -1054,7 +1137,7 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
     SetCXIndex(fcgCXTempDir,             cnf->oth.temp_dir);
     fcgCB2passEnc->Checked             = cnf->enc.use_auto_npass != 0;
     fcgCBAudioInput->Checked           = cnf->enc.audio_input != 0;
-    fcgCBAFSTimecode->Checked          = cnf->vid.auo_tcfile_out != 0;
+    fcgCBAuoTcfileout->Checked          = cnf->vid.auo_tcfile_out != 0;
 
     fcgTXCmdEx->Text                   = String(cnf->vid.cmdex).ToString();
     fcgTXOutputExt->Text               = String(cnf->vid.outext).ToString();
@@ -1114,8 +1197,8 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     cnf->enc.audio_input            = fcgCBAudioInput->Checked;
     cnf->enc.auto_npass             = 2;
     //cnf->vid.amp_check              = NULL;
-    cnf->vid.afs                    = fcgCBAFSTimecode->Checked;
-    cnf->vid.auo_tcfile_out         = fcgCBAFSTimecode->Checked;
+    cnf->vid.afs                    = fcgCBAuoTcfileout->Checked;
+    cnf->vid.auo_tcfile_out         = fcgCBAuoTcfileout->Checked;
     cnf->vid.afs_bitrate_correction = FALSE;
     cnf->vid.check_keyframe         = FALSE;
     cnf->vid.priority               = fcgCXffmpegOutPriority->SelectedIndex;
@@ -1331,7 +1414,8 @@ System::Void frmConfig::SetAllCheckChangedEvents(Control ^top) {
 }
 
 System::Void frmConfig::SetHelpToolTips() {
-    fcgTTEx->SetToolTip(fcgBTffmpegOutPath, L""
+#define SET_TOOL_TIP_EX(target) { fcgTTEx->SetToolTip(target, LOAD_CLI_STRING(AuofrmTT ## target)); }
+    fcgTTEx->SetToolTip(fcgBTVideoEncoderPath, L""
         + L"ffmpeg.exeの場所を指定します。\n"
         + L"\n"
         + L"この設定はffmpegOut.confに保存され、\n"
@@ -1350,208 +1434,50 @@ System::Void frmConfig::SetHelpToolTips() {
         + L"出力ファイルの拡張子を、ここで設定した拡張子で上書き・追加します。"
         );
 
-    //インタレ
-    fcgTTEx->SetToolTip(fcgCXInterlaced,       L""
-        + L"[" + String(interlaced_desc[0]).ToString() + L"]\n"
-        + L"   プログレッシブ(非インタレ)としてYUY2 -> YV12 変換を行います。\n"
-        + L"\n"
-        + L"[" + String(interlaced_desc[1]).ToString() + L"] … --tff\n"
-        + L"   インターレースとしてYUY2 -> YV12 変換を行います。"
-        );
-
-    fcgTTEx->SetToolTip(fcgCXffmpegOutPriority, L""
-        + L"エンコーダのCPU優先度を設定します。\n"
-        + L"AviutlSync で Aviutlの優先度と同じになります。"
-        );
-    fcgTTEx->SetToolTip(fcgCXTempDir,      L""
-        + L"一時ファイル群\n"
-        + L"・音声一時ファイル(wav / エンコード後音声)\n"
-        + L"・動画一時ファイル\n"
-        + L"・タイムコードファイル\n"
-        + L"・qpファイル\n"
-        + L"・mux後ファイル\n"
-        + L"の作成場所を指定します。"
-        );
-    fcgTTEx->SetToolTip(fcgBTCustomTempDir, L""
-        + L"一時ファイルの場所を「カスタム」に設定した際に\n"
-        + L"使用される一時ファイルの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-
+    //拡張
+    SET_TOOL_TIP_EX(fcgCXTempDir);
+    SET_TOOL_TIP_EX(fcgBTCustomTempDir);
     //音声
-    fcgTTEx->SetToolTip(fcgCXAudioEncoder, L""
-        + L"使用する音声エンコーダを指定します。\n"
-        + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgCBFAWCheck,     L""
-        + L"音声エンコード時に音声がFakeAACWav(FAW)かどうかの判定を行い、\n"
-        + L"FAWだと判定された場合、設定を無視して、\n"
-        + L"自動的にFAWを使用するよう切り替えます。\n"
-        + L"\n"
-        + L"一度音声エンコーダからFAW(fawcl)を選択し、\n"
-        + L"実行ファイルの場所を指定しておく必要があります。"
-        );
-    fcgTTEx->SetToolTip(fcgBTAudioEncoderPath, L""
-        + L"音声エンコーダの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXAudioEncMode, L""
-        + L"音声エンコーダのエンコードモードを切り替えます。\n"
-        + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgCBAudio2pass,   L""
-        + L"音声エンコードを2passで行います。\n"
-        + L"2pass時はパイプ処理は行えません。"
-        );
-    fcgTTEx->SetToolTip(fcgCBAudioUsePipe, L""
-        + L"パイプを通して、音声データをエンコーダに渡します。\n"
-        + L"パイプと2passは同時に指定できません。"
-        );
-    fcgTTEx->SetToolTip(fcgNUAudioBitrate, L""
-        + L"音声ビットレートを指定します。"
-        );
-    fcgTTEx->SetToolTip(fcgCXAudioPriority, L""
-        + L"音声エンコーダのCPU優先度を設定します。\n"
-        + L"AviutlSync で Aviutlの優先度と同じになります。"
-        );
-    fcgTTEx->SetToolTip(fcgCXAudioEncTiming, L""
-        + L"音声を処理するタイミングを設定します。\n"
-        + L" 後　 … 映像→音声の順で処理します。\n"
-        + L" 前　 … 音声→映像の順で処理します。\n"
-        + L" 同時 … 映像と音声を同時に処理します。"
-        );
-    fcgTTEx->SetToolTip(fcgCXAudioTempDir, L""
-        + L"音声一時ファイル(エンコード後のファイル)\n"
-        + L"の出力先を変更します。"
-        );
-    fcgTTEx->SetToolTip(fcgBTCustomAudioTempDir, L""
-        + L"音声一時ファイルの場所を「カスタム」にした時に\n"
-        + L"使用される音声一時ファイルの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-
+    SET_TOOL_TIP_EX(fcgCXAudioEncoder);
+    SET_TOOL_TIP_EX(fcgCBFAWCheck);
+    SET_TOOL_TIP_EX(fcgBTAudioEncoderPath);
+    SET_TOOL_TIP_EX(fcgCXAudioEncMode);
+    SET_TOOL_TIP_EX(fcgCBAudio2pass);
+    SET_TOOL_TIP_EX(fcgCBAudioUsePipe);
+    SET_TOOL_TIP_EX(fcgNUAudioBitrate);
+    SET_TOOL_TIP_EX(fcgCXAudioPriority);
+    SET_TOOL_TIP_EX(fcgCXAudioEncTiming);
+    SET_TOOL_TIP_EX(fcgCXAudioTempDir);
+    SET_TOOL_TIP_EX(fcgBTCustomAudioTempDir);
     //muxer
-    fcgTTEx->SetToolTip(fcgCBMP4MuxerExt, L""
-        + L"指定したmuxerでmuxを行います。\n"
-        + L"チェックを外すとmuxを行いません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXMP4CmdEx,    L""
-        + L"muxerに渡す追加オプションを選択します。\n"
-        + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgBTMP4MuxerPath, L""
-        + L"mp4用muxerの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgBTTC2MP4Path, L""
-        + L"tc2mp4modの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgBTMP4RawPath, L""
-        + L"raw用mp4muxerの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXMP4BoxTempDir, L""
-        + L"mp4box用の一時フォルダの場所を指定します。"
-        );
-    fcgTTEx->SetToolTip(fcgBTMP4BoxTempDir, L""
-        + L"mp4box用一時フォルダの場所を「カスタム」に設定した際に\n"
-        + L"使用される一時フォルダの場所です。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCBMKVMuxerExt, L""
-        + L"指定したmuxerでmuxを行います。\n"
-        + L"チェックを外すとmuxを行いません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXMKVCmdEx,    L""
-        + L"muxerに渡す追加オプションを選択します。\n"
-        + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgBTMKVMuxerPath, L""
-        + L"mkv用muxerの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCBMPGMuxerExt, L""
-        + L"指定したmuxerでmuxを行います。\n"
-        + L"チェックを外すとmuxを行いません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXMPGCmdEx,    L""
-        + L"muxerに渡す追加オプションを選択します。\n"
-        + L"これらの設定はffmpegOut.iniに記述されています。"
-        );
-    fcgTTEx->SetToolTip(fcgBTMPGMuxerPath, L""
-        + L"mpg用muxerの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCBMuxMinimize, L""
-        + L"mux時のウィンドウを最小化で開始します。"
-        );
-    fcgTTEx->SetToolTip(fcgCXMuxPriority, L""
-        + L"muxerのCPU優先度を指定します。\n"
-        + L"AviutlSync で Aviutlの優先度と同じになります。"
-        );
+    SET_TOOL_TIP_EX(fcgCBMP4MuxerExt);
+    SET_TOOL_TIP_EX(fcgCXMP4CmdEx);
+    SET_TOOL_TIP_EX(fcgBTMP4MuxerPath);
+    SET_TOOL_TIP_EX(fcgBTTC2MP4Path);
+    SET_TOOL_TIP_EX(fcgBTMP4RawPath);
+    SET_TOOL_TIP_EX(fcgCXMP4BoxTempDir);
+    SET_TOOL_TIP_EX(fcgBTMP4BoxTempDir);
+    SET_TOOL_TIP_EX(fcgCBMKVMuxerExt);
+    SET_TOOL_TIP_EX(fcgCXMKVCmdEx);
+    SET_TOOL_TIP_EX(fcgBTMKVMuxerPath);
+    SET_TOOL_TIP_EX(fcgCBMPGMuxerExt);
+    SET_TOOL_TIP_EX(fcgCXMPGCmdEx);
+    SET_TOOL_TIP_EX(fcgBTMPGMuxerPath);
+    SET_TOOL_TIP_EX(fcgCXMuxPriority);
     //バッチファイル実行
-    fcgTTEx->SetToolTip(fcgCBRunBatBefore, L""
-        + L"エンコード開始前にバッチファイルを実行します。"
-        );
-    fcgTTEx->SetToolTip(fcgCBRunBatAfter, L""
-        + L"エンコード終了後、バッチファイルを実行します。"
-        );
-    fcgTTEx->SetToolTip(fcgCBWaitForBatBefore, L""
-        + L"バッチ処理開始後、バッチ処理が終了するまで待機します。"
-        );
-    fcgTTEx->SetToolTip(fcgCBWaitForBatAfter, L""
-        + L"バッチ処理開始後、バッチ処理が終了するまで待機します。"
-        );
-    fcgTTEx->SetToolTip(fcgBTBatBeforePath, L""
-        + L"エンコード終了後実行するバッチファイルを指定します。\n"
-        + L"実際のバッチ実行時には新たに\"<バッチファイル名>_tmp.bat\"を作成、\n"
-        + L"指定したバッチファイルの内容をコピーし、\n"
-        + L"さらに特定文字列を置換して実行します。\n"
-        + L"使用できる置換文字列はreadmeをご覧下さい。"
-        );
-    fcgTTEx->SetToolTip(fcgBTBatAfterPath, L""
-        + L"エンコード終了後実行するバッチファイルを指定します。\n"
-        + L"実際のバッチ実行時には新たに\"<バッチファイル名>_tmp.bat\"を作成、\n"
-        + L"指定したバッチファイルの内容をコピーし、\n"
-        + L"さらに特定文字列を置換して実行します。\n"
-        + L"使用できる置換文字列はreadmeをご覧下さい。"
-        );
-
-    fcgTSBDelete->ToolTipText = L""
-        + L"現在選択中のプロファイルを削除します。";
-
-    fcgTSBOtherSettings->ToolTipText = L""
-        + L"プロファイルの保存フォルダを変更します。";
-
-    fcgTSBSave->ToolTipText = L""
-        + L"現在の設定をプロファイルに上書き保存します。";
-
-    fcgTSBSaveNew->ToolTipText = L""
-        + L"現在の設定を新たなプロファイルに保存します。";
-
+    SET_TOOL_TIP_EX(fcgCBRunBatBefore);
+    SET_TOOL_TIP_EX(fcgCBRunBatAfter);
+    SET_TOOL_TIP_EX(fcgCBWaitForBatBefore);
+    SET_TOOL_TIP_EX(fcgCBWaitForBatAfter);
+    SET_TOOL_TIP_EX(fcgBTBatBeforePath);
+    SET_TOOL_TIP_EX(fcgBTBatAfterPath);
     //他
-    fcgTTEx->SetToolTip(fcgBTDefault,     L""
-        + L"デフォルト設定をロードします。"
-        );
+    SET_TOOL_TIP_EX(fcgBTDefault);
+    //上部ツールストリップ
+    fcgTSBDelete->ToolTipText = LOAD_CLI_STRING(AuofrmTTfcgTSBDelete);
+    fcgTSBOtherSettings->ToolTipText = LOAD_CLI_STRING(AuofrmTTfcgTSBOtherSettings);
+    fcgTSBSave->ToolTipText = LOAD_CLI_STRING(AuofrmTTfcgTSBSave);
+    fcgTSBSaveNew->ToolTipText = LOAD_CLI_STRING(AuofrmTTfcgTSBSaveNew);
 }
 System::Void frmConfig::ShowExehelp(String^ ExePath, String^ args) {
     if (!File::Exists(ExePath)) {

@@ -80,7 +80,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y ffmpegOut.ini "$(OutDir)"</Command>
+      <Command>copy /y ffmpegOut.ini "$(OutDir)"
+copy /y ffmpegOut.en.ini "$(OutDir)"
+copy /y ffmpegOut.zh.ini "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -116,7 +118,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y ffmpegOut.ini "$(OutDir)"</Command>
+      <Command>copy /y ffmpegOut.ini "$(OutDir)"
+copy /y ffmpegOut.en.ini "$(OutDir)"
+copy /y ffmpegOut.zh.ini "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -280,6 +284,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ffmpegOut.def" />
+    <None Include="ffmpegOut.en.lng" />
     <None Include="ffmpegOut.ini" />
     <None Include="ffmpegOut.ja.lng" />
   </ItemGroup>
@@ -288,6 +293,7 @@
     <ClInclude Include="auo_version.h" />
     <ClInclude Include="encode\convert_simd.h" />
     <ClInclude Include="encode\exe_version.h" />
+    <ClInclude Include="frm\auo_mes.h" />
     <ClInclude Include="frm\frmSetLogColor.h">
       <FileType>CppForm</FileType>
     </ClInclude>

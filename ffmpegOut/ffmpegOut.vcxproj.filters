@@ -143,6 +143,9 @@
     <None Include="ffmpegOut.ja.lng">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="ffmpegOut.en.lng">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auo.h">
@@ -270,6 +273,9 @@
     </ClInclude>
     <ClInclude Include="prm\cpu_info.h">
       <Filter>ヘッダー ファイル\prm</Filter>
+    </ClInclude>
+    <ClInclude Include="frm\auo_mes.h">
+      <Filter>ヘッダー ファイル\frm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -29,7 +29,7 @@
 #include "auo_version.h"
 
 FFMPEGOUT_JA_LNG EXE_DATA DISCARDABLE "ffmpegOut.ja.lng"
-//FFMPEGOUT_EN_LNG EXE_DATA DISCARDABLE "ffmpegOut.en.lng"
+FFMPEGOUT_EN_LNG EXE_DATA DISCARDABLE "ffmpegOut.en.lng"
 //FFMPEGOUT_ZH_LNG EXE_DATA DISCARDABLE "ffmpegOut.zh.lng"
 
 //

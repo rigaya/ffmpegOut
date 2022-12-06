@@ -565,10 +565,10 @@ private: System::Windows::Forms::Label^  fcgLBTempDir;
 
 private: System::Windows::Forms::ToolStripButton^  fcgTSBBitrateCalc;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator3;
-private: System::Windows::Forms::Button^  fcgBTffmpegOutPath;
+private: System::Windows::Forms::Button^  fcgBTVideoEncoderPath;
 
-private: System::Windows::Forms::TextBox^  fcgTXffmpegOutPath;
-private: System::Windows::Forms::Label^  fcgLBffmpegOutPath;
+private: System::Windows::Forms::TextBox^  fcgTXVideoEncoderPath;
+private: System::Windows::Forms::Label^  fcgLBVideoEncoderPath;
 
 
 
@@ -655,7 +655,7 @@ private: System::Windows::Forms::CheckBox^  fcgCBRunBatBefore;
 private: System::Windows::Forms::Label^  fcgLBInCmd;
 
 private: System::Windows::Forms::TextBox^  fcgTXInCmd;
-private: System::Windows::Forms::CheckBox^  fcgCBAFSTimecode;
+private: System::Windows::Forms::CheckBox^  fcgCBAuoTcfileout;
 private: System::Windows::Forms::CheckBox^  fcgCBAudioUseInternal;
 
 
@@ -785,13 +785,15 @@ private: System::Windows::Forms::ComboBox^  fcgCXAudioEncoderInternal;
 private: System::Windows::Forms::Label^  fcgLBAudioBitrateInternal;
 private: System::Windows::Forms::NumericUpDown^  fcgNUAudioBitrateInternal;
 private: System::Windows::Forms::ComboBox^  fcgCXAudioEncModeInternal;
-private: System::Windows::Forms::Label^  label4;
+private: System::Windows::Forms::Label^  fcgLBAudioEncModeInternal;
+
 
 
 private: System::Windows::Forms::Panel^  fcgPNHideTabControlVideo;
 private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
 private: System::Windows::Forms::ToolStripDropDownButton^  fcgTSLanguage;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
+private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
 
 
 
@@ -850,7 +852,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(frmConfig::typeid));
             this->fcgtabControlVideo = (gcnew System::Windows::Forms::TabControl());
             this->fcgtabPageExSettings = (gcnew System::Windows::Forms::TabPage());
-            this->fcgCBAFSTimecode = (gcnew System::Windows::Forms::CheckBox());
+            this->fcgCBAuoTcfileout = (gcnew System::Windows::Forms::CheckBox());
             this->fcgCBAudioInput = (gcnew System::Windows::Forms::CheckBox());
             this->fcgCB2passEnc = (gcnew System::Windows::Forms::CheckBox());
             this->fcgLBOutputExt = (gcnew System::Windows::Forms::Label());
@@ -859,9 +861,9 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgLBInterlaced = (gcnew System::Windows::Forms::Label());
             this->fcgCXOutputCsp = (gcnew System::Windows::Forms::ComboBox());
             this->fcgCXInterlaced = (gcnew System::Windows::Forms::ComboBox());
-            this->fcgBTffmpegOutPath = (gcnew System::Windows::Forms::Button());
-            this->fcgTXffmpegOutPath = (gcnew System::Windows::Forms::TextBox());
-            this->fcgLBffmpegOutPath = (gcnew System::Windows::Forms::Label());
+            this->fcgBTVideoEncoderPath = (gcnew System::Windows::Forms::Button());
+            this->fcgTXVideoEncoderPath = (gcnew System::Windows::Forms::TextBox());
+            this->fcgLBVideoEncoderPath = (gcnew System::Windows::Forms::Label());
             this->fcgLBTempDir = (gcnew System::Windows::Forms::Label());
             this->fcgBTCustomTempDir = (gcnew System::Windows::Forms::Button());
             this->fcggroupBoxCmdEx = (gcnew System::Windows::Forms::GroupBox());
@@ -883,6 +885,8 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgTSSettings = (gcnew System::Windows::Forms::ToolStripDropDownButton());
             this->fcgTSBCMDOnly = (gcnew System::Windows::Forms::ToolStripButton());
             this->toolStripSeparator3 = (gcnew System::Windows::Forms::ToolStripSeparator());
+            this->fcgTSLanguage = (gcnew System::Windows::Forms::ToolStripDropDownButton());
+            this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
             this->fcgTSBBitrateCalc = (gcnew System::Windows::Forms::ToolStripButton());
             this->toolStripSeparator2 = (gcnew System::Windows::Forms::ToolStripSeparator());
             this->fcgTSBOtherSettings = (gcnew System::Windows::Forms::ToolStripButton());
@@ -896,7 +900,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgLBAudioBitrateInternal = (gcnew System::Windows::Forms::Label());
             this->fcgNUAudioBitrateInternal = (gcnew System::Windows::Forms::NumericUpDown());
             this->fcgCXAudioEncModeInternal = (gcnew System::Windows::Forms::ComboBox());
-            this->label4 = (gcnew System::Windows::Forms::Label());
+            this->fcgLBAudioEncModeInternal = (gcnew System::Windows::Forms::Label());
             this->fcgCXAudioEncoderInternal = (gcnew System::Windows::Forms::ComboBox());
             this->fcgPNAudioExt = (gcnew System::Windows::Forms::Panel());
             this->fcgCXAudioDelayCut = (gcnew System::Windows::Forms::ComboBox());
@@ -982,8 +986,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgCSReplaceStrings = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->fcgPNHideTabControlVideo = (gcnew System::Windows::Forms::Panel());
             this->fcgPNHideToolStripBorder = (gcnew System::Windows::Forms::Panel());
-            this->fcgTSLanguage = (gcnew System::Windows::Forms::ToolStripDropDownButton());
-            this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
+            this->fcgLBguiExBlog = (gcnew System::Windows::Forms::LinkLabel());
             this->fcgtabControlVideo->SuspendLayout();
             this->fcgtabPageExSettings->SuspendLayout();
             this->fcggroupBoxCmdEx->SuspendLayout();
@@ -1016,7 +1019,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             // fcgtabPageExSettings
             // 
-            this->fcgtabPageExSettings->Controls->Add(this->fcgCBAFSTimecode);
+            this->fcgtabPageExSettings->Controls->Add(this->fcgCBAuoTcfileout);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCBAudioInput);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCB2passEnc);
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBOutputExt);
@@ -1025,9 +1028,9 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBInterlaced);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCXOutputCsp);
             this->fcgtabPageExSettings->Controls->Add(this->fcgCXInterlaced);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgBTffmpegOutPath);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgTXffmpegOutPath);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgLBffmpegOutPath);
+            this->fcgtabPageExSettings->Controls->Add(this->fcgBTVideoEncoderPath);
+            this->fcgtabPageExSettings->Controls->Add(this->fcgTXVideoEncoderPath);
+            this->fcgtabPageExSettings->Controls->Add(this->fcgLBVideoEncoderPath);
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBTempDir);
             this->fcgtabPageExSettings->Controls->Add(this->fcgBTCustomTempDir);
             this->fcgtabPageExSettings->Controls->Add(this->fcggroupBoxCmdEx);
@@ -1042,16 +1045,16 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgtabPageExSettings->Text = L"映像";
             this->fcgtabPageExSettings->UseVisualStyleBackColor = true;
             // 
-            // fcgCBAFSTimecode
+            // fcgCBAuoTcfileout
             // 
-            this->fcgCBAFSTimecode->AutoSize = true;
-            this->fcgCBAFSTimecode->Location = System::Drawing::Point(22, 89);
-            this->fcgCBAFSTimecode->Name = L"fcgCBAFSTimecode";
-            this->fcgCBAFSTimecode->Size = System::Drawing::Size(113, 18);
-            this->fcgCBAFSTimecode->TabIndex = 16;
-            this->fcgCBAFSTimecode->Tag = L"chValue";
-            this->fcgCBAFSTimecode->Text = L"afsタイムコード出力";
-            this->fcgCBAFSTimecode->UseVisualStyleBackColor = true;
+            this->fcgCBAuoTcfileout->AutoSize = true;
+            this->fcgCBAuoTcfileout->Location = System::Drawing::Point(22, 89);
+            this->fcgCBAuoTcfileout->Name = L"fcgCBAuoTcfileout";
+            this->fcgCBAuoTcfileout->Size = System::Drawing::Size(113, 18);
+            this->fcgCBAuoTcfileout->TabIndex = 16;
+            this->fcgCBAuoTcfileout->Tag = L"chValue";
+            this->fcgCBAuoTcfileout->Text = L"afsタイムコード出力";
+            this->fcgCBAuoTcfileout->UseVisualStyleBackColor = true;
             // 
             // fcgCBAudioInput
             // 
@@ -1086,9 +1089,9 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             // fcgTXOutputExt
             // 
-            this->fcgTXOutputExt->Location = System::Drawing::Point(449, 12);
+            this->fcgTXOutputExt->Location = System::Drawing::Point(476, 12);
             this->fcgTXOutputExt->Name = L"fcgTXOutputExt";
-            this->fcgTXOutputExt->Size = System::Drawing::Size(150, 21);
+            this->fcgTXOutputExt->Size = System::Drawing::Size(123, 21);
             this->fcgTXOutputExt->TabIndex = 12;
             this->fcgTXOutputExt->Tag = L"chValue";
             // 
@@ -1114,7 +1117,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             this->fcgCXOutputCsp->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXOutputCsp->FormattingEnabled = true;
-            this->fcgCXOutputCsp->Location = System::Drawing::Point(127, 123);
+            this->fcgCXOutputCsp->Location = System::Drawing::Point(166, 123);
             this->fcgCXOutputCsp->Name = L"fcgCXOutputCsp";
             this->fcgCXOutputCsp->Size = System::Drawing::Size(152, 22);
             this->fcgCXOutputCsp->TabIndex = 9;
@@ -1124,43 +1127,43 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             this->fcgCXInterlaced->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXInterlaced->FormattingEnabled = true;
-            this->fcgCXInterlaced->Location = System::Drawing::Point(127, 156);
+            this->fcgCXInterlaced->Location = System::Drawing::Point(166, 156);
             this->fcgCXInterlaced->Name = L"fcgCXInterlaced";
             this->fcgCXInterlaced->Size = System::Drawing::Size(152, 22);
             this->fcgCXInterlaced->TabIndex = 8;
             this->fcgCXInterlaced->Tag = L"chValue";
             // 
-            // fcgBTffmpegOutPath
+            // fcgBTVideoEncoderPath
             // 
-            this->fcgBTffmpegOutPath->Location = System::Drawing::Point(274, 34);
-            this->fcgBTffmpegOutPath->Name = L"fcgBTffmpegOutPath";
-            this->fcgBTffmpegOutPath->Size = System::Drawing::Size(27, 22);
-            this->fcgBTffmpegOutPath->TabIndex = 2;
-            this->fcgBTffmpegOutPath->Text = L"...";
-            this->fcgBTffmpegOutPath->UseVisualStyleBackColor = true;
-            this->fcgBTffmpegOutPath->Click += gcnew System::EventHandler(this, &frmConfig::fcgBTffmpegOutPath_Click);
+            this->fcgBTVideoEncoderPath->Location = System::Drawing::Point(291, 33);
+            this->fcgBTVideoEncoderPath->Name = L"fcgBTVideoEncoderPath";
+            this->fcgBTVideoEncoderPath->Size = System::Drawing::Size(27, 22);
+            this->fcgBTVideoEncoderPath->TabIndex = 2;
+            this->fcgBTVideoEncoderPath->Text = L"...";
+            this->fcgBTVideoEncoderPath->UseVisualStyleBackColor = true;
+            this->fcgBTVideoEncoderPath->Click += gcnew System::EventHandler(this, &frmConfig::fcgBTVideoEncoderPath_Click);
             // 
-            // fcgTXffmpegOutPath
+            // fcgTXVideoEncoderPath
             // 
-            this->fcgTXffmpegOutPath->AllowDrop = true;
-            this->fcgTXffmpegOutPath->Location = System::Drawing::Point(22, 34);
-            this->fcgTXffmpegOutPath->Name = L"fcgTXffmpegOutPath";
-            this->fcgTXffmpegOutPath->Size = System::Drawing::Size(246, 21);
-            this->fcgTXffmpegOutPath->TabIndex = 1;
-            this->fcgTXffmpegOutPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXffmpegOutPath_TextChanged);
-            this->fcgTXffmpegOutPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
-            this->fcgTXffmpegOutPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
-            this->fcgTXffmpegOutPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXffmpegOutPath_Enter);
-            this->fcgTXffmpegOutPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXffmpegOutPath_Leave);
+            this->fcgTXVideoEncoderPath->AllowDrop = true;
+            this->fcgTXVideoEncoderPath->Location = System::Drawing::Point(22, 34);
+            this->fcgTXVideoEncoderPath->Name = L"fcgTXVideoEncoderPath";
+            this->fcgTXVideoEncoderPath->Size = System::Drawing::Size(263, 21);
+            this->fcgTXVideoEncoderPath->TabIndex = 1;
+            this->fcgTXVideoEncoderPath->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXVideoEncoderPath_TextChanged);
+            this->fcgTXVideoEncoderPath->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_DragDrop);
+            this->fcgTXVideoEncoderPath->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgSetDragDropFilename_Enter);
+            this->fcgTXVideoEncoderPath->Enter += gcnew System::EventHandler(this, &frmConfig::fcgTXVideoEncoderPath_Enter);
+            this->fcgTXVideoEncoderPath->Leave += gcnew System::EventHandler(this, &frmConfig::fcgTXVideoEncoderPath_Leave);
             // 
-            // fcgLBffmpegOutPath
+            // fcgLBVideoEncoderPath
             // 
-            this->fcgLBffmpegOutPath->AutoSize = true;
-            this->fcgLBffmpegOutPath->Location = System::Drawing::Point(11, 13);
-            this->fcgLBffmpegOutPath->Name = L"fcgLBffmpegOutPath";
-            this->fcgLBffmpegOutPath->Size = System::Drawing::Size(49, 14);
-            this->fcgLBffmpegOutPath->TabIndex = 5;
-            this->fcgLBffmpegOutPath->Text = L"～の指定";
+            this->fcgLBVideoEncoderPath->AutoSize = true;
+            this->fcgLBVideoEncoderPath->Location = System::Drawing::Point(11, 13);
+            this->fcgLBVideoEncoderPath->Name = L"fcgLBVideoEncoderPath";
+            this->fcgLBVideoEncoderPath->Size = System::Drawing::Size(49, 14);
+            this->fcgLBVideoEncoderPath->TabIndex = 5;
+            this->fcgLBVideoEncoderPath->Text = L"～の指定";
             // 
             // fcgLBTempDir
             // 
@@ -1260,9 +1263,9 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             this->fcgCXffmpegOutPriority->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXffmpegOutPriority->FormattingEnabled = true;
-            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(449, 42);
+            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(476, 42);
             this->fcgCXffmpegOutPriority->Name = L"fcgCXffmpegOutPriority";
-            this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(152, 22);
+            this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(125, 22);
             this->fcgCXffmpegOutPriority->TabIndex = 3;
             this->fcgCXffmpegOutPriority->Tag = L"chValue";
             // 
@@ -1366,6 +1369,23 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->toolStripSeparator3->Name = L"toolStripSeparator3";
             this->toolStripSeparator3->Size = System::Drawing::Size(6, 25);
             // 
+            // fcgTSLanguage
+            // 
+            this->fcgTSLanguage->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
+            this->fcgTSLanguage->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+            this->fcgTSLanguage->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSLanguage.Image")));
+            this->fcgTSLanguage->ImageTransparentColor = System::Drawing::Color::Magenta;
+            this->fcgTSLanguage->Name = L"fcgTSLanguage";
+            this->fcgTSLanguage->Size = System::Drawing::Size(44, 22);
+            this->fcgTSLanguage->Text = L"言語";
+            this->fcgTSLanguage->DropDownItemClicked += gcnew System::Windows::Forms::ToolStripItemClickedEventHandler(this, &frmConfig::fcgTSLanguage_DropDownItemClicked);
+            // 
+            // toolStripSeparator1
+            // 
+            this->toolStripSeparator1->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
+            this->toolStripSeparator1->Name = L"toolStripSeparator1";
+            this->toolStripSeparator1->Size = System::Drawing::Size(6, 25);
+            // 
             // fcgTSBBitrateCalc
             // 
             this->fcgTSBBitrateCalc->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
@@ -1429,10 +1449,10 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             // 
             // fcggroupBoxAudio
             // 
+            this->fcggroupBoxAudio->Controls->Add(this->fcgPNAudioExt);
             this->fcggroupBoxAudio->Controls->Add(this->fcgCBAudioUseInternal);
             this->fcggroupBoxAudio->Controls->Add(this->fcgCBFAWCheck);
             this->fcggroupBoxAudio->Controls->Add(this->fcgPNAudioInternal);
-            this->fcggroupBoxAudio->Controls->Add(this->fcgPNAudioExt);
             this->fcggroupBoxAudio->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->fcggroupBoxAudio->Location = System::Drawing::Point(622, 25);
@@ -1470,7 +1490,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgPNAudioInternal->Controls->Add(this->fcgLBAudioBitrateInternal);
             this->fcgPNAudioInternal->Controls->Add(this->fcgNUAudioBitrateInternal);
             this->fcgPNAudioInternal->Controls->Add(this->fcgCXAudioEncModeInternal);
-            this->fcgPNAudioInternal->Controls->Add(this->label4);
+            this->fcgPNAudioInternal->Controls->Add(this->fcgLBAudioEncModeInternal);
             this->fcgPNAudioInternal->Controls->Add(this->fcgCXAudioEncoderInternal);
             this->fcgPNAudioInternal->Location = System::Drawing::Point(2, 37);
             this->fcgPNAudioInternal->Name = L"fcgPNAudioInternal";
@@ -1507,14 +1527,14 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgCXAudioEncModeInternal->Tag = L"chValue";
             this->fcgCXAudioEncModeInternal->SelectedIndexChanged += gcnew System::EventHandler(this, &frmConfig::fcgCXAudioEncModeInternal_SelectedIndexChanged);
             // 
-            // label4
+            // fcgLBAudioEncModeInternal
             // 
-            this->label4->AutoSize = true;
-            this->label4->Location = System::Drawing::Point(14, 50);
-            this->label4->Name = L"label4";
-            this->label4->Size = System::Drawing::Size(32, 14);
-            this->label4->TabIndex = 79;
-            this->label4->Text = L"モード";
+            this->fcgLBAudioEncModeInternal->AutoSize = true;
+            this->fcgLBAudioEncModeInternal->Location = System::Drawing::Point(14, 50);
+            this->fcgLBAudioEncModeInternal->Name = L"fcgLBAudioEncModeInternal";
+            this->fcgLBAudioEncModeInternal->Size = System::Drawing::Size(32, 14);
+            this->fcgLBAudioEncModeInternal->TabIndex = 79;
+            this->fcgLBAudioEncModeInternal->Text = L"モード";
             // 
             // fcgCXAudioEncoderInternal
             // 
@@ -2374,7 +2394,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgLBVersionDate->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 9, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->fcgLBVersionDate->ForeColor = System::Drawing::SystemColors::ControlDarkDark;
-            this->fcgLBVersionDate->Location = System::Drawing::Point(478, 505);
+            this->fcgLBVersionDate->Location = System::Drawing::Point(436, 505);
             this->fcgLBVersionDate->Name = L"fcgLBVersionDate";
             this->fcgLBVersionDate->Size = System::Drawing::Size(49, 15);
             this->fcgLBVersionDate->TabIndex = 8;
@@ -2429,27 +2449,27 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             this->fcgPNHideToolStripBorder->TabIndex = 16;
             this->fcgPNHideToolStripBorder->Visible = false;
             // 
-            // fcgTSLanguage
+            // fcgLBguiExBlog
             // 
-            this->fcgTSLanguage->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
-            this->fcgTSLanguage->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
-            this->fcgTSLanguage->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"fcgTSLanguage.Image")));
-            this->fcgTSLanguage->ImageTransparentColor = System::Drawing::Color::Magenta;
-            this->fcgTSLanguage->Name = L"fcgTSLanguage";
-            this->fcgTSLanguage->Size = System::Drawing::Size(44, 22);
-            this->fcgTSLanguage->Text = L"言語";
-            // 
-            // toolStripSeparator1
-            // 
-            this->toolStripSeparator1->Alignment = System::Windows::Forms::ToolStripItemAlignment::Right;
-            this->toolStripSeparator1->Name = L"toolStripSeparator1";
-            this->toolStripSeparator1->Size = System::Drawing::Size(6, 25);
+            this->fcgLBguiExBlog->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+            this->fcgLBguiExBlog->AutoSize = true;
+            this->fcgLBguiExBlog->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Italic, System::Drawing::GraphicsUnit::Point,
+                static_cast<System::Byte>(128)));
+            this->fcgLBguiExBlog->LinkColor = System::Drawing::Color::Gray;
+            this->fcgLBguiExBlog->Location = System::Drawing::Point(620, 506);
+            this->fcgLBguiExBlog->Name = L"fcgLBguiExBlog";
+            this->fcgLBguiExBlog->Size = System::Drawing::Size(101, 14);
+            this->fcgLBguiExBlog->TabIndex = 17;
+            this->fcgLBguiExBlog->TabStop = true;
+            this->fcgLBguiExBlog->Text = L"ffmpegOutについて";
+            this->fcgLBguiExBlog->VisitedLinkColor = System::Drawing::Color::Gray;
             // 
             // frmConfig
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
             this->ClientSize = System::Drawing::Size(1008, 527);
+            this->Controls->Add(this->fcgLBguiExBlog);
             this->Controls->Add(this->fcgPNHideToolStripBorder);
             this->Controls->Add(this->fcgPNHideTabControlVideo);
             this->Controls->Add(this->fcgLBVersion);
@@ -2738,7 +2758,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
         }
     private:
         System::Void frmConfig::ExeTXPathEnter() {
-            fcgTXffmpegOutPath_Enter(nullptr, nullptr);
+            fcgTXVideoEncoderPath_Enter(nullptr, nullptr);
             fcgTXAudioEncoderPath_Enter(nullptr, nullptr);
             fcgTXMP4MuxerPath_Enter(nullptr, nullptr);
             fcgTXTC2MP4Path_Enter(nullptr, nullptr);
@@ -2748,7 +2768,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
         }
     private:
         System::Void frmConfig::ExeTXPathLeave() {
-            fcgTXffmpegOutPath_Leave(nullptr, nullptr);
+            fcgTXVideoEncoderPath_Leave(nullptr, nullptr);
             fcgTXAudioEncoderPath_Leave(nullptr, nullptr);
             fcgTXMP4MuxerPath_Leave(nullptr, nullptr);
             fcgTXTC2MP4Path_Leave(nullptr, nullptr);
@@ -2757,19 +2777,19 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             fcgTXMPGMuxerPath_Leave(nullptr, nullptr);
         }
     private: 
-        System::Void fcgBTffmpegOutPath_Click(System::Object^  sender, System::EventArgs^  e) {
-            openExeFile(fcgTXffmpegOutPath, LocalStg.ffmpegOutExeName);
+        System::Void fcgBTVideoEncoderPath_Click(System::Object^  sender, System::EventArgs^  e) {
+            openExeFile(fcgTXVideoEncoderPath, LocalStg.ffmpegOutExeName);
         }
     private:
-        System::Void fcgTXffmpegOutPath_Enter(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXffmpegOutPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
-                fcgTXffmpegOutPath->Text = L"";
+        System::Void fcgTXVideoEncoderPath_Enter(System::Object^  sender, System::EventArgs^  e) {
+            if (fcgTXVideoEncoderPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
+                fcgTXVideoEncoderPath->Text = L"";
             }
         }
     private:
-        System::Void fcgTXffmpegOutPath_Leave(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXffmpegOutPath->Text->Length == 0) {
-                fcgTXffmpegOutPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
+        System::Void fcgTXVideoEncoderPath_Leave(System::Object^  sender, System::EventArgs^  e) {
+            if (fcgTXVideoEncoderPath->Text->Length == 0) {
+                fcgTXVideoEncoderPath->Text = LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH);
             }
         }
     private:
@@ -3037,14 +3057,14 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
             qualityTimer->Change(System::Threading::Timeout::Infinite, fcgTBQualityTimerPeriod);
         }
     private:
-        System::Void fcgTXffmpegOutPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-            if (fcgTXffmpegOutPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
+        System::Void fcgTXVideoEncoderPath_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+            if (fcgTXVideoEncoderPath->Text == LOAD_CLI_STRING(AUO_CONFIG_CX_USE_DEFAULT_EXE_PATH)) {
                 LocalStg.ffmpegOutPath = L"";
-                fcgTXffmpegOutPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
+                fcgTXVideoEncoderPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Disabled);
             } else {
-                fcgTXffmpegOutPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
-                LocalStg.ffmpegOutPath = fcgTXffmpegOutPath->Text;
-                fcgBTffmpegOutPath->ContextMenuStrip = (File::Exists(fcgTXffmpegOutPath->Text)) ? fcgCSExeFiles : nullptr;
+                fcgTXVideoEncoderPath->ForeColor = getTextBoxForeColor(themeMode, dwStgReader, DarkenWindowState::Normal);
+                LocalStg.ffmpegOutPath = fcgTXVideoEncoderPath->Text;
+                fcgBTVideoEncoderPath->ContextMenuStrip = (File::Exists(fcgTXVideoEncoderPath->Text)) ? fcgCSExeFiles : nullptr;
             }
         }
     private:
@@ -3199,7 +3219,7 @@ private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
 
             //Name, args, Path の順番
             array<ExeControls>^ ControlList = {
-                { fcgBTffmpegOutPath->Name,      fcgTXffmpegOutPath->Text,      sys_dat->exstg->s_local.ffmpeg_help_cmd },
+                { fcgBTVideoEncoderPath->Name,      fcgTXVideoEncoderPath->Text,      sys_dat->exstg->s_local.ffmpeg_help_cmd },
                 { fcgBTAudioEncoderPath->Name,   fcgTXAudioEncoderPath->Text,   sys_dat->exstg->s_aud_ext[fcgCXAudioEncoder->SelectedIndex].cmd_help },
                 { fcgBTMP4MuxerPath->Name,       fcgTXMP4MuxerPath->Text,       sys_dat->exstg->s_mux[MUXER_MP4].help_cmd },
                 { fcgBTTC2MP4Path->Name,         fcgTXTC2MP4Path->Text,         sys_dat->exstg->s_mux[MUXER_TC2MP4].help_cmd },

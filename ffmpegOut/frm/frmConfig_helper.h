@@ -210,8 +210,6 @@ namespace ffmpegOut {
     const int fcgCXAudioEncModeLargeWidth = 237;
 };
 
-static const WCHAR *use_default_exe_path = L"exe_files内の実行ファイルを自動選択";
-
 /*
 //コンボボックスの表示名
 const WCHAR * const x264_encodemode_desc[] = {
@@ -244,29 +242,30 @@ const int x264_encmode_to_passint[] = {
     NULL
 };
 */
-const WCHAR * const aspect_desc[] = {
-    L"SAR比を指定 (デフォルト)",
-    L"画面比から自動計算",
-    NULL
+
+static const ENC_OPTION_STR aspect_desc[] = {
+    { NULL, AUO_CONFIG_CX_ASPECT_SAR, L"SAR比を指定 (デフォルト)" },
+    { NULL, AUO_CONFIG_CX_ASPECT_DAR, L"画面比から自動計算"       },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
-const WCHAR * const tempdir_desc[] = {
-    L"出力先と同じフォルダ (デフォルト)",
-    L"システムの一時フォルダ",
-    L"カスタム",
-    NULL
+static const ENC_OPTION_STR tempdir_desc[] = {
+    { NULL, AUO_CONFIG_CX_TEMPDIR_OUTDIR, L"出力先と同じフォルダ (デフォルト)" },
+    { NULL, AUO_CONFIG_CX_TEMPDIR_SYSTEM, L"システムの一時フォルダ"            },
+    { NULL, AUO_CONFIG_CX_TEMPDIR_CUSTOM, L"カスタム"                          },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
-const WCHAR * const audtempdir_desc[] = {
-    L"変更しない",
-    L"カスタム",
-    NULL
+static const ENC_OPTION_STR audtempdir_desc[] = {
+    { NULL, AUO_CONFIG_CX_AUDTEMP_DEFAULT, L"変更しない" },
+    { NULL, AUO_CONFIG_CX_AUDTEMP_CUSTOM,  L"カスタム"   },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
-const WCHAR * const mp4boxtempdir_desc[] = {
-    L"指定しない",
-    L"カスタム",
-    NULL
+static const ENC_OPTION_STR mp4boxtempdir_desc[] = {
+    { NULL, AUO_CONFIG_CX_MP4BOXTEMP_DEFAULT, L"指定しない" },
+    { NULL, AUO_CONFIG_CX_MP4BOXTEMP_CUSTOM,  L"カスタム"   },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
 //const WCHAR * const interlaced_desc[] = {
@@ -276,17 +275,17 @@ const WCHAR * const mp4boxtempdir_desc[] = {
 //    NULL
 //};
 
-const WCHAR * const interlaced_desc[] = {
-    L"プログレッシブ",
-    L"インターレース",
-    NULL
+static const ENC_OPTION_STR interlaced_desc[] = {
+    { NULL, AUO_CONFIG_CX_INTERLACE_PROGRESSIVE, L"プログレッシブ" },
+    { NULL, AUO_CONFIG_CX_INTERLACE_TFF,         L"インターレース" },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
-const WCHAR * const audio_enc_timing_desc[] = {
-    L"後",
-    L"前",
-    L"同時",
-    NULL
+static const ENC_OPTION_STR audio_enc_timing_desc[] = {
+    { NULL, AUO_CONFIG_CX_AUD_ENC_ORDER_AFTER,    L"後"   },
+    { NULL, AUO_CONFIG_CX_AUD_ENC_ORDER_BEFORE,   L"前"   },
+    { NULL, AUO_CONFIG_CX_AUD_ENC_ORDER_PARALLEL, L"同時" },
+    { NULL, AUO_MES_UNKNOWN, NULL }
 };
 
 //メモ表示用 RGB
