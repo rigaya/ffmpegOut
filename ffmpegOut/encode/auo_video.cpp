@@ -523,7 +523,13 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     const DWORD aviutl_fourcc = COLORFORMATS[color_format].FOURCC;
 
     //YUY2/YC48->NV12/YUV444, RGBコピー用関数
-    const func_convert_frame convert_frame = get_convert_func(oip->w, color_format, conf->enc.use_highbit_depth ? 16 : 8, conf->enc.interlaced, conf->enc.output_csp);
+    auto convert_func_output_csp = conf->enc.output_csp;
+    if (convert_func_output_csp == OUT_CSP_P010) {
+        convert_func_output_csp = OUT_CSP_NV12;
+    } else if (convert_func_output_csp == OUT_CSP_YUV444_16) {
+        convert_func_output_csp = OUT_CSP_YUV444;
+    }
+    const func_convert_frame convert_frame = get_convert_func(oip->w, color_format, conf->enc.use_highbit_depth ? 16 : 8, conf->enc.interlaced, convert_func_output_csp);
     if (convert_frame == NULL) {
         ret |= AUO_RESULT_ERROR; error_select_convert_func(oip->w, oip->h, conf->enc.use_highbit_depth ? 16 : 8, conf->enc.interlaced, conf->enc.output_csp);
         return ret;
