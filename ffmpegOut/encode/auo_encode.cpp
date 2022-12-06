@@ -711,7 +711,8 @@ void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int curre
     DWORD buildNumber = 0;
     const TCHAR *osver = getOSVersion(&buildNumber);
     write_log_auo_line_fmt(LOG_INFO, L"%s %s / %s %s (%d) / %s",
-        AUO_NAME_WITHOUT_EXT_W, AUO_VERSION_STR_W, osver, is_64bit_os() ? L"x64" : L"x86", buildNumber, char_to_wstring(cpu_info).c_str());
+        AUO_NAME_WITHOUT_EXT_W, AUO_VERSION_STR_W, char_to_wstring(osver).c_str(),
+        is_64bit_os() ? L"x64" : L"x86", buildNumber, char_to_wstring(cpu_info).c_str());
 }
 
 static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, const SYSTEM_DATA *sys_dat) {
