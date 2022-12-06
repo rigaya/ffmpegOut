@@ -342,7 +342,7 @@ AUO_CONFIG_ERR_OPEN_HELP=Failed to open help text.
 AUO_CONFIG_BITRATE_AUTO=auto
 
 [AUO_CONFIG_FCG]
-AuofcgtabPageExSettings=映像
+AuofcgtabPageExSettings=Video
 AuofcgCBAuoTcfileout=Output timecode
 AuofcgCBAudioInput=Enable Audio
 AuofcgCB2passEnc=2pass encode
@@ -498,10 +498,10 @@ AUO_CONFIG_CX_REPLACE_DAR_Y=display aspect ratio (y)
 
 [AUO_CONFIG_TT]
 AuofrmTTfcgTXVideoEncoderPath=Set ffmpeg.exe to be used.
-AuofrmTTfcgCXOutputCsp=
-AuofrmTTfcgCB2passEnc=
-AuofrmTTfcgCBAudioInput=
-AuofrmTTfcgTXOutputExt=
+AuofrmTTfcgCXOutputCsp=Select output colorspace.
+AuofrmTTfcgCB2passEnc=Enable 2pass encode.
+AuofrmTTfcgCBAudioInput=Enable audio output.
+AuofrmTTfcgTXOutputExt=Set output extention.
 AuofrmTTfcgCXTempDir=Set directory for the temporary files below.\n- audio temp files\n- video temp file\n- timecode file\n- qp file\n- muxed file
 AuofrmTTfcgBTCustomTempDir=Custom temporary directory path.\n\nThis setting is saved in ffmpegOut.conf,\nand cannot be changed in each bat process.
 AuofrmTTfcgCBAudioUseExt=Check Off\nUse ffmpegOutC internal audio encoder.\n\nCheck On\nUse external audio encoder.
