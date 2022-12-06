@@ -287,6 +287,7 @@ void init_SYSTEM_DATA(SYSTEM_DATA *_sys_dat) {
     get_auo_path(_sys_dat->auo_path, _countof(_sys_dat->auo_path));
     get_aviutl_dir(_sys_dat->aviutl_dir, _countof(_sys_dat->aviutl_dir));
     _sys_dat->exstg = new guiEx_settings();
+    load_lng(g_sys_dat.exstg->get_lang());
     _sys_dat->init = TRUE;
 }
 void delete_SYSTEM_DATA(SYSTEM_DATA *_sys_dat) {
