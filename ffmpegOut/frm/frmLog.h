@@ -108,12 +108,12 @@ namespace AUO_NAME_R {
                     x264_priority->Name = L"ToolStripItem" + String(priority_table[i].text).ToString();
                     x264_priority->Text = String(priority_table[i].text).ToString();
                     x264_priority->Checked = (_x264_priority != NULL && *_x264_priority == priority_table[i].value) ? true : false;
-                    this->ToolStripMenuItemx264Priority->DropDownItems->Add(x264_priority);
+                    this->ToolStripMenuItemVidEncPriority->DropDownItems->Add(x264_priority);
                 } else {
-                    this->ToolStripMenuItemx264Priority->DropDownItems->Add(gcnew System::Windows::Forms::ToolStripSeparator());
+                    this->ToolStripMenuItemVidEncPriority->DropDownItems->Add(gcnew System::Windows::Forms::ToolStripSeparator());
                 }
             }
-            this->ToolStripMenuItemx264Priority->Enabled    = false;
+            this->ToolStripMenuItemVidEncPriority->Enabled    = false;
             this->ToolStripMenuItemEncPause->Enabled        = false;
             frmTransparency = exstg.s_log.transparency;
             this->ToolStripMenuItemTransparent->Checked     = exstg.s_log.transparent != 0;
@@ -197,7 +197,7 @@ namespace AUO_NAME_R {
     private: System::Windows::Forms::RichTextBox^  richTextLog;
     private: System::Windows::Forms::ContextMenuStrip^  contextMenuStripLog;
 
-    private: System::Windows::Forms::ToolStripMenuItem^  ToolStripMenuItemx264Priority;
+    private: System::Windows::Forms::ToolStripMenuItem^  ToolStripMenuItemVidEncPriority;
     private: System::Windows::Forms::ToolStripMenuItem^  ToolStripMenuItemTransparent;
     private: System::Windows::Forms::ToolStripMenuItem^  ToolStripMenuItemStartMinimized;
     private: System::Windows::Forms::ToolStripMenuItem^  ToolStripMenuItemEncPause;
@@ -240,7 +240,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
             this->contextMenuStripLog = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->toolStripMenuItemFileOpen = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->toolStripMenuItemFilePathOpen = (gcnew System::Windows::Forms::ToolStripMenuItem());
-            this->ToolStripMenuItemx264Priority = (gcnew System::Windows::Forms::ToolStripMenuItem());
+            this->ToolStripMenuItemVidEncPriority = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->ToolStripMenuItemEncPause = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->ToolStripMenuItemTransparent = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->toolStripMenuItemTransparentValue = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -284,7 +284,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
             // 
             this->contextMenuStripLog->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(14) {
                 this->toolStripMenuItemFileOpen,
-                    this->toolStripMenuItemFilePathOpen, this->ToolStripMenuItemx264Priority, this->ToolStripMenuItemEncPause, this->ToolStripMenuItemTransparent,
+                    this->toolStripMenuItemFilePathOpen, this->ToolStripMenuItemVidEncPriority, this->ToolStripMenuItemEncPause, this->ToolStripMenuItemTransparent,
                     this->toolStripMenuItemTransparentValue, this->toolStripMenuItemSetLogColor, this->ToolStripMenuItemStartMinimized, this->toolStripMenuItemSaveLogSize,
                     this->toolStripMenuItemAutoSave, this->toolStripMenuItemAutoSaveSettings, this->toolStripMenuItemShowStatus, this->toolStripMenuItemTaskBarProgress,
                     this->toolStripMenuItemWindowFont
@@ -308,12 +308,12 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
             this->toolStripMenuItemFilePathOpen->Text = L"この動画の場所を開く...";
             this->toolStripMenuItemFilePathOpen->Click += gcnew System::EventHandler(this, &frmLog::toolStripMenuItemFilePathOpen_Click);
             // 
-            // ToolStripMenuItemx264Priority
+            // ToolStripMenuItemVidEncPriority
             // 
-            this->ToolStripMenuItemx264Priority->Name = L"ToolStripMenuItemx264Priority";
-            this->ToolStripMenuItemx264Priority->Size = System::Drawing::Size(224, 22);
-            this->ToolStripMenuItemx264Priority->Text = L"エンコーダ優先度";
-            this->ToolStripMenuItemx264Priority->DropDownItemClicked += gcnew System::Windows::Forms::ToolStripItemClickedEventHandler(this, &frmLog::ToolStripMenuItemx264Priority_DropDownItemClicked);
+            this->ToolStripMenuItemVidEncPriority->Name = L"ToolStripMenuItemVidEncPriority";
+            this->ToolStripMenuItemVidEncPriority->Size = System::Drawing::Size(224, 22);
+            this->ToolStripMenuItemVidEncPriority->Text = L"エンコーダ優先度";
+            this->ToolStripMenuItemVidEncPriority->DropDownItemClicked += gcnew System::Windows::Forms::ToolStripItemClickedEventHandler(this, &frmLog::ToolStripMenuItemVidEncPriority_DropDownItemClicked);
             // 
             // ToolStripMenuItemEncPause
             // 
@@ -489,7 +489,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
             LOAD_CLI_TEXT(richTextLog);
             LOAD_CLI_TEXT(toolStripMenuItemFileOpen);
             LOAD_CLI_TEXT(toolStripMenuItemFilePathOpen);
-            //LOAD_CLI_TEXT(ToolStripMenuItemVidEncPriority);
+            LOAD_CLI_TEXT(ToolStripMenuItemVidEncPriority);
             LOAD_CLI_TEXT(ToolStripMenuItemEncPause);
             LOAD_CLI_TEXT(ToolStripMenuItemTransparent);
             LOAD_CLI_TEXT(toolStripMenuItemTransparentValue);
@@ -805,11 +805,11 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
                     if (*_x264_priority == priority_table[i].value)
                         break;
 
-                for (j = 0; j < this->ToolStripMenuItemx264Priority->DropDownItems->Count; j++)
+                for (j = 0; j < this->ToolStripMenuItemVidEncPriority->DropDownItems->Count; j++)
                     if (wcscmp(priority_table[j].text, L"") != NULL)
-                        ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemx264Priority->DropDownItems[j])->Checked = false;
-                ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemx264Priority->DropDownItems[i])->Checked = true;
-                this->ToolStripMenuItemx264Priority->Enabled = true;
+                        ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemVidEncPriority->DropDownItems[j])->Checked = false;
+                ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemVidEncPriority->DropDownItems[i])->Checked = true;
+                this->ToolStripMenuItemVidEncPriority->Enabled = true;
             }
 
             if (_enc_pause) {
@@ -819,7 +819,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
         }
     public:
         System::Void DisableEncControl() {
-            this->ToolStripMenuItemx264Priority->Enabled = false;
+            this->ToolStripMenuItemVidEncPriority->Enabled = false;
             this->ToolStripMenuItemEncPause->Enabled = false;
             _x264_priority = NULL;
             _start_time = 0;
@@ -936,21 +936,21 @@ private: System::Windows::Forms::ToolStripMenuItem^  toolStripMenuItemFilePathOp
             ToolStripCheckItem_CheckedChanged(sender, e);
         }
     private:
-        System::Void ToolStripMenuItemx264Priority_DropDownItemClicked(System::Object^  sender, System::Windows::Forms::ToolStripItemClickedEventArgs^  e) {
+        System::Void ToolStripMenuItemVidEncPriority_DropDownItemClicked(System::Object^  sender, System::Windows::Forms::ToolStripItemClickedEventArgs^  e) {
             int i, j;
-            if (_x264_priority != NULL && e->ClickedItem->GetType() == this->ToolStripMenuItemx264Priority->GetType()) {
+            if (_x264_priority != NULL && e->ClickedItem->GetType() == this->ToolStripMenuItemVidEncPriority->GetType()) {
                 System::Windows::Forms::ToolStripMenuItem^ item = (System::Windows::Forms::ToolStripMenuItem^)e->ClickedItem;
                 //一度全部のチェックを外す
-                for (i = 0; i < this->ToolStripMenuItemx264Priority->DropDownItems->Count; i++) {
+                for (i = 0; i < this->ToolStripMenuItemVidEncPriority->DropDownItems->Count; i++) {
                     if (wcscmp(priority_table[i].text, L"") != NULL) {
-                        ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemx264Priority->DropDownItems[i])->Checked = false;
+                        ((System::Windows::Forms::ToolStripMenuItem^)this->ToolStripMenuItemVidEncPriority->DropDownItems[i])->Checked = false;
                     }
                 }
 
                 //自分だけチェックする
                 item->Checked = true;
                 //自分のインデックスを取得
-                for (j = 0; j < this->ToolStripMenuItemx264Priority->DropDownItems->Count; j++) {
+                for (j = 0; j < this->ToolStripMenuItemVidEncPriority->DropDownItems->Count; j++) {
                     if (wcscmp(priority_table[j].text, L"") != NULL) {
                         if (String::Compare(String(priority_table[j].text).ToString(), item->Text) == 0) {
                             break;

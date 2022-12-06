@@ -82,7 +82,7 @@ const PRIORITY_CLASS priority_table[] = {
     {L"low",              AUO_CONF_PRIORITY_LOW,        BELOW_NORMAL_PRIORITY_CLASS },
     {L"lower",            AUO_CONF_PRIORITY_LOWER,      IDLE_PRIORITY_CLASS         },
     {L"",                 AUO_MES_UNKNOWN,              NORMAL_PRIORITY_CLASS       },
-    {L"realtime(非推奨)", AUO_CONF_PRIORITY_REALTIME,   REALTIME_PRIORITY_CLASS     },
+    {L"realtime",         AUO_CONF_PRIORITY_REALTIME,   REALTIME_PRIORITY_CLASS     },
     {NULL,                AUO_MES_UNKNOWN, 0                           }
 };
 
