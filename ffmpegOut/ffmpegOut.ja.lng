@@ -485,10 +485,10 @@ AUO_CONFIG_CX_REPLACE_DAR_Y=画面アスペクト比 (縦)
 
 [AUO_CONFIG_TT]
 AuofrmTTfcgTXVideoEncoderPath=使用するffmpeg.exeを指定します。\n指定がない場合、exe_files以下のffmpegを自動的に検索して使用します。
-AuofrmTTfcgCXOutputCsp=
-AuofrmTTfcgCB2passEnc=
-AuofrmTTfcgCBAudioInput=
-AuofrmTTfcgTXOutputExt=
+AuofrmTTfcgCXOutputCsp=出力色空間を指定します。
+AuofrmTTfcgCB2passEnc=2passエンコードを行います。\n2passエンコードに対応しているコーデックを指定する必要があります。
+AuofrmTTfcgCBAudioInput=音声の出力を有効にします。
+AuofrmTTfcgTXOutputExt=出力拡張子を指定します。
 AuofrmTTfcgCXTempDir=一時ファイル群\n・音声一時ファイル(wav / エンコード後音声)\n・動画一時ファイル\n・タイムコードファイル\n・qpファイル\n・mux後ファイル\nの作成場所を指定します。
 AuofrmTTfcgBTCustomTempDir=一時ファイルの場所を「カスタム」に設定した際に\n使用される一時ファイルの場所を指定します。\n\nこの設定はffmpeg.confに保存され、\nバッチ処理ごとの変更はできません。
 AuofrmTTfcgCXAudioEncoder=使用する音声エンコーダを指定します。\nこれらの設定はffmpeg.iniに記述されています。
