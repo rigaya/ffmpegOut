@@ -1097,6 +1097,7 @@ System::Void frmConfig::LoadLangText() {
     LOAD_CLI_TEXT(fcgLBBatAfterPath);
     LOAD_CLI_TEXT(fcgCBWaitForBatAfter);
     LOAD_CLI_TEXT(fcgCBRunBatAfter);
+    LOAD_CLI_TEXT(fcgLBguiExBlog);
     LOAD_CLI_TEXT(fcgBTCancel);
     LOAD_CLI_TEXT(fcgBTOK);
     LOAD_CLI_TEXT(fcgBTDefault);

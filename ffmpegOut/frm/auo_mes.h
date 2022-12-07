@@ -551,6 +551,7 @@ enum AuoMes {
         AuofcgLBBatAfterPath,
         AuofcgCBWaitForBatAfter,
         AuofcgCBRunBatAfter,
+        AuofcgLBguiExBlog,
         AuofcgBTCancel,
         AuofcgBTOK,
         AuofcgBTDefault,
