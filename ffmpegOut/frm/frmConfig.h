@@ -1059,7 +1059,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // fcgCBAudioInput
             // 
             this->fcgCBAudioInput->AutoSize = true;
-            this->fcgCBAudioInput->Location = System::Drawing::Point(154, 65);
+            this->fcgCBAudioInput->Location = System::Drawing::Point(191, 65);
             this->fcgCBAudioInput->Name = L"fcgCBAudioInput";
             this->fcgCBAudioInput->Size = System::Drawing::Size(78, 18);
             this->fcgCBAudioInput->TabIndex = 15;
@@ -1089,7 +1089,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // 
             // fcgTXOutputExt
             // 
-            this->fcgTXOutputExt->Location = System::Drawing::Point(476, 12);
+            this->fcgTXOutputExt->Location = System::Drawing::Point(478, 12);
             this->fcgTXOutputExt->Name = L"fcgTXOutputExt";
             this->fcgTXOutputExt->Size = System::Drawing::Size(123, 21);
             this->fcgTXOutputExt->TabIndex = 12;
@@ -1263,7 +1263,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // 
             this->fcgCXffmpegOutPriority->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXffmpegOutPriority->FormattingEnabled = true;
-            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(476, 42);
+            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(478, 42);
             this->fcgCXffmpegOutPriority->Name = L"fcgCXffmpegOutPriority";
             this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(125, 22);
             this->fcgCXffmpegOutPriority->TabIndex = 3;
@@ -1503,7 +1503,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // fcgLBAudioDelayCut
             // 
             this->fcgLBAudioDelayCut->AutoSize = true;
-            this->fcgLBAudioDelayCut->Location = System::Drawing::Point(223, 127);
+            this->fcgLBAudioDelayCut->Location = System::Drawing::Point(216, 127);
             this->fcgLBAudioDelayCut->Name = L"fcgLBAudioDelayCut";
             this->fcgLBAudioDelayCut->Size = System::Drawing::Size(60, 14);
             this->fcgLBAudioDelayCut->TabIndex = 33;
@@ -1513,7 +1513,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // 
             this->fcgCXAudioEncTiming->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->fcgCXAudioEncTiming->FormattingEnabled = true;
-            this->fcgCXAudioEncTiming->Location = System::Drawing::Point(288, 39);
+            this->fcgCXAudioEncTiming->Location = System::Drawing::Point(294, 39);
             this->fcgCXAudioEncTiming->Name = L"fcgCXAudioEncTiming";
             this->fcgCXAudioEncTiming->Size = System::Drawing::Size(68, 22);
             this->fcgCXAudioEncTiming->TabIndex = 27;
@@ -1680,7 +1680,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             // fcgCBAudioEncTiming
             // 
             this->fcgCBAudioEncTiming->AutoSize = true;
-            this->fcgCBAudioEncTiming->Location = System::Drawing::Point(243, 42);
+            this->fcgCBAudioEncTiming->Location = System::Drawing::Point(235, 42);
             this->fcgCBAudioEncTiming->Name = L"fcgCBAudioEncTiming";
             this->fcgCBAudioEncTiming->Size = System::Drawing::Size(40, 14);
             this->fcgCBAudioEncTiming->TabIndex = 28;
