@@ -1421,6 +1421,11 @@ System::Void frmConfig::SetHelpToolTips() {
     SET_TOOL_TIP_EX(fcgCB2passEnc);
     SET_TOOL_TIP_EX(fcgCBAudioInput);
     SET_TOOL_TIP_EX(fcgTXOutputExt);
+    SET_TOOL_TIP_EX(fcgCBAuoTcfileout);
+    SET_TOOL_TIP_EX(fcgCXInterlaced);
+    SET_TOOL_TIP_EX(fcgTXCmdEx);
+    SET_TOOL_TIP_EX(fcgTXInCmd);
+    SET_TOOL_TIP_EX(fcgCXffmpegOutPriority);
 
     //拡張
     SET_TOOL_TIP_EX(fcgCXTempDir);
