@@ -1416,24 +1416,11 @@ System::Void frmConfig::SetAllCheckChangedEvents(Control ^top) {
 
 System::Void frmConfig::SetHelpToolTips() {
 #define SET_TOOL_TIP_EX(target) { fcgTTEx->SetToolTip(target, LOAD_CLI_STRING(AuofrmTT ## target)); }
-    fcgTTEx->SetToolTip(fcgBTVideoEncoderPath, L""
-        + L"ffmpeg.exeの場所を指定します。\n"
-        + L"\n"
-        + L"この設定はffmpegOut.confに保存され、\n"
-        + L"バッチ処理ごとの変更はできません。"
-        );
-    fcgTTEx->SetToolTip(fcgCXOutputCsp,       L""
-        + L"ffmpeg.exeに渡す映像データの色空間を指定します。"
-        );
-    fcgTTEx->SetToolTip(fcgCB2passEnc,       L""
-        + L"自動的に2passエンコードを行います。"
-        );
-    fcgTTEx->SetToolTip(fcgCBAudioInput,       L""
-        + L"出力した音声をmuxします。"
-        );
-    fcgTTEx->SetToolTip(fcgTXOutputExt,       L""
-        + L"出力ファイルの拡張子を、ここで設定した拡張子で上書き・追加します。"
-        );
+    SET_TOOL_TIP_EX(fcgBTVideoEncoderPath);
+    SET_TOOL_TIP_EX(fcgCXOutputCsp);
+    SET_TOOL_TIP_EX(fcgCB2passEnc);
+    SET_TOOL_TIP_EX(fcgCBAudioInput);
+    SET_TOOL_TIP_EX(fcgTXOutputExt);
 
     //拡張
     SET_TOOL_TIP_EX(fcgCXTempDir);
