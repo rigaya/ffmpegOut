@@ -146,6 +146,9 @@
     <None Include="ffmpegOut.en.lng">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="ffmpegOut.en.ini">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auo.h">

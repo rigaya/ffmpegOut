@@ -284,6 +284,7 @@ copy /y ffmpegOut.zh.ini "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="ffmpegOut.def" />
+    <None Include="ffmpegOut.en.ini" />
     <None Include="ffmpegOut.en.lng" />
     <None Include="ffmpegOut.ini" />
     <None Include="ffmpegOut.ja.lng" />
