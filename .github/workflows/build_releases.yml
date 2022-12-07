@@ -17,7 +17,7 @@ jobs:
       version_name: ${{ steps.rev.outputs.VERSION_NAME }}
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Set version name
@@ -25,13 +25,13 @@ jobs:
       run: |
         cd ${{ github.workspace }}
         REVCOUNT=`git rev-list --count HEAD`
-        echo "::set-output name=REV_COUNT::${REVCOUNT}"
+        echo "rev_count=${REVCOUNT}" >> $GITHUB_OUTPUT
         if [[ "${{ github.ref }}" =~ "refs/tags/" ]]; then
           VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
         else
           VERSION=r${REVCOUNT}
         fi
-        echo "::set-output name=VERSION_NAME::${VERSION}"
+        echo "version_name=${VERSION}" >> $GITHUB_OUTPUT
 
   build:
     name: Upload Release Asset
@@ -51,7 +51,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0
@@ -97,4 +97,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: .\ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+          files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
