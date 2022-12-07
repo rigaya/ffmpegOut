@@ -185,12 +185,12 @@ ffmpegOut の Aviutl から削除するには、"plugins" フォルダ内の下�
 
 中国語については、Aviutlの中国語対応をされているNsyw様に翻訳いただきました。ご対応いただきありがとうございました！
 
-他の言語については、x264guiEx.auoと同じフォルダに下記2ファイルを置くことで、新たな言語を追加できます。
+他の言語については、ffmpegOut.auoと同じフォルダに下記2ファイルを置くことで、新たな言語を追加できます。
 
 | ファイル名 | 翻訳元 |
 |:---        |:---   |
-| x264guiEx.<2文字の言語コード>.lng | x264guiEx.ja.lng |
-| x264guiEx.<2文字の言語コード>.ini | x264guiEx.ja.ini |
+| ffmpegOut.<2文字の言語コード>.lng | ffmpegOut.ja.lng |
+| ffmpegOut.<2文字の言語コード>.ini | ffmpegOut.ja.ini |
 
 いずれもUTF-8で保存してください。
 
