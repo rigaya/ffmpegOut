@@ -288,6 +288,8 @@ copy /y ffmpegOut.zh.ini "$(OutDir)"</Command>
     <None Include="ffmpegOut.en.lng" />
     <None Include="ffmpegOut.ini" />
     <None Include="ffmpegOut.ja.lng" />
+    <None Include="ffmpegOut.zh.ini" />
+    <None Include="ffmpegOut.zh.lng" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auo.h" />

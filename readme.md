@@ -109,6 +109,8 @@ ffmpegOut の Aviutl から削除するには、"plugins" フォルダ内の下�
 - [ファイル] ffmpegOut.auo
 - [ファイル] ffmpegOut.conf (存在する場合のみ)
 - [ファイル] ffmpegOut(.ini)
+- [ファイル] ffmpegOut.en.(.ini)
+- [ファイル] ffmpegOut.zh.(.ini)
 - [ファイル] auo_setup.auf
 
 ![削除](./data/ffmpegOut_1_00_uninstall_01.png)
@@ -180,6 +182,8 @@ ffmpegOut の Aviutl から削除するには、"plugins" フォルダ内の下�
 ## 多言語対応
 
 現在、日本語、英語の切り替えに対応しています。
+
+中国語については、Aviutlの中国語対応をされているNsyw様に翻訳いただきました。ご対応いただきありがとうございました！
 
 他の言語については、x264guiEx.auoと同じフォルダに下記2ファイルを置くことで、新たな言語を追加できます。
 
