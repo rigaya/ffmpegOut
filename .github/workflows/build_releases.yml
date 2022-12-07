@@ -77,6 +77,7 @@ jobs:
           7z x -offmpegOut_release\ auo_setup.zip
           copy /y .\Release\ffmpegOut.auo ffmpegOut_release\plugins\
           copy /y .\ffmpegOut\ffmpegOut.ini ffmpegOut_release\plugins\
+          copy /y .\ffmpegOut\ffmpegOut.en.ini ffmpegOut_release\plugins\
           echo D | xcopy /y /e .\ffmpegOut\stg ffmpegOut_release\plugins\ffmpegOut_stg
           copy /y .\ffmpegOut\auo_setup.ini ffmpegOut_release\exe_files\
           copy /y .\ffmpegOut\ffmpegOut_readme.txt ffmpegOut_release\
