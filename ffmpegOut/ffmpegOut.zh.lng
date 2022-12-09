@@ -369,6 +369,7 @@ AuofcgtabPageAudioMain=音频
 AuofcgLBAudioBitrateInternal=kbps
 AuofcgLBAudioEncModeInternal=模式
 AuofcgCBAudioUseExt=使用外部编码器
+AuofcgCBAudioUseInternal=使用内部编码器
 AuofcgCBFAWCheck=FAW检测
 AuofcgLBAudioDelayCut=延迟剪切
 AuofcgCBAudioEncTiming=处理顺序
