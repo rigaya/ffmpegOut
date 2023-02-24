@@ -19,7 +19,7 @@ x264‚ð—˜—p‚µ‚½‚¢ê‡‚É‚ÍA“Á‚É——R‚ª‚È‚¯‚ê‚Îx264guiEx‚ðŽg—p‚µ‚½‚Ù‚¤‚ª•Ö—˜‚¾‚ÆŽv‚
 
 
 y“®ìŠÂ‹«z
-Windows 8.1/10/11 (x86/x64)
+Windows 10/11 (x86/x64)
 Aviutl 1.00 ˆÈ~
 
 
@@ -216,6 +216,9 @@ iniƒtƒ@ƒCƒ‹‚Ì‰¹º‚ÌƒRƒ}ƒ“ƒhƒ‰ƒCƒ“‚ð’²®‚µ‚Ä‚Ý‚Ä‚­‚¾‚³‚¢B
 VC++ 2022 Community
 
 y‚Ç‚¤‚Å‚à‚¢‚¢ƒƒ‚z
+2023.03.04 (1.06)
+- ƒIƒuƒWƒFƒNƒgƒGƒNƒXƒvƒ[ƒ‰‚©‚çƒhƒ‰ƒbƒOƒhƒƒbƒv‚µ‚½ƒtƒ@ƒCƒ‹‚ª‚ ‚éê‡‚Ìo—Í‚É‘Î‰žB
+
 2022.12.09 (1.05)
 - –|–ó˜R‚ê‚ðC³B
 
