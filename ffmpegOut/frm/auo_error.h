@@ -123,5 +123,6 @@ void warning_failed_open_bat_new();
 
 void error_get_exedit_file_mapping();
 void error_get_exedit_output_start();
+void warning_video_very_short();
 
 #endif //_AUO_ERROR_H_

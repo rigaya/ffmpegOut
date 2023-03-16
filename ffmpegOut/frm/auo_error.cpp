@@ -610,3 +610,8 @@ void error_get_exedit_file_mapping() {
 void error_get_exedit_output_start() {
     write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_EXEDIT_OUTPUT_START));
 }
+
+void warning_video_very_short() {
+    write_log_auo_line(LOG_WARNING, g_auo_mes.get(AUO_ERR_VIDEO_VERY_SHORT1));
+    write_log_auo_line(LOG_WARNING, g_auo_mes.get(AUO_ERR_VIDEO_VERY_SHORT2));
+}
