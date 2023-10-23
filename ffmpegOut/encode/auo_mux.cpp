@@ -238,11 +238,11 @@ static void build_aud_mux_cmd(char *audstr, size_t nSize, const char *aud_cmd, D
     }
 }
 
-static AUO_RESULT build_mux_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, 
+static AUO_RESULT build_mux_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe,
                           const SYSTEM_DATA *sys_dat, const MUXER_SETTINGS *mux_stg, UINT64 expected_filesize,
                           BOOL enable_vid_mux, DWORD enable_aud_mux, BOOL enable_chap_mux) {
     strcpy_s(cmd, nSize, mux_stg->base_cmd);
-    const BOOL enable_tc_mux = ((conf->vid.afs) != 0) && str_has_char(mux_stg->tc_cmd);
+    const BOOL enable_tc_mux = is_afsvfr(conf) && str_has_char(mux_stg->tc_cmd);
     const MUXER_CMD_EX *muxer_mode = &mux_stg->ex_cmd[get_mux_excmd_mode(conf, pe)];
     const char *vidstr = (enable_vid_mux) ? mux_stg->vid_cmd : "";
     const char *tcstr  = (enable_tc_mux) ? mux_stg->tc_cmd : "";
@@ -472,7 +472,7 @@ AUO_RESULT mux(const CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, cons
         ret |= AUO_RESULT_ERROR; error_no_exe_file(mux_stg->dispname, mux_stg->fullpath);
         return ret;
     }
-    if (pe->muxer_to_be_used == MUXER_TC2MP4 && !PathFileExists(sys_dat->exstg->s_mux[MUXER_MP4].fullpath)) {		
+    if (pe->muxer_to_be_used == MUXER_TC2MP4 && !PathFileExists(sys_dat->exstg->s_mux[MUXER_MP4].fullpath)) {
         ret |= AUO_RESULT_ERROR; error_no_exe_file(sys_dat->exstg->s_mux[MUXER_MP4].dispname, sys_dat->exstg->s_mux[MUXER_MP4].fullpath);
         return ret;
     }
@@ -507,7 +507,7 @@ AUO_RESULT mux(const CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, cons
     if (ret & AUO_RESULT_ERROR)
         return AUO_RESULT_ERROR; //エラーメッセージはbuild_mux_cmd関数内で吐かれる
     sprintf_s(muxargs, _countof(muxargs), "\"%s\" %s", mux_stg->fullpath, muxcmd);
-    write_log_auo_line(LOG_MORE, muxargs);
+    write_log_auo_line(LOG_MORE, char_to_wstring(muxargs).c_str());
     //パイプの設定
     pipes.stdOut.mode = AUO_PIPE_ENABLE;
     pipes.stdErr.mode = AUO_PIPE_MUXED;
@@ -563,13 +563,13 @@ AUO_RESULT mux(const CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, cons
             change_mux_vid_filename(muxout, pe);
         }
         write_cached_lines(muxer_log_level, mux_stg->dispname, &log_line_cache);
-        write_log_auo_line_fmt(LOG_MORE, "%s CPU使用率: %.2f%%", mux_stg->dispname, GetProcessAvgCPUUsage(pi_mux.hProcess));
+        write_log_auo_line_fmt(LOG_MORE, L"%s %s: %.2f%%", mux_stg->dispname, g_auo_mes.get(AUO_MUX_CPU_USAGE), GetProcessAvgCPUUsage(pi_mux.hProcess));
         CloseHandle(pi_mux.hProcess);
         CloseHandle(pi_mux.hThread);
     }
 
     release_log_cache(&log_line_cache);
-    set_window_title(AUO_FULL_NAME, PROGRESSBAR_DISABLED);
+    set_window_title(g_auo_mes.get(AUO_GUIEX_FULL_NAME), PROGRESSBAR_DISABLED);
 
     //さらにmuxの必要があれば、それを行う(L-SMASH系 timelineeditor のあとの remuxer を想定)
     if (!ret && mux_stg->post_mux >= MUXER_MP4) {
