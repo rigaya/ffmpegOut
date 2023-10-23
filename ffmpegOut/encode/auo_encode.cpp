@@ -289,11 +289,7 @@ static BOOL check_muxer_matched_with_ini(const MUXER_SETTINGS *mux_stg) {
 }
 
 bool is_afsvfr(const CONF_GUIEX *conf) {
-#if ENCODER_SVTAV1
-    return (conf->vid.afs != 0 && !conf->vid.afs_24fps);
-#else
     return conf->vid.afs != 0;
-#endif
 }
 
 static BOOL check_amp(CONF_GUIEX *conf) {
@@ -1079,6 +1075,20 @@ void cmd_replace(char *cmd, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *
     replace(cmd, nSize, "%{mkvmuxerpath}", GetFullPathFrom(sys_dat->exstg->s_mux[MUXER_MKV].fullpath, sys_dat->aviutl_dir).c_str());
 }
 
+static void remove_file(const char *target, const wchar_t *name) {
+    if (!DeleteFile(target)) {
+        auto errstr = getLastErrorStr(GetLastError());
+        write_log_auo_line_fmt(LOG_WARNING, L"%s%s: %s (\"%s\")", name, g_auo_mes.get(AUO_ENCODE_FILE_REMOVE_FAILED), errstr.c_str(), char_to_wstring(target).c_str());
+    }
+}
+
+static void move_file(const char *move_from, const char *move_to, const wchar_t *name) {
+    if (!MoveFile(move_from, move_to)) {
+        auto errstr = getLastErrorStr(GetLastError());
+        write_log_auo_line_fmt(LOG_WARNING, L"%s%s: %s (\"%s\")", name, g_auo_mes.get(AUO_ENCODE_FILE_MOVE_FAILED), errstr.c_str(), char_to_wstring(move_to).c_str());
+    }
+}
+
 //一時ファイルの移動・削除を行う
 // move_from -> move_to
 // temp_filename … 動画ファイルの一時ファイル名。これにappendixをつけてmove_from を作る。
@@ -1121,10 +1131,10 @@ static BOOL move_temp_file(const char *appendix, const char *temp_filename, cons
     char move_to[MAX_PATH_LEN] = { 0 };
     apply_appendix(move_to, _countof(move_to), savefile, appendix);
     if (_stricmp(move_from, move_to) != NULL) {
-        if (PathFileExists(move_to))
-            remove(move_to);
-        if (rename(move_from, move_to))
-            write_log_auo_line_fmt(LOG_WARNING, L"%s%s", name, g_auo_mes.get(AUO_ENCODE_FILE_MOVE_FAILED));
+        if (PathFileExists(move_to)) {
+            remove_file(move_to, name);
+        }
+        move_file(move_from, move_to, name);
     }
     return TRUE;
 }
@@ -1138,7 +1148,7 @@ AUO_RESULT move_temporary_files(const CONF_GUIEX *conf, const PRM_ENC *pe, const
     }
     //動画のみファイル
     //if (str_has_char(pe->muxed_vid_filename) && PathFileExists(pe->muxed_vid_filename))
-    //	remove(pe->muxed_vid_filename);
+    //	remove_file(pe->muxed_vid_filename, L"映像一時ファイル");
     //mux後ファイル
     if (pe->muxer_to_be_used >= 0) {
         char muxout_appendix[MAX_APPENDIX_LEN];
