@@ -167,7 +167,7 @@ static const COVERT_FUNC_INFO FUNC_TABLE[] = {
     { CF_YC48, OUT_CSP_YV12,   BIT16, P,  1,  SSE2,                 convert_yc48_to_yv12_16bit_sse2 },
     { CF_YC48, OUT_CSP_YV12,   BIT16, P,  1,  NONE,                 convert_yc48_to_yv12_16bit },
     
-    { CF_YC48, OUT_CSP_YV12,   BIT16, I,  1,  AVX512VBMI,      convert_yc48_to_yv12_i_16bit_avx512vbmi },
+    { CF_YC48, OUT_CSP_YV12,   BIT16, I,  1,  AVX512VBMI,           convert_yc48_to_yv12_i_16bit_avx512vbmi },
     { CF_YC48, OUT_CSP_YV12,   BIT16, I,  1,  AVX512BW,             convert_yc48_to_yv12_i_16bit_avx512bw },
     { CF_YC48, OUT_CSP_YV12,   BIT16, I,  1,  AVX2|AVX,             convert_yc48_to_yv12_i_16bit_avx2 },
     { CF_YC48, OUT_CSP_YV12,   BIT16, I,  1,  AVX|SSE41|SSSE3|SSE2, convert_yc48_to_yv12_i_16bit_avx },
@@ -253,6 +253,8 @@ static const COVERT_FUNC_INFO FUNC_TABLE[] = {
     { CF_YC48, OUT_CSP_YUV422, BIT16, A,  1,  NONE,                 convert_yc48_to_yuv422_16bit },
 #endif
     //YC48 -> yuv444(8bit)
+    { CF_YC48, OUT_CSP_YUV444, BIT_8, A,  1,  AVX512VBMI,           convert_yc48_to_yuv444_avx512vbmi },
+    { CF_YC48, OUT_CSP_YUV444, BIT_8, A,  1,  AVX512BW,             convert_yc48_to_yuv444_avx512bw },
     { CF_YC48, OUT_CSP_YUV444, BIT_8, A,  1,  AVX2|AVX,             convert_yc48_to_yuv444_avx2 },
     { CF_YC48, OUT_CSP_YUV444, BIT_8, A,  1,  AVX|SSE41|SSSE3|SSE2, convert_yc48_to_yuv444_avx },
     { CF_YC48, OUT_CSP_YUV444, BIT_8, A, 16,  SSE41|SSSE3|SSE2,     convert_yc48_to_yuv444_sse41_mod16 },
