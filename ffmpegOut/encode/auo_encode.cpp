@@ -1123,7 +1123,7 @@ static BOOL move_temp_file(const char *appendix, const char *temp_filename, cons
         return (must_exist) ? FALSE : TRUE;
     }
     if (ret == AUO_RESULT_SUCCESS && erase) {
-        remove(move_from);
+        remove_file(move_from, name);
         return TRUE;
     }
     if (savefile == NULL || appendix == NULL)
@@ -1167,15 +1167,15 @@ AUO_RESULT move_temporary_files(const CONF_GUIEX *conf, const PRM_ENC *pe, const
         char chap_apple[MAX_PATH_LEN];
         const MUXER_CMD_EX *muxer_mode = &sys_dat->exstg->s_mux[pe->muxer_to_be_used].ex_cmd[(pe->muxer_to_be_used == MUXER_MKV) ? conf->mux.mkv_mode : conf->mux.mp4_mode];
         set_chap_filename(chap_file, _countof(chap_file), chap_apple, _countof(chap_apple), muxer_mode->chap_file, pe, sys_dat, conf, oip);
-        move_temp_file(NULL, chap_file,  NULL, ret, TRUE, "チャプター",        FALSE);
-        move_temp_file(NULL, chap_apple, NULL, ret, TRUE, "チャプター(Apple)", FALSE);
+        move_temp_file(NULL, chap_file,  NULL, ret, TRUE, g_auo_mes.get(AUO_ENCODE_CHAPTER_FILE), FALSE);
+        move_temp_file(NULL, chap_apple, NULL, ret, TRUE, g_auo_mes.get(AUO_ENCODE_CHAPTER_APPLE_FILE), FALSE);
     }
     //ステータスファイル
     if (conf->enc.use_auto_npass && sys_dat->exstg->s_local.auto_del_stats) {
         char stats[MAX_PATH_LEN];
         strcpy_s(stats, sizeof(stats), conf->vid.stats);
         cmd_replace(stats, sizeof(stats), pe, sys_dat, conf, oip);
-        move_temp_file(NULL, stats, NULL, ret, TRUE, "ステータス", FALSE);
+        move_temp_file(NULL, stats, NULL, ret, TRUE, g_auo_mes.get(AUO_ENCODE_STATUS_FILE), FALSE);
         strcat_s(stats, sizeof(stats), ".mbtree");
         move_temp_file(NULL, stats, NULL, ret, TRUE, "mbtree ステータス", FALSE);
     }
