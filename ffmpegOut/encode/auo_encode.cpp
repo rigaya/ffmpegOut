@@ -592,8 +592,38 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
                     warning_use_default_audio_encoder(exstg->s_aud_ext[cnf_aud->encoder].dispname);
                 }
             }
-            if (0 <= cnf_aud->encoder && cnf_aud->encoder < exstg->s_aud_ext_count) {
+            for (;;) {
+                if (cnf_aud->encoder < 0 || exstg->s_aud_ext_count <= cnf_aud->encoder) {
+                    error_invalid_ini_file();
+                    check = FALSE;
+                    break;
+                }
                 AUDIO_SETTINGS *aud_stg = &exstg->s_aud_ext[cnf_aud->encoder];
+                if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
+                    const bool retry_with_default_audenc = false; // ffmpeg_audencを配布していないQSV/NV/VCEEncではここのretryは無効化する
+                    const int orig_encoder = cnf_aud->encoder;
+                    if (retry_with_default_audenc) {
+                        if (default_audenc_cnf_avail
+                            && orig_encoder != exstg->s_local.default_audio_encoder_ext
+                            && 0 <= exstg->s_local.default_audio_encoder_ext && exstg->s_local.default_audio_encoder_ext < exstg->s_aud_ext_count
+                            && muxer_supports_audio_format(pe->muxer_to_be_used, &exstg->s_aud_ext[exstg->s_local.default_audio_encoder_ext])) {
+                            cnf_aud->encoder = exstg->s_local.default_audio_encoder_ext;
+                        } else if (default_audenc_auo_avail) {
+                            cnf_aud->encoder = DEFAULT_AUDIO_ENCODER_EXT;
+                        }
+                    }
+                    error_unsupported_audio_format_by_muxer(pe->video_out_type,
+                        exstg->s_aud_ext[orig_encoder].dispname,
+                        (orig_encoder != cnf_aud->encoder) ? exstg->s_aud_ext[cnf_aud->encoder].dispname : nullptr);
+                    // 同じエンコーダあるいはデフォルトエンコーダがうまく取得できな場合は再チェックしても意味がない
+                    if (orig_encoder == cnf_aud->encoder) {
+                        check = FALSE;
+                        break;
+                    }
+                    // デフォルトエンコーダに戻して再チェック
+                    warning_use_default_audio_encoder(exstg->s_aud_ext[cnf_aud->encoder].dispname);
+                    continue;
+                }
                 if (!audio_encoder_exe_exists(conf, exstg)) {
                     //とりあえず、exe_filesを探す
                     {
@@ -638,31 +668,48 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
                         }
                     }
                     if (!PathFileExists(aud_stg->fullpath)) {
-                        //fawの場合はfaw2aacがあればOKだが、それもなければエラー
-                        if (!(cnf_aud->encoder == exstg->get_faw_index(conf->aud.use_internal) && check_if_faw2aac_exists())) {
+                        //fawの場合はOK
+                        if (cnf_aud->encoder != exstg->get_faw_index(conf->aud.use_internal)) {
                             error_no_exe_file(aud_stg->dispname, aud_stg->fullpath);
                             check = FALSE;
+                            break;
                         }
                     }
                 }
-                if (str_has_char(aud_stg->filename) && (cnf_aud->encoder != exstg->get_faw_index(conf->aud.use_internal) || !check_if_faw2aac_exists())) {
+#if !ENCODER_FFMPEG
+                if (str_has_char(aud_stg->filename) && (cnf_aud->encoder != exstg->get_faw_index(conf->aud.use_internal))) {
+                    std::wstring exe_message;
+                    if (!check_audenc_output(aud_stg, exe_message)) {
+                        const bool retry_with_default_audenc = false; // ffmpeg_audencを配布していないQSV/NV/VCEEncではここのretryは無効化する
+                        const int orig_encoder = cnf_aud->encoder;
+                        if (retry_with_default_audenc) {
+                            if (default_audenc_cnf_avail
+                                && orig_encoder != exstg->s_local.default_audio_encoder_ext
+                                && 0 <= exstg->s_local.default_audio_encoder_ext && exstg->s_local.default_audio_encoder_ext < exstg->s_aud_ext_count
+                                && muxer_supports_audio_format(pe->muxer_to_be_used, &exstg->s_aud_ext[exstg->s_local.default_audio_encoder_ext])) {
+                                cnf_aud->encoder = exstg->s_local.default_audio_encoder_ext;
+                            } else if (default_audenc_auo_avail) {
+                                cnf_aud->encoder = DEFAULT_AUDIO_ENCODER_EXT;
+                            }
+                            error_failed_to_run_audio_encoder(
+                                exstg->s_aud_ext[orig_encoder].dispname,
+                                exe_message.c_str(),
+                                (orig_encoder != cnf_aud->encoder) ? exstg->s_aud_ext[cnf_aud->encoder].dispname : nullptr);
+                        }
+                        // 同じエンコーダあるいはデフォルトエンコーダがうまく取得できな場合は再チェックしても意味がない
+                        if (orig_encoder == cnf_aud->encoder) {
+                            check = FALSE;
+                            break;
+                        }
+                        // デフォルトエンコーダに戻して再チェック
+                        warning_use_default_audio_encoder(exstg->s_aud_ext[cnf_aud->encoder].dispname);
+                        continue;
+                    }
                     info_use_exe_found(aud_stg->dispname, aud_stg->fullpath);
                 }
-#if !ENCODER_FFMPEG
-                if (!muxer_supports_audio_format(pe->muxer_to_be_used, aud_stg)) {
-                    AUDIO_SETTINGS *aud_default = nullptr;
-                    if (default_audenc_cnf_avail) {
-                        aud_default = &exstg->s_aud_ext[exstg->s_local.default_audio_encoder_ext];
-                    } else if (default_audenc_auo_avail) {
-                        aud_default = &exstg->s_aud_ext[DEFAULT_AUDIO_ENCODER_EXT];
-                    }
-                    error_unsupported_audio_format_by_muxer(pe->video_out_type, aud_stg->dispname, (aud_default) ? aud_default->dispname : nullptr);
-                    check = FALSE;
-                }
-#endif
-            } else {
-                error_invalid_ini_file();
-                check = FALSE;
+#endif                
+                // ここまで来たらエンコーダの確認終了なのでbreak
+                break;
             }
         }
     }
@@ -689,11 +736,11 @@ BOOL check_output(CONF_GUIEX *conf, OUTPUT_INFO *oip, const PRM_ENC *pe, guiEx_s
     return check;
 }
 
-void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int current_pass, int total_pass, bool amp_crf_reenc) {
+void open_log_window(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, int current_pass, int total_pass, bool amp_crf_reenc) {
     wchar_t mes[MAX_PATH_LEN + 512];
     const wchar_t *newLine = (get_current_log_len(current_pass == 1 && !amp_crf_reenc)) ? L"\r\n\r\n" : L""; //必要なら行送り
     static const wchar_t *SEPARATOR = L"------------------------------------------------------------------------------------------------------------------------------";
-    const std::wstring savefile_w = char_to_wstring(savefile);
+    const std::wstring savefile_w = char_to_wstring(oip->savefile);
     if (total_pass < 2 || current_pass > total_pass)
         swprintf_s(mes, L"%s%s\r\n[%s]\r\n%s", newLine, SEPARATOR, savefile_w.c_str(), SEPARATOR);
     else
@@ -701,14 +748,37 @@ void open_log_window(const char *savefile, const SYSTEM_DATA *sys_dat, int curre
 
     show_log_window(sys_dat->aviutl_dir, sys_dat->exstg->s_local.disable_visual_styles);
     write_log_line(LOG_INFO, mes);
-    
+
     char cpu_info[256];
     getCPUInfo(cpu_info);
     DWORD buildNumber = 0;
-    const TCHAR *osver = getOSVersion(&buildNumber);
+    const auto osver = char_to_wstring(getOSVersion(&buildNumber));
     write_log_auo_line_fmt(LOG_INFO, L"%s %s / %s %s (%d) / %s",
-        AUO_NAME_WITHOUT_EXT_W, AUO_VERSION_STR_W, char_to_wstring(osver).c_str(),
-        is_64bit_os() ? L"x64" : L"x86", buildNumber, char_to_wstring(cpu_info).c_str());
+        AUO_NAME_WITHOUT_EXT_W, AUO_VERSION_STR_W, osver.c_str(), is_64bit_os() ? L"x64" : L"x86", buildNumber, char_to_wstring(cpu_info).c_str());
+
+    if (oip->flag & OUTPUT_INFO_FLAG_VIDEO) {
+        const double video_length = oip->n * (double)oip->scale / oip->rate;
+
+        const int vid_h = (int)(video_length / 3600);
+        const int vid_m = (int)(video_length - vid_h * 3600) / 60;
+        const int vid_s = (int)(video_length - vid_h * 3600 - vid_m * 60);
+        const int vid_ms = std::min((int)((video_length - (double)(vid_h * 3600 + vid_m * 60 + vid_s)) * 1000.0), 999);
+
+        write_log_auo_line_fmt(LOG_INFO, L"video: %d:%02d:%02d.%03d %d/%d(%.3f) fps",
+            vid_h, vid_m, vid_s, vid_ms, oip->rate, oip->scale, oip->rate / (double)oip->scale);
+    }
+
+    if (oip->flag & OUTPUT_INFO_FLAG_AUDIO) {
+        const double audio_length = oip->audio_n / (double)oip->audio_rate;
+
+        const int aud_h = (int)audio_length / 3600;
+        const int aud_m = (int)(audio_length - aud_h * 3600) / 60;
+        const int aud_s = (int)(audio_length - aud_h * 3600 - aud_m * 60);
+        const int aud_ms = std::min((int)((audio_length - (double)(aud_h * 3600 + aud_m * 60 + aud_s)) * 1000.0), 999);
+
+        write_log_auo_line_fmt(LOG_INFO, L"audio: %d:%02d:%02d.%03d %dch %.1fkHz %d samples",
+            aud_h, aud_m, aud_s, aud_ms, oip->audio_ch, oip->audio_rate / 1000.0, oip->audio_n);
+    }
 }
 
 static void set_tmpdir(PRM_ENC *pe, int tmp_dir_index, const char *savefile, const SYSTEM_DATA *sys_dat) {

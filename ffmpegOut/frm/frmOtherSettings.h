@@ -30,6 +30,7 @@
 #include "auo_version.h"
 #include "auo_settings.h"
 #include "auo_mes.h"
+#include "rgy_thread_affinity.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -120,6 +121,8 @@ namespace AUO_NAME_R {
     private: System::Windows::Forms::Label^  fosLBStgDir;
     private: System::Windows::Forms::Button^  fosBTStgDir;
     private: System::Windows::Forms::TextBox^  fosTXStgDir;
+    private: System::Windows::Forms::ComboBox^  fosCXPowerThrottling;
+    private: System::Windows::Forms::Label^  fosLBPowerThrottling;
 
 
 
@@ -191,9 +194,14 @@ namespace AUO_NAME_R {
             this->fosfontDialog = (gcnew System::Windows::Forms::FontDialog());
             this->fosTabControl = (gcnew System::Windows::Forms::TabControl());
             this->fostabPageGeneral = (gcnew System::Windows::Forms::TabPage());
+            this->fosCXPowerThrottling = (gcnew System::Windows::Forms::ComboBox());
+            this->fosLBPowerThrottling = (gcnew System::Windows::Forms::Label());
             this->fosCXDefaultAudioEncoder = (gcnew System::Windows::Forms::ComboBox());
             this->fosLBDefaultAudioEncoder = (gcnew System::Windows::Forms::Label());
             this->fostabPageGUI = (gcnew System::Windows::Forms::TabPage());
+            this->fosLBStgDir = (gcnew System::Windows::Forms::Label());
+            this->fosBTStgDir = (gcnew System::Windows::Forms::Button());
+            this->fosTXStgDir = (gcnew System::Windows::Forms::TextBox());
             this->fosCBOutputMoreLog = (gcnew System::Windows::Forms::CheckBox());
             this->fosCBRunBatMinimized = (gcnew System::Windows::Forms::CheckBox());
             this->fosCBGetRelativePath = (gcnew System::Windows::Forms::CheckBox());
@@ -205,9 +213,6 @@ namespace AUO_NAME_R {
             this->fosLBDisableVisualStyles = (gcnew System::Windows::Forms::Label());
             this->fosCBLogStartMinimized = (gcnew System::Windows::Forms::CheckBox());
             this->fosPNHideTabPage = (gcnew System::Windows::Forms::Panel());
-            this->fosLBStgDir = (gcnew System::Windows::Forms::Label());
-            this->fosBTStgDir = (gcnew System::Windows::Forms::Button());
-            this->fosTXStgDir = (gcnew System::Windows::Forms::TextBox());
             this->fosTabControl->SuspendLayout();
             this->fostabPageGeneral->SuspendLayout();
             this->fostabPageGUI->SuspendLayout();
@@ -259,6 +264,8 @@ namespace AUO_NAME_R {
             // 
             // fostabPageGeneral
             // 
+            this->fostabPageGeneral->Controls->Add(this->fosCXPowerThrottling);
+            this->fostabPageGeneral->Controls->Add(this->fosLBPowerThrottling);
             this->fostabPageGeneral->Controls->Add(this->fosCXDefaultAudioEncoder);
             this->fostabPageGeneral->Controls->Add(this->fosLBDefaultAudioEncoder);
             this->fostabPageGeneral->Location = System::Drawing::Point(4, 24);
@@ -268,6 +275,24 @@ namespace AUO_NAME_R {
             this->fostabPageGeneral->TabIndex = 0;
             this->fostabPageGeneral->Text = L"一般設定";
             this->fostabPageGeneral->UseVisualStyleBackColor = true;
+            // 
+            // fosCXPowerThrottling
+            // 
+            this->fosCXPowerThrottling->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->fosCXPowerThrottling->FormattingEnabled = true;
+            this->fosCXPowerThrottling->Location = System::Drawing::Point(41, 100);
+            this->fosCXPowerThrottling->Name = L"fosCXPowerThrottling";
+            this->fosCXPowerThrottling->Size = System::Drawing::Size(190, 23);
+            this->fosCXPowerThrottling->TabIndex = 27;
+            // 
+            // fosLBPowerThrottling
+            // 
+            this->fosLBPowerThrottling->AutoSize = true;
+            this->fosLBPowerThrottling->Location = System::Drawing::Point(14, 77);
+            this->fosLBPowerThrottling->Name = L"fosLBPowerThrottling";
+            this->fosLBPowerThrottling->Size = System::Drawing::Size(89, 15);
+            this->fosLBPowerThrottling->TabIndex = 26;
+            this->fosLBPowerThrottling->Text = L"電力スロットリング";
             // 
             // fosCXDefaultAudioEncoder
             // 
@@ -308,6 +333,32 @@ namespace AUO_NAME_R {
             this->fostabPageGUI->TabIndex = 1;
             this->fostabPageGUI->Text = L"ログ・設定画面";
             this->fostabPageGUI->UseVisualStyleBackColor = true;
+            // 
+            // fosLBStgDir
+            // 
+            this->fosLBStgDir->AutoSize = true;
+            this->fosLBStgDir->Location = System::Drawing::Point(7, 7);
+            this->fosLBStgDir->Name = L"fosLBStgDir";
+            this->fosLBStgDir->Size = System::Drawing::Size(123, 15);
+            this->fosLBStgDir->TabIndex = 34;
+            this->fosLBStgDir->Text = L"設定ファイルの保存場所";
+            // 
+            // fosBTStgDir
+            // 
+            this->fosBTStgDir->Location = System::Drawing::Point(334, 27);
+            this->fosBTStgDir->Name = L"fosBTStgDir";
+            this->fosBTStgDir->Size = System::Drawing::Size(35, 23);
+            this->fosBTStgDir->TabIndex = 35;
+            this->fosBTStgDir->Text = L"...";
+            this->fosBTStgDir->UseVisualStyleBackColor = true;
+            this->fosBTStgDir->Click += gcnew System::EventHandler(this, &frmOtherSettings::fosBTStgDir_Click);
+            // 
+            // fosTXStgDir
+            // 
+            this->fosTXStgDir->Location = System::Drawing::Point(34, 27);
+            this->fosTXStgDir->Name = L"fosTXStgDir";
+            this->fosTXStgDir->Size = System::Drawing::Size(294, 23);
+            this->fosTXStgDir->TabIndex = 33;
             // 
             // fosCBOutputMoreLog
             // 
@@ -419,32 +470,6 @@ namespace AUO_NAME_R {
             this->fosPNHideTabPage->Size = System::Drawing::Size(392, 415);
             this->fosPNHideTabPage->TabIndex = 18;
             // 
-            // fosLBStgDir
-            // 
-            this->fosLBStgDir->AutoSize = true;
-            this->fosLBStgDir->Location = System::Drawing::Point(7, 7);
-            this->fosLBStgDir->Name = L"fosLBStgDir";
-            this->fosLBStgDir->Size = System::Drawing::Size(123, 15);
-            this->fosLBStgDir->TabIndex = 34;
-            this->fosLBStgDir->Text = L"設定ファイルの保存場所";
-            // 
-            // fosBTStgDir
-            // 
-            this->fosBTStgDir->Location = System::Drawing::Point(334, 27);
-            this->fosBTStgDir->Name = L"fosBTStgDir";
-            this->fosBTStgDir->Size = System::Drawing::Size(35, 23);
-            this->fosBTStgDir->TabIndex = 35;
-            this->fosBTStgDir->Text = L"...";
-            this->fosBTStgDir->UseVisualStyleBackColor = true;
-            this->fosBTStgDir->Click += gcnew System::EventHandler(this, &frmOtherSettings::fosBTStgDir_Click);
-            // 
-            // fosTXStgDir
-            // 
-            this->fosTXStgDir->Location = System::Drawing::Point(34, 27);
-            this->fosTXStgDir->Name = L"fosTXStgDir";
-            this->fosTXStgDir->Size = System::Drawing::Size(294, 23);
-            this->fosTXStgDir->TabIndex = 33;
-            // 
             // frmOtherSettings
             // 
             this->AcceptButton = this->fosCBOK;
@@ -486,6 +511,7 @@ namespace AUO_NAME_R {
             //LOAD_CLI_TEXT(fosCBAutoDelChap);
             LOAD_CLI_TEXT(fostabPageGeneral);
             LOAD_CLI_TEXT(fosLBDefaultAudioEncoder);
+            LOAD_CLI_TEXT(fosLBPowerThrottling);
             //LOAD_CLI_TEXT(fosCBAutoRefLimitByLevel);
             //LOAD_CLI_TEXT(fosCBChapConvertToUTF8);
             //LOAD_CLI_TEXT(fosCBKeepQPFile);
@@ -544,6 +570,7 @@ namespace AUO_NAME_R {
             fos_ex_stg->s_local.get_relative_path        = fosCBGetRelativePath->Checked;
             fos_ex_stg->s_local.run_bat_minimized        = fosCBRunBatMinimized->Checked;
             fos_ex_stg->s_local.default_audio_encoder_ext= fosCXDefaultAudioEncoder->SelectedIndex;
+            fos_ex_stg->s_local.thread_pthrottling_mode   = (int)RGY_THREAD_POWER_THROTTOLING_MODE_STR[fosCXPowerThrottling->SelectedIndex].first;
             fos_ex_stg->save_local();
             fos_ex_stg->save_log_win();
             this->Close();
@@ -555,6 +582,12 @@ namespace AUO_NAME_R {
             for (int i = 0; i < fos_ex_stg->s_aud_ext_count; i++)
                 fosCXDefaultAudioEncoder->Items->Add(LOAD_CLI_STRING(AUO_OTHER_SETTINGS_AUDIO_ENCODER_EXTERNAL) + L": " + String(fos_ex_stg->s_aud_ext[i].dispname).ToString());
             fosCXDefaultAudioEncoder->ResumeLayout();
+
+            fosCXPowerThrottling->SuspendLayout();
+            fosCXPowerThrottling->Items->Clear();
+            for (int i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++)
+                fosCXPowerThrottling->Items->Add(String(RGY_THREAD_POWER_THROTTOLING_MODE_STR[i].second).ToString());
+            fosCXPowerThrottling->ResumeLayout();
         }
     private:
         System::Void frmOtherSettings_Load(System::Object^  sender, System::EventArgs^  e) {
@@ -574,6 +607,12 @@ namespace AUO_NAME_R {
             fosCBGetRelativePath->Checked        = fos_ex_stg->s_local.get_relative_path != 0;
             fosCBRunBatMinimized->Checked        = fos_ex_stg->s_local.run_bat_minimized != 0;
             fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder_ext, 0, fosCXDefaultAudioEncoder->Items->Count);
+            for (int i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++) {
+                if ((int)RGY_THREAD_POWER_THROTTOLING_MODE_STR[i].first == fos_ex_stg->s_local.thread_pthrottling_mode) {
+                    fosCXPowerThrottling->SelectedIndex = i;
+                    break;
+                }
+            }
             if (str_has_char(fos_ex_stg->s_local.conf_font.name))
                 SetFontFamilyToForm(this, gcnew FontFamily(String(fos_ex_stg->s_local.conf_font.name).ToString()), this->Font->FontFamily);
         }

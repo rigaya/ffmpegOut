@@ -64,6 +64,7 @@
 #include "auo_video.h"
 #include "auo_audio_parallel.h"
 #include "cpu_info.h"
+#include "rgy_thread_affinity.h"
 
 typedef struct video_output_thread_t {
     CONVERT_CF_DATA *pixel_data;
@@ -566,7 +567,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     write_args(enc_cmd);
     sprintf_s(enc_args, _countof(enc_args), "\"%s\" %s", enc_path, enc_cmd);
     
-    if ((jitter = (int *)calloc(oip->n + 1, sizeof(int))) == NULL) {
+    if (afs && (jitter = (int *)calloc(oip->n + 1, sizeof(int))) == NULL) {
         ret |= AUO_RESULT_ERROR; error_malloc_tc();
         //Aviutl(afs)からのフレーム読み込み
     } else if (!setup_afsvideo(oip, sys_dat, conf, pe)) {
@@ -589,6 +590,12 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         PROCESS_TIME time_aviutl;
         GetProcessTime(pe->h_p_aviutl, &time_aviutl);
         pe->h_p_videnc = pi_enc.hProcess;
+
+        //Aviutlのpower throttlingを設定
+        const auto thread_pthrottling_mode = (RGYThreadPowerThrottlingMode)sys_dat->exstg->s_local.thread_pthrottling_mode;
+        if (thread_pthrottling_mode != RGYThreadPowerThrottlingMode::Unset) {
+            SetThreadPowerThrottolingModeForModule(GetCurrentProcessId(), nullptr, thread_pthrottling_mode);
+        }
 
         //x264が待機に入るまでこちらも待機
         while (WaitForInputIdle(pi_enc.hProcess, LOG_UPDATE_INTERVAL) == WAIT_TIMEOUT)
@@ -618,6 +625,12 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
                 //x264優先度
                 check_enc_priority(pe->h_p_aviutl, pi_enc.hProcess, set_priority);
+
+                if (!(i & 255)) {
+                    if (thread_pthrottling_mode != RGYThreadPowerThrottlingMode::Unset) {
+                        SetThreadPowerThrottolingModeForModule(pi_enc.dwProcessId, nullptr, thread_pthrottling_mode);
+                    }
+                }
 
                 //音声同時処理
                 if (!conf->aud.use_internal) {
@@ -682,7 +695,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
                 //標準入力への書き込みを開始
                 SetEvent(thread_data.he_out_start);
             } else {
-                *(next_jitter - 1) = DROP_FRAME_FLAG;
+                if (jitter) *(next_jitter - 1) = DROP_FRAME_FLAG;
                 pe->drop_count++;
                 //次のフレームの変換を許可
                 SetEvent(thread_data.he_out_fin);
@@ -722,6 +735,10 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
         DWORD tm_vid_enc_fin = timeGetTime();
 
+        if (thread_pthrottling_mode != RGYThreadPowerThrottlingMode::Unset) {
+            SetThreadPowerThrottolingModeForModule(GetCurrentProcessId(), nullptr, RGYThreadPowerThrottlingMode::Unset);
+        }
+
         //最後にメッセージを取得
         while (ReadLogEnc(&pipes, pe->drop_count, i) > 0);
 
@@ -760,7 +777,7 @@ static AUO_RESULT video_output_inside(CONF_GUIEX *conf, const OUTPUT_INFO *oip, 
 
     for (; !ret && pe->current_x264_pass <= pe->total_x264_pass; pe->current_x264_pass++) {
         if (pe->current_x264_pass > 1)
-            open_log_window(oip->savefile, sys_dat, pe->current_x264_pass, pe->total_x264_pass);
+            open_log_window(oip, sys_dat, pe->current_x264_pass, pe->total_x264_pass);
         set_window_title_ffmpegout(pe);
         ret |= ffmpeg_out(conf, oip, pe, sys_dat);
         set_window_title(AUO_FULL_NAME_W, PROGRESSBAR_DISABLED);

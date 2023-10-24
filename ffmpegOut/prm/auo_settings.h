@@ -53,6 +53,7 @@ static const BOOL   DEFAULT_CHAP_NERO_TO_UTF8     = 0;
 static const BOOL   DEFAULT_AUDIO_ENCODER_EXT     = 0;
 static const BOOL   DEFAULT_AUDIO_ENCODER_IN      = 1;
 static const BOOL   DEFAULT_AUDIO_ENCODER_USE_IN  = 1;
+static const int    DEFAULT_THREAD_PTHROTTLING    = 0;
 static const int    DEFAULT_AMP_RETRY_LIMIT       = 2;
 static const double DEFAULT_AMP_MARGIN            = 0.05;
 static const double DEFAULT_AMP_REENC_AUDIO_MULTI = 0.15;
@@ -346,6 +347,7 @@ typedef struct LOCAL_SETTINGS {
     BOOL   default_audenc_use_in;               //デフォルトの音声エンコーダとして、内蔵エンコーダを選択する
     int    default_audio_encoder_ext;           //デフォルトの外部音声エンコーダ
     int    default_audio_encoder_in;            //デフォルトの内蔵音声エンコーダ
+    int    thread_pthrottling_mode;             //スレッドの電力スロットリングモード
     //int    amp_retry_limit;                     //自動マルチパス試行回数制限
     //double amp_bitrate_margin_multi;            //自動マルチパスで、上限ファイルサイズからビットレートを再計算するときの倍率
     //double amp_reenc_audio_multi;               //自動マルチパスで、音声側を再エンコしてビットレート調整をする上限倍率

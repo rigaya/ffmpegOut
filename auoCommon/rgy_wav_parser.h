@@ -1,9 +1,9 @@
 ﻿// -----------------------------------------------------------------------------------------
-// x264guiEx/x265guiEx/svtAV1guiEx/ffmpegOut/QSVEnc/NVEnc/VCEEnc by rigaya
+// QSVEnc/NVEnc by rigaya
 // -----------------------------------------------------------------------------------------
 // The MIT License
 //
-// Copyright (c) 2010-2022 rigaya
+// Copyright (c) 2023 rigaya
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,24 +25,31 @@
 //
 // --------------------------------------------------------------------------------------------
 
-#ifndef _AUO_AUDIO_H_
-#define _AUO_AUDIO_H_
+#ifndef __RGY_WAV_PARSER_H__
+#define __RGY_WAV_PARSER_H__
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-#include "output.h"
-#include "auo_conf.h"
-#include "auo_system.h"
+#include <cstdint>
+#include <vector>
 
-void *get_audio_data(const OUTPUT_INFO *oip, PRM_ENC *pe, int start, int length, int *readed);
+static const uint32_t WAVE_HEADER_SIZE = 44;
 
-void auo_faw_check(CONF_AUDIO *aud, const OUTPUT_INFO *oip, PRM_ENC *pe, const guiEx_settings *ex_stg);
-void check_audio_length(OUTPUT_INFO *oip);
+struct RGYWAVHeader {
+    char file_id[5]; // "RIFF"
+    uint32_t file_size;
+    char format[5]; // "WAVE"
+    char subchunk_id[5]; // "fmt "
+    uint32_t subchunk_size; // 16 for PCM
+    uint16_t audio_format; // PCM = 1
+    uint16_t number_of_channels;
+    uint32_t sample_rate;
+    uint32_t byte_rate; // sample_rate * number of channels * bits per sample / 8
+    uint16_t block_align;
+    uint16_t bits_per_sample;
+    char data_id[5]; //"data"
+    uint32_t data_size; // samples * number of channels * bits per sample / 8 (Actual number of bytes)
 
-AUO_RESULT audio_output(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat); //音声処理を実行
-AUO_RESULT audio_output_parallel(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);
+    uint32_t parseHeader(const uint8_t *data);
+    std::vector<uint8_t> createHeader();
+};
 
-BOOL check_audenc_output(const AUDIO_SETTINGS *aud_stg, std::wstring& exe_message);
-
-#endif //_AUO_AUDIO_H_
+#endif //__RGY_WAV_PARSER_H__

@@ -359,7 +359,13 @@ void guiEx_settings::set_last_out_stg(const char *stg) {
 }
 
 BOOL guiEx_settings::is_faw(const AUDIO_SETTINGS *aud_stg) const {
-    return stristr((aud_stg->is_internal) ? aud_stg->codec : aud_stg->filename, "faw") ? TRUE : FALSE;
+    if (stristr(aud_stg->codec, "faw")) {
+        return TRUE;
+    }
+    if (!aud_stg->is_internal) {
+        return wcsstr(aud_stg->dispname, L"FAW") ? TRUE : FALSE;
+    }
+    return FALSE;
 }
 
 int guiEx_settings::get_faw_index(BOOL internal) const {
@@ -624,6 +630,7 @@ void guiEx_settings::load_local() {
     s_local.default_audio_encoder_ext = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder",     DEFAULT_AUDIO_ENCODER_EXT,    conf_fileName);
     s_local.default_audio_encoder_in  = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder_in",  DEFAULT_AUDIO_ENCODER_IN,     conf_fileName);
     s_local.default_audenc_use_in     = GetPrivateProfileInt(   ini_section_main, "default_audenc_use_in",     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
+    s_local.thread_pthrottling_mode   = GetPrivateProfileInt(   ini_section_main, "thread_pthrottling_mode",   DEFAULT_THREAD_PTHROTTLING,    conf_fileName);
 
     //s_local.amp_retry_limit           = GetPrivateProfileInt(   INI_SECTION_AMP,  "amp_retry_limit",          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
     //s_local.amp_bitrate_margin_multi  = GetPrivateProfileDouble(INI_SECTION_AMP,  "amp_bitrate_margin_multi", DEFAULT_AMP_MARGIN,            conf_fileName);
@@ -715,6 +722,7 @@ void guiEx_settings::save_local() {
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder",     s_local.default_audio_encoder_ext, DEFAULT_AUDIO_ENCODER_EXT,     conf_fileName);
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder_in",  s_local.default_audio_encoder_in,  DEFAULT_AUDIO_ENCODER_IN,      conf_fileName);
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audenc_use_in",     s_local.default_audenc_use_in,     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
+    WritePrivateProfileIntWithDefault(   ini_section_main, "thread_pthrottling_mode",   s_local.thread_pthrottling_mode, DEFAULT_THREAD_PTHROTTLING,      conf_fileName);
 
     //WritePrivateProfileIntWithDefault(   INI_SECTION_AMP,  "amp_retry_limit",           s_local.amp_retry_limit,          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
     //WritePrivateProfileDoubleWithDefault(INI_SECTION_AMP,  "amp_bitrate_margin_multi",  s_local.amp_bitrate_margin_multi, DEFAULT_AMP_MARGIN,            conf_fileName);

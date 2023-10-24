@@ -194,7 +194,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     make_outfilename_and_set_to_oipsavefile(oip, outfilename, _countof(outfilename), &conf_out);
 
     //ログウィンドウを開く
-    open_log_window(oip->savefile, &g_sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
+    open_log_window(oip, &g_sys_dat, 1, (conf_out.enc.use_auto_npass) ? conf_out.enc.auto_npass : 1);
     if (conf_not_initialized) {
         warning_conf_not_initialized(default_stg_file);
     }
