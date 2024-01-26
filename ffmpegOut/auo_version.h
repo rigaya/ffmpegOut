@@ -28,9 +28,9 @@
 #ifndef _AUO_VERSION_H_
 #define _AUO_VERSION_H_
 
-#define AUO_VERSION          0,1,9,0
-#define AUO_VERSION_STR      "1.09"
-#define AUO_VERSION_STR_W   L"1.09"
+#define AUO_VERSION          0,1,10,0
+#define AUO_VERSION_STR      "1.10"
+#define AUO_VERSION_STR_W   L"1.10"
 #define AUO_NAME_R            ffmpegOut
 #define AUO_NAME_WITHOUT_EXT "ffmpegOut"
 #define AUO_NAME_WITHOUT_EXT_W L"ffmpegOut"
