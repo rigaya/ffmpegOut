@@ -630,6 +630,7 @@ void guiEx_settings::load_local() {
     s_local.default_audio_encoder_ext = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder",     DEFAULT_AUDIO_ENCODER_EXT,    conf_fileName);
     s_local.default_audio_encoder_in  = GetPrivateProfileInt(   ini_section_main, "default_audio_encoder_in",  DEFAULT_AUDIO_ENCODER_IN,     conf_fileName);
     s_local.default_audenc_use_in     = GetPrivateProfileInt(   ini_section_main, "default_audenc_use_in",     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
+    s_local.av_length_threshold       = GetPrivateProfileDouble(ini_section_main, "av_length_threshold",       DEFAULT_AV_LENGTH_DIFF_THRESOLD, conf_fileName);
     s_local.thread_pthrottling_mode   = GetPrivateProfileInt(   ini_section_main, "thread_pthrottling_mode",   DEFAULT_THREAD_PTHROTTLING,    conf_fileName);
 
     //s_local.amp_retry_limit           = GetPrivateProfileInt(   INI_SECTION_AMP,  "amp_retry_limit",          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
@@ -722,6 +723,7 @@ void guiEx_settings::save_local() {
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder",     s_local.default_audio_encoder_ext, DEFAULT_AUDIO_ENCODER_EXT,     conf_fileName);
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audio_encoder_in",  s_local.default_audio_encoder_in,  DEFAULT_AUDIO_ENCODER_IN,      conf_fileName);
     WritePrivateProfileIntWithDefault(   ini_section_main, "default_audenc_use_in",     s_local.default_audenc_use_in,     DEFAULT_AUDIO_ENCODER_USE_IN,  conf_fileName);
+    WritePrivateProfileDoubleWithDefault(ini_section_main, "av_length_threshold",       s_local.av_length_threshold,       DEFAULT_AV_LENGTH_DIFF_THRESOLD,conf_fileName);
     WritePrivateProfileIntWithDefault(   ini_section_main, "thread_pthrottling_mode",   s_local.thread_pthrottling_mode, DEFAULT_THREAD_PTHROTTLING,      conf_fileName);
 
     //WritePrivateProfileIntWithDefault(   INI_SECTION_AMP,  "amp_retry_limit",           s_local.amp_retry_limit,          DEFAULT_AMP_RETRY_LIMIT,       conf_fileName);
