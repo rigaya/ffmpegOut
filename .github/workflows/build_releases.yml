@@ -68,7 +68,7 @@ jobs:
       - name: Download auo_setup
         id: download_auosetup
         run: |
-          curl -s -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.01/auo_setup_2.01.zip
+          curl -s -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.01/auo_setup_2.01v2.zip
 
       - name: Create Archieve
         id: archieve
