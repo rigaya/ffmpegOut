@@ -202,7 +202,11 @@ static void build_full_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, cons
     cmd_replace(prm.vid.cmdex, sizeof(prm.vid.cmdex), pe, sys_dat, conf, oip);
     cmd_replace(prm.vid.incmd, sizeof(prm.vid.incmd), pe, sys_dat, conf, oip);
     //コマンドライン作成
-    strcpy_s(cmd, nSize, " -y -f rawvideo");
+    strcpy_s(cmd, nSize, " -y");
+    //入力追加オプション
+    if (strlen(prm.vid.incmd) > 0) sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " %s", prm.vid.incmd);
+    //入力フォーマット
+    strcpy_s(cmd + strlen(cmd), nSize - strlen(cmd), " -f rawvideo");
     //解像度情報追加(-s)
     if (strcmp(input, PIPE_FN) == NULL)
         sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -s %dx%d", oip->w, oip->h);
@@ -211,8 +215,6 @@ static void build_full_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, cons
     //fps
     int gcd = get_gcd(oip->rate, oip->scale);
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -r %d/%d", oip->rate / gcd, oip->scale / gcd);
-    //入力追加オプション
-    if (strlen(prm.vid.incmd) > 0) sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " %s", prm.vid.incmd);
     //入力ファイル
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -i \"%s\"", input);
     //音声入力
