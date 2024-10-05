@@ -96,11 +96,11 @@ jobs:
         run: |
           7z h -scrc* ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
 
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+      #- name: Upload Release Asset
+      #  id: upload-release-asset 
+      #  uses: softprops/action-gh-release@v1
+      #  if: startsWith(github.ref, 'refs/tags/')
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
