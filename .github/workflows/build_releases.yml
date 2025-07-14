@@ -68,7 +68,7 @@ jobs:
       - name: Download auo_setup
         id: download_auosetup
         run: |
-          curl -s -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.01/auo_setup_2.01v2.zip
+          curl -s -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.02/auo_setup_2.02.zip
 
       - name: Create Archieve
         id: archieve
@@ -83,7 +83,18 @@ jobs:
           copy /y .\ffmpegOut\auo_setup.ini ffmpegOut_release\exe_files\
           copy /y .\ffmpegOut\ffmpegOut_readme.txt ffmpegOut_release\
           dir /b /s ffmpegOut_release\
-          7z a -mx9 ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip .\ffmpegOut_release\*
+          7z a -mx9 AviUtl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip .\ffmpegOut_release\*
+
+          mkdir ffmpegOut_release2
+          mkdir ffmpegOut_release2\Plugin
+          mkdir ffmpegOut_release2\Plugin\exe_files
+          xcopy /e /y ffmpegOut_release\exe_files ffmpegOut_release2\Plugin\exe_files
+          xcopy /e /y ffmpegOut_release\plugins   ffmpegOut_release2\Plugin
+          del ffmpegOut_release2\Plugin\auo_setup.auf
+          del ffmpegOut_release2\Plugin\exe_files\auo_setup.exe
+          del ffmpegOut_release2\Plugin\exe_files\auo_setup2.exe
+          7z a -t7z -m0=lzma -mx=9 -mmt AviUtl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.7z .\ffmpegOut_release2\*
+          copy /b "%SEVENZIP_SFX_PATH%" + Config.txt + AviUtl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.7z AviUtl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install.exe
 
       - name: Check Version
         id: check_ver
@@ -94,13 +105,14 @@ jobs:
       - name: Calc hash
         id: calc_hash
         run: |
-          7z h -scrc* ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+          7z h -scrc* AviUtl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+          7z h -scrc* AviUtl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install.exe
 
-      #- name: Upload Release Asset
-      #  id: upload-release-asset 
-      #  uses: softprops/action-gh-release@v1
-      #  if: startsWith(github.ref, 'refs/tags/')
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
