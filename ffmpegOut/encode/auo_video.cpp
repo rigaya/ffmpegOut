@@ -84,18 +84,19 @@ int get_aviutl_color_format(int use_highbit, int output_csp) {
     //Aviutlからの入力に使用するフォーマット
     switch (output_csp) {
         case OUT_CSP_P010:
+            return (is_aviutl2()) ? CF_YUY2 : CF_YC48;
         case OUT_CSP_YUV444:
         case OUT_CSP_YUV444_16:
-            return CF_YC48;
+            return (is_aviutl2()) ? CF_RGB : CF_YC48;
         case OUT_CSP_RGB:
             return CF_RGB;
         case OUT_CSP_RGBA:
-            return CF_RGBA;
+            return (is_aviutl2()) ? CF_RGB : CF_RGBA;
         case OUT_CSP_NV12:
         case OUT_CSP_NV16:
         case OUT_CSP_YUY2:
         default:
-            return (use_highbit) ? CF_YC48 : CF_YUY2;
+            return (use_highbit) ? ((is_aviutl2()) ? CF_RGB : CF_YC48) : CF_YUY2;
     }
 }
 
@@ -522,6 +523,9 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     }
     PathGetDirectory(enc_dir, _countof(enc_dir), enc_path);
 
+    if (is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA) {
+        conf->enc.output_csp = OUT_CSP_RGB;
+    }
     const int color_format = get_aviutl_color_format(conf->enc.use_highbit_depth, conf->enc.output_csp);
     const DWORD aviutl_fourcc = COLORFORMATS[color_format].FOURCC;
 

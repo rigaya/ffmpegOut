@@ -359,11 +359,6 @@ static const COVERT_FUNC_INFO FUNC_TABLE[] = {
     //Copy RGB
     { CF_RGB,  OUT_CSP_RGB,    BIT_8, A,  1,  SSSE3|SSE2,           sort_to_rgb_ssse3 },
     { CF_RGB,  OUT_CSP_RGB,    BIT_8, A,  1,  NONE,                 sort_to_rgb },
-    //Convert RGB to YUV444
-    { CF_RGB,  OUT_CSP_YUV444, BIT_8, A,  1,  AVX2|AVX,             convert_rgb_to_yuv444_avx2 },
-    { CF_RGB,  OUT_CSP_YUV444, BIT_8, A,  1,  NONE,                 convert_rgb_to_yuv444 },
-    { CF_RGB,  OUT_CSP_YUV444, BIT16, A,  1,  AVX2|AVX,             convert_rgb_to_yuv444_16bit_avx2 },
-    { CF_RGB,  OUT_CSP_YUV444, BIT16, A,  1,  NONE,                 convert_rgb_to_yuv444_16bit },
 #elif ENCODER_FFMPEG
     //Copy RGB
     { CF_RGB,  OUT_CSP_RGB,    BIT_8, A,  1,  SSE2,                 copy_rgb_sse2 },
@@ -372,6 +367,11 @@ static const COVERT_FUNC_INFO FUNC_TABLE[] = {
     { CF_RGBA,  OUT_CSP_RGBA,  BIT_8, A,  1,  SSE2,                 copy_rgba_sse2 },
     { CF_RGBA,  OUT_CSP_RGBA,  BIT_8, A,  1,  NONE,                 copy_rgba },
 #endif
+    //Convert RGB to YUV444
+    { CF_RGB,  OUT_CSP_YUV444, BIT_8, A,  1,  AVX2|AVX,             convert_rgb_to_yuv444_avx2 },
+    { CF_RGB,  OUT_CSP_YUV444, BIT_8, A,  1,  NONE,                 convert_rgb_to_yuv444 },
+    { CF_RGB,  OUT_CSP_YUV444, BIT16, A,  1,  AVX2|AVX,             convert_rgb_to_yuv444_16bit_avx2 },
+    { CF_RGB,  OUT_CSP_YUV444, BIT16, A,  1,  NONE,                 convert_rgb_to_yuv444_16bit },
     { 0, 0, 0, A, 0, 0, NULL }
 };
 
