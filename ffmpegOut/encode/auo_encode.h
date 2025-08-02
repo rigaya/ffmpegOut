@@ -54,6 +54,7 @@ void get_audio_pipe_name(char *pipename, size_t nSize, int audIdx);
 
 typedef AUO_RESULT (*encode_task) (CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, const SYSTEM_DATA *sys_dat);
 
+std::string find_latest_videnc_for_frm();
 bool video_is_last_pass(const PRM_ENC *pe);
 
 BOOL check_if_exedit_is_used();
@@ -62,6 +63,7 @@ void open_log_window(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, int cur
 void auto_save_log(const CONF_GUIEX *conf, const OUTPUT_INFO *oip, const PRM_ENC *pe, const SYSTEM_DATA *sys_dat, const bool force_save);
 void warn_video_length(const OUTPUT_INFO *oip);
 int get_total_path(const CONF_GUIEX *conf);
+void init_enc_prm(const CONF_GUIEX *conf, PRM_ENC *pe, OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat);
 void set_enc_prm(CONF_GUIEX *conf, PRM_ENC *pe, const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat);
 void free_enc_prm(PRM_ENC *pe);
 
@@ -85,7 +87,7 @@ DWORD GetExePriority(DWORD set, HANDLE h_aviutl); //実行ファイルに指定�
 AUO_RESULT getLogFilePath(char *log_file_path, size_t nSize, const PRM_ENC *pe, const SYSTEM_DATA *sys_dat, const CONF_GUIEX *conf, const OUTPUT_INFO *oip);
 
 int check_video_ouput(const CONF_GUIEX *conf, const OUTPUT_INFO *oip);
-int check_muxer_to_be_used(const CONF_GUIEX *conf, int video_output_type, BOOL audio_output);
+int check_muxer_to_be_used(const CONF_GUIEX *conf, const PRM_ENC *pe, const SYSTEM_DATA *sys_dat, const char *temp_filename, int video_output_type, BOOL audio_output);
 
 
 double get_duration(const CONF_GUIEX *conf, const SYSTEM_DATA *sys_dat, const PRM_ENC *pe, const OUTPUT_INFO *oip);

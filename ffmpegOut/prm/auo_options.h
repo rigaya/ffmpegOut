@@ -35,20 +35,26 @@
 
 #include "auo.h"
 #include "auo_settings.h"
-/*
+
 //エンコードモード
 enum {
-    X264_RC_CRF = 0,
-    X264_RC_BITRATE,
-    X264_RC_QP,
+    ENC_RC_CRF = 0,
+    ENC_RC_BITRATE,
+    ENC_RC_QP,
 };
 
 //QPの最大値
-const int X264_QP_MAX_8BIT  = 69;
-const int X264_QP_MAX_10BIT = 81;
+const int ENC_QP_MAX_8BIT  = 69;
+const int ENC_QP_MAX_10BIT = 81;
 
 //差がこのくらいなら等しいとみなす(オプション用なのでこのくらいで十分)
 const float EPS_FLOAT = 1.0e-4f;
+
+#if ENCODER_X265
+static const int AUO_KEYINT_MAX_AUTO = 0;
+#elif ENCODER_X264 || ENCODER_SVTAV1
+static const int AUO_KEYINT_MAX_AUTO = -1;
+#endif
 
 //マクロブロックタイプの一般的なオプション
 enum {
@@ -60,7 +66,7 @@ enum {
     MB_PARTITION_I4x4 = 0x00000010,
     MB_PARTITION_ALL  = 0x0000001F,
 };
-*/
+
 enum {
     OUT_CSP_NV12,
     OUT_CSP_YUY2,
@@ -70,6 +76,8 @@ enum {
     OUT_CSP_RGB,
     OUT_CSP_RGBA,
     OUT_CSP_NV16,
+    OUT_CSP_YUV422,
+    OUT_CSP_YUV400,
 };
 
 enum {

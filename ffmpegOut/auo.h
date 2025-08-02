@@ -43,27 +43,89 @@ const DWORD AUDIO_BUFFER_DEFAULT  = 48000;
 const DWORD AUDIO_BUFFER_MAX      = AUDIO_BUFFER_DEFAULT * 30;
 
 enum {
+    VIDEO_OUTPUT_UNKNOWN  = -3,
     VIDEO_OUTPUT_DISABLED = -2,
     VIDEO_OUTPUT_RAW      = -1,
     VIDEO_OUTPUT_MP4      = 0,
     VIDEO_OUTPUT_MKV      = 1,
-    VIDEO_OUTPUT_MPEG2    = 3,
 };
 
+#if ENCODER_X264
+static const char *ENCODER_NAME   = "x264";
+static const wchar_t *ENCODER_NAME_W = L"x264";
+static const char *ENOCDER_RAW_EXT = ".264";
+static const char *ENCODER_APP_NAME = ENCODER_NAME;
+static const wchar_t *ENCODER_APP_NAME_W = ENCODER_NAME_W;
+static const char *ENCODER_REPLACE_MACRO = "%{x264path}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".264"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.264"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#elif ENCODER_X265
+static const char *ENCODER_NAME   = "x265";
+static const wchar_t *ENCODER_NAME_W   = L"x265";
+static const char *ENOCDER_RAW_EXT = ".265";
+static const char *ENCODER_APP_NAME = ENCODER_NAME;
+static const wchar_t *ENCODER_APP_NAME_W = ENCODER_NAME_W;
+static const char *ENCODER_REPLACE_MACRO = "%{x265path}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".265"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.265"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#elif ENCODER_SVTAV1
+static const char *ENCODER_NAME   = "svt-av1";
+static const wchar_t *ENCODER_NAME_W   = L"svt-av1";
+static const char *ENOCDER_RAW_EXT = ".av1";
+static const char *ENCODER_APP_NAME = "SvtAv1EncApp";
+static const wchar_t *ENCODER_APP_NAME_W = L"SvtAv1EncApp";
+static const char *ENCODER_REPLACE_MACRO = "%{svtav1path}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".av1"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.av1"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#elif ENCODER_FFMPEG
 static const char    *ENCODER_NAME   =  "ffmpeg";
 static const wchar_t *ENCODER_NAME_W = L"ffmpeg";
 static const char    *ENOCDER_RAW_EXT = ".264";
 static const char    *ENCODER_APP_NAME = "ffmpeg";
 static const wchar_t *ENCODER_APP_NAME_W = L"ffmpeg";
 static const char    *ENCODER_REPLACE_MACRO = "%{ffmpegpath}";
+#elif ENCODER_QSV
+static const wchar_t *ENCODER_NAME_W = L"QSV";
+static const char    *ENOCDER_RAW_EXT = ".264";
+static const char    *ENCODER_APP_NAME = "QSVEnc";
+static const wchar_t *ENCODER_APP_NAME_W = L"QSVEnc";
+static const char    *ENCODER_REPLACE_MACRO = "%{qsvenccpath}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".264"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.264"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#elif ENCODER_NVENC
+static const wchar_t *ENCODER_NAME_W = L"NVENC";
+static const char    *ENOCDER_RAW_EXT = ".264";
+static const char    *ENCODER_APP_NAME = "NVEnc";
+static const wchar_t *ENCODER_APP_NAME_W = L"NVEnc";
+static const char    *ENCODER_REPLACE_MACRO = "%{nvenccpath}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".264"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.264"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#elif ENCODER_VCEENC
+static const wchar_t *ENCODER_NAME_W = L"VCE";
+static const char    *ENOCDER_RAW_EXT = ".264";
+static const char    *ENCODER_APP_NAME = "VCEEnc";
+static const wchar_t *ENCODER_APP_NAME_W = L"VCEEnc";
+static const char    *ENCODER_REPLACE_MACRO = "%{vceenccpath}";
+static const char *const OUTPUT_FILE_EXT[]        = {  ".mp4",     ".mkv",     ".264"    };
+static const char *const OUTPUT_FILE_EXT_FILTER[] = { "*.mp4",    "*.mkv",    "*.264"    };
+static const char *const OUTPUT_FILE_EXT_DESC[]   = { "mp4 file", "mkv file", "raw file" };
+#else
+static_assert(false);
+#endif
 
 enum {
     MUXER_DISABLED = VIDEO_OUTPUT_DISABLED,
     MUXER_MP4      = VIDEO_OUTPUT_MP4,
     MUXER_MKV      = VIDEO_OUTPUT_MKV,
     MUXER_TC2MP4   = VIDEO_OUTPUT_MP4 + 2,
-    MUXER_MPG      = VIDEO_OUTPUT_MPEG2,
-    MUXER_MP4_RAW  = VIDEO_OUTPUT_MP4 + 4,
+    MUXER_MP4_RAW,
+    MUXER_INTERNAL,
+    MUXER_MAX_COUNT,
 };
 
 enum {

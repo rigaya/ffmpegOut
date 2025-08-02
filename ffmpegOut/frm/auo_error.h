@@ -69,6 +69,12 @@ void error_afs_setup(BOOL afs, BOOL auto_afs_disable);
 void warning_x264_mp4_output_not_supported();
 void error_run_process(const wchar_t *exe_name, int rp_ret);
 void error_video_output_thread_start();
+void error_video_create_param_mem();
+void error_video_create_event();
+void error_video_wait_event();
+void error_video_set_event();
+void error_video_open_shared_input_buf();
+void error_video_get_conv_func();
 void warning_auto_qpfile_failed();
 void warning_auo_tcfile_failed();
 void error_open_wavfile();
@@ -129,7 +135,6 @@ void warning_video_very_short();
 
 void error_get_exedit_file_mapping();
 void error_get_exedit_output_start();
-void warning_video_very_short();
 
 std::wstring getLastErrorStr(DWORD err);
 

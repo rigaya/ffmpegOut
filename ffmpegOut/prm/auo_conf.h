@@ -33,7 +33,7 @@
 #include <Windows.h>
 #include "auo.h"
 #include "auo_mes.h"
-#include "auo_convert.h"
+#include "auo_options.h"
 #include "auo_settings.h"
 
 const int CONF_INITIALIZED = 1;
@@ -82,7 +82,7 @@ const PRIORITY_CLASS priority_table[] = {
     {L"low",              AUO_CONF_PRIORITY_LOW,        BELOW_NORMAL_PRIORITY_CLASS },
     {L"lower",            AUO_CONF_PRIORITY_LOWER,      IDLE_PRIORITY_CLASS         },
     {L"",                 AUO_MES_UNKNOWN,              NORMAL_PRIORITY_CLASS       },
-    {L"realtime",         AUO_CONF_PRIORITY_REALTIME,   REALTIME_PRIORITY_CLASS     },
+    {L"realtime(非推奨)", AUO_CONF_PRIORITY_REALTIME,   REALTIME_PRIORITY_CLASS     },
     {NULL,                AUO_MES_UNKNOWN, 0                           }
 };
 
@@ -180,8 +180,10 @@ typedef struct CONF_MUX {
     int  priority;        //mux優先度(インデックス)
     int  mp4_temp_dir;    //mp4box用一時ディレクトリ
     BOOL apple_mode;      //Apple用モード(mp4系専用)
-    BOOL disable_mpgext;  //mpg出力時、外部muxerを使用する
-    int  mpg_mode;        //mpg 外部muxer用追加コマンドの設定
+    BOOL unused;
+    int  unused2;
+    BOOL use_internal;    //内蔵muxerの使用
+    int  internal_mode;   //内蔵muxer用のオプション
 } CONF_MUX; //muxer用設定
 
 typedef struct CONF_OTHER {
@@ -227,6 +229,14 @@ public:
     static int  load_guiEx_conf(CONF_GUIEX *conf, const char *stg_file);       //設定をstgファイルから読み込み
     static int  save_guiEx_conf(const CONF_GUIEX *conf, const char *stg_file); //設定をstgファイルとして保存
 };
+
+static bool cnf_disable_guicmd(const CONF_OTHER *oth) {
+#if ENCODER_QSV || ENCODER_NVENC || ENCODER_VCEENC
+    return false;
+#else
+    return oth->disable_guicmd;
+#endif    
+}
 
 void init_CONF_GUIEX(CONF_GUIEX *conf, BOOL use_highbit); //初期化し、デフォルトを設定
 

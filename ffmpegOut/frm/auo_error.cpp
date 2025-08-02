@@ -31,9 +31,8 @@
 #include "auo_mes.h"
 #include "auo_version.h"
 #include "auo_pipe.h"
-#include "auo_chapter.h"
+#include "rgy_chapter.h"
 #include "auo_settings.h"
-#include "auo_options.h"
 #include "auo_util.h"
 
 void warning_conf_not_initialized(const char *default_stg_file) {
@@ -238,7 +237,7 @@ void error_invalid_ini_file() {
 }
 
 void error_unsupported_audio_format_by_muxer(const int video_out_type, const wchar_t *selected_aud, const wchar_t *default_aud) {
-#if 0
+#if !ENCODER_FFMPEG
     if (video_out_type < _countof(OUTPUT_FILE_EXT)) {
         write_log_auo_line_fmt(LOG_WARNING, g_auo_mes.get(AUO_ERR_UNSUPPORTED_AUDIO_FORMAT_BY_MUXER1), selected_aud, char_to_wstring(OUTPUT_FILE_EXT[video_out_type] + 1).c_str());
         if (default_aud) {
@@ -308,6 +307,30 @@ void error_run_process(const wchar_t *exe_name, int rp_ret) {
 
 void error_video_output_thread_start() {
     write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_OUTPUT_THREAD_START));
+}
+
+void error_video_create_param_mem() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_CREATE_PARAM_MEM));
+}
+
+void error_video_create_event() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_CREATE_EVENT));
+}
+
+void error_video_wait_event() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_WAIT_EVENT));
+}
+
+void error_video_set_event() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_SET_EVENT));
+}
+
+void error_video_open_shared_input_buf() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_OPEN_SHARED_INPUT_BUF));
+}
+
+void error_video_get_conv_func() {
+    write_log_auo_line(LOG_ERROR, g_auo_mes.get(AUO_ERR_VIDEO_GET_CONV_FUNC));
 }
 
 void warning_auto_qpfile_failed() {

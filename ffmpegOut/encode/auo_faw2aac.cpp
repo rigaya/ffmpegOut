@@ -186,10 +186,10 @@ AUO_RESULT audio_faw2aac(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *pe, 
         wavheader.file_size = 0;
         wavheader.subchunk_size = 16;
         wavheader.audio_format = 1;
-        wavheader.number_of_channels = oip->audio_ch;
+        wavheader.number_of_channels = (uint16_t)oip->audio_ch;
         wavheader.sample_rate = oip->audio_rate;
         wavheader.byte_rate = oip->audio_rate * oip->audio_ch * elemsize;
-        wavheader.block_align = wav_sample_size;
+        wavheader.block_align = (uint16_t)wav_sample_size;
         wavheader.bits_per_sample = elemsize * 8;
         wavheader.data_size = oip->audio_n * wavheader.number_of_channels * elemsize;
 

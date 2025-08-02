@@ -56,7 +56,7 @@
 #include "auo_convert.h"
 #include "auo_system.h"
 #include "auo_version.h"
-#include "auo_chapter.h"
+#include "rgy_chapter.h"
 #include "auo_mes.h"
 #include "auo_options.h"
 
@@ -65,6 +65,7 @@
 #include "auo_audio_parallel.h"
 #include "cpu_info.h"
 #include "rgy_thread_affinity.h"
+#include "rgy_simd.h"
 
 typedef struct video_output_thread_t {
     CONVERT_CF_DATA *pixel_data;
@@ -104,8 +105,8 @@ static int calc_input_frame_size(int width, int height, int color_format, int& b
     width = (color_format == CF_RGB) ? (width+3) & ~3 : (color_format == CF_RGBA) ? width : (width+1) & ~1;
     //widthが割り切れない場合、多めにアクセスが発生するので、そのぶんを確保しておく
     const DWORD pixel_size = COLORFORMATS[color_format].size;
-    const DWORD simd_check = get_availableSIMD();
-    const DWORD align_size = (simd_check & AUO_SIMD_SSE2) ? ((simd_check & AUO_SIMD_AVX2) ? 64 : 32) : 1;
+    const auto simd_check = get_availableSIMD();
+    const DWORD align_size = ((simd_check & RGY_SIMD::SSE2) != RGY_SIMD::NONE) ? (((simd_check & RGY_SIMD::AVX2) != RGY_SIMD::NONE) ? 64 : 32) : 1;
 #define ALIGN_NEXT(i, align) (((i) + (align-1)) & (~(align-1))) //alignは2の累乗(1,2,4,8,16,32...)
     buf_size = ALIGN_NEXT(width * height * pixel_size + (ALIGN_NEXT(width, align_size / pixel_size) - width) * 2 * pixel_size, align_size);
 #undef ALIGN_NEXT
@@ -129,7 +130,7 @@ BOOL setup_afsvideo(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, CONF_GUI
         warning_auto_afs_disable();
         conf->vid.afs = FALSE;
         //再度使用するmuxerをチェックする
-        pe->muxer_to_be_used = check_muxer_to_be_used(conf, pe->video_out_type, (oip->flag & OUTPUT_INFO_FLAG_AUDIO) != 0);
+        pe->muxer_to_be_used = check_muxer_to_be_used(conf, pe, sys_dat, pe->temp_filename, pe->video_out_type, (oip->flag & OUTPUT_INFO_FLAG_AUDIO) != 0);
         return TRUE;
     }
     //エラー
@@ -214,13 +215,13 @@ static void build_full_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, cons
     //rawの形式情報追加
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -pix_fmt %s", specify_input_csp(prm.enc.output_csp));
     //fps
-    int gcd = get_gcd(oip->rate, oip->scale);
+    int gcd = rgy_gcd(oip->rate, oip->scale);
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -r %d/%d", oip->rate / gcd, oip->scale / gcd);
     //入力ファイル
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -i \"%s\"", input);
     //音声入力
     if ((oip->flag & OUTPUT_INFO_FLAG_AUDIO) && conf->enc.audio_input) {
-        if (!(conf->enc.use_auto_npass && pe->current_x264_pass == 1)) {
+        if (!(conf->enc.use_auto_npass && pe->current_pass == 1)) {
             if (conf->aud.use_internal) {
                 if_valid_wait_for_single_object(pe->aud_parallel.he_vid_start, INFINITE);
                 for (int i_aud = 0; i_aud < pe->aud_count; i_aud++) {
@@ -255,7 +256,7 @@ static void build_full_cmd(char *cmd, size_t nSize, const CONF_GUIEX *conf, cons
     //	sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -vframes %d", oip->n - pe->drop_count);
     //自動2pass
     if (conf->enc.use_auto_npass)
-        sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -pass %d", pe->current_x264_pass);
+        sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " -pass %d", pe->current_pass);
     //出力ファイル
     sprintf_s(cmd + strlen(cmd), nSize - strlen(cmd), " \"%s\"", pe->temp_filename);
 }
@@ -502,7 +503,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     char enc_cmd[MAX_CMD_LEN]  = { 0 };
     char enc_args[MAX_CMD_LEN] = { 0 };
     char enc_dir[MAX_PATH_LEN] = { 0 };
-    char *enc_path = sys_dat->exstg->s_local.ffmpeg_path;
+    char *enc_path = sys_dat->exstg->s_enc.fullpath;
 
     const bool afs = conf->vid.afs != 0;
     video_output_thread_t thread_data = { 0 };
@@ -627,7 +628,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 
             if (!(i & 7)) {
                 //Aviutlの進捗表示を更新
-                oip->func_rest_time_disp(i + oip->n * (pe->current_x264_pass - 1), oip->n * pe->total_x264_pass);
+                oip->func_rest_time_disp(i + oip->n * (pe->current_pass - 1), oip->n * pe->total_pass);
 
                 //x264優先度
                 check_enc_priority(pe->h_p_aviutl, pi_enc.hProcess, set_priority);
@@ -726,7 +727,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         if(conf->enc.output_csp == OUT_CSP_RGBA)
             efm.output_end();
 
-        if (!ret) oip->func_rest_time_disp(oip->n * pe->current_x264_pass, oip->n * pe->total_x264_pass);
+        if (!ret) oip->func_rest_time_disp(oip->n * pe->current_pass, oip->n * pe->total_pass);
 
         //音声の同時処理を終了させる
         ret |= finish_aud_parallel_task(oip, pe, conf->aud.use_internal, ret);
@@ -768,8 +769,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
 static void set_window_title_ffmpegout(const PRM_ENC *pe) {
     wchar_t mes[256];
     swprintf_s(mes, _countof(mes), L"%s %s", ENCODER_NAME_W, g_auo_mes.get(AUO_VIDEO_ENCODE));
-    if (pe->total_x264_pass > 1)
-        swprintf_s(mes + wcslen(mes), _countof(mes) - wcslen(mes), L"   %d / %d pass", pe->current_x264_pass, pe->total_x264_pass);
+    if (pe->total_pass > 1)
+        swprintf_s(mes + wcslen(mes), _countof(mes) - wcslen(mes), L"   %d / %d pass", pe->current_pass, pe->total_pass);
     if (pe->aud_parallel.th_aud)
         wcscat_s(mes, _countof(mes), g_auo_mes.get(AUO_VIDEO_AUDIO_ENCODE));
     set_window_title(mes, PROGRESSBAR_CONTINUOUS);
@@ -781,9 +782,9 @@ static AUO_RESULT video_output_inside(CONF_GUIEX *conf, const OUTPUT_INFO *oip, 
     if (pe->video_out_type == VIDEO_OUTPUT_DISABLED)
         return ret;
 
-    for (; !ret && pe->current_x264_pass <= pe->total_x264_pass; pe->current_x264_pass++) {
-        if (pe->current_x264_pass > 1)
-            open_log_window(oip, sys_dat, pe->current_x264_pass, pe->total_x264_pass);
+    for (; !ret && pe->current_pass <= pe->total_pass; pe->current_pass++) {
+        if (pe->current_pass > 1)
+            open_log_window(oip, sys_dat, pe->current_pass, pe->total_pass);
         set_window_title_ffmpegout(pe);
         ret |= ffmpeg_out(conf, oip, pe, sys_dat);
         set_window_title(AUO_FULL_NAME_W, PROGRESSBAR_DISABLED);

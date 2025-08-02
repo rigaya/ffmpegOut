@@ -188,8 +188,9 @@ BOOL func_output( OUTPUT_INFO *oip )
     }
     conf_out = g_conf;
 
+    init_enc_prm(&conf_out, &pe, oip, &g_sys_dat);
+
     //出力拡張子の設定
-    char *orig_savfile = oip->savefile;
     char outfilename[MAX_PATH_LEN];
     make_outfilename_and_set_to_oipsavefile(oip, outfilename, _countof(outfilename), &conf_out);
 
@@ -319,7 +320,6 @@ void delete_SYSTEM_DATA(SYSTEM_DATA *_sys_dat) {
 void get_default_conf(CONF_GUIEX *conf) {
     conf->mux.disable_mkvext = TRUE;
     conf->mux.disable_mp4ext = TRUE;
-    conf->mux.disable_mpgext = TRUE;
     conf->aud.ext.encoder = g_sys_dat.exstg->s_local.default_audio_encoder_ext;
     conf->aud.in.encoder = g_sys_dat.exstg->s_local.default_audio_encoder_in;
     conf->aud.use_internal = g_sys_dat.exstg->s_local.default_audenc_use_in;

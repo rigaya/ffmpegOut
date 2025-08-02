@@ -207,8 +207,8 @@ System::Void frmConfig::InformfbcClosed() {
 System::Void frmConfig::LoadLocalStg() {
     guiEx_settings *_ex_stg = sys_dat->exstg;
     _ex_stg->load_encode_stg();
-    LocalStg.ffmpegOutExeName = String(_ex_stg->s_local.ffmpeg_filname).ToString();
-    LocalStg.ffmpegOutPath    = String(_ex_stg->s_local.ffmpeg_path).ToString();
+    LocalStg.ffmpegOutExeName = String(_ex_stg->s_enc.filename).ToString();
+    LocalStg.ffmpegOutPath    = String(_ex_stg->s_enc.fullpath).ToString();
     LocalStg.CustomTmpDir    = String(_ex_stg->s_local.custom_tmp_dir).ToString();
     LocalStg.CustomAudTmpDir = String(_ex_stg->s_local.custom_audio_tmp_dir).ToString();
     LocalStg.CustomMP4TmpDir = String(_ex_stg->s_local.custom_mp4box_tmp_dir).ToString();
@@ -220,8 +220,6 @@ System::Void frmConfig::LoadLocalStg() {
     LocalStg.MKVMuxerPath    = String(_ex_stg->s_mux[MUXER_MKV].fullpath).ToString();
     LocalStg.TC2MP4ExeName   = String(_ex_stg->s_mux[MUXER_TC2MP4].filename).ToString();
     LocalStg.TC2MP4Path      = String(_ex_stg->s_mux[MUXER_TC2MP4].fullpath).ToString();
-    LocalStg.MPGMuxerExeName = String(_ex_stg->s_mux[MUXER_MPG].filename).ToString();
-    LocalStg.MPGMuxerPath    = String(_ex_stg->s_mux[MUXER_MPG].fullpath).ToString();
     LocalStg.MP4RawExeName   = String(_ex_stg->s_mux[MUXER_MP4_RAW].filename).ToString();
     LocalStg.MP4RawPath      = String(_ex_stg->s_mux[MUXER_MP4_RAW].fullpath).ToString();
 
@@ -275,7 +273,7 @@ System::Boolean frmConfig::CheckLocalStg() {
 System::Void frmConfig::SaveLocalStg() {
     guiEx_settings *_ex_stg = sys_dat->exstg;
     _ex_stg->load_encode_stg();
-    GetCHARfromString(_ex_stg->s_local.ffmpeg_path,           sizeof(_ex_stg->s_local.ffmpeg_path),           LocalStg.ffmpegOutPath);
+    GetCHARfromString(_ex_stg->s_enc.fullpath,                sizeof(_ex_stg->s_enc.fullpath),                LocalStg.ffmpegOutPath);
     GetCHARfromString(_ex_stg->s_local.custom_tmp_dir,        sizeof(_ex_stg->s_local.custom_tmp_dir),        LocalStg.CustomTmpDir);
     GetCHARfromString(_ex_stg->s_local.custom_mp4box_tmp_dir, sizeof(_ex_stg->s_local.custom_mp4box_tmp_dir), LocalStg.CustomMP4TmpDir);
     GetCHARfromString(_ex_stg->s_local.custom_audio_tmp_dir,  sizeof(_ex_stg->s_local.custom_audio_tmp_dir),  LocalStg.CustomAudTmpDir);
@@ -284,7 +282,6 @@ System::Void frmConfig::SaveLocalStg() {
     GetCHARfromString(_ex_stg->s_mux[MUXER_MP4].fullpath,     sizeof(_ex_stg->s_mux[MUXER_MP4].fullpath),     LocalStg.MP4MuxerPath);
     GetCHARfromString(_ex_stg->s_mux[MUXER_MKV].fullpath,     sizeof(_ex_stg->s_mux[MUXER_MKV].fullpath),     LocalStg.MKVMuxerPath);
     GetCHARfromString(_ex_stg->s_mux[MUXER_TC2MP4].fullpath,  sizeof(_ex_stg->s_mux[MUXER_TC2MP4].fullpath),  LocalStg.TC2MP4Path);
-    GetCHARfromString(_ex_stg->s_mux[MUXER_MPG].fullpath,     sizeof(_ex_stg->s_mux[MUXER_MPG].fullpath),     LocalStg.MPGMuxerPath);
     GetCHARfromString(_ex_stg->s_mux[MUXER_MP4_RAW].fullpath, sizeof(_ex_stg->s_mux[MUXER_MP4_RAW].fullpath), LocalStg.MP4RawPath);
     for (int i = 0; i < _ex_stg->s_aud_ext_count; i++)
         GetCHARfromString(_ex_stg->s_aud_ext[i].fullpath,     sizeof(_ex_stg->s_aud_ext[i].fullpath),             LocalStg.audEncPath[i]);
@@ -868,8 +865,6 @@ System::Void frmConfig::InitComboBox() {
 
     setMuxerCmdExNames(fcgCXMP4CmdEx, MUXER_MP4);
     setMuxerCmdExNames(fcgCXMKVCmdEx, MUXER_MKV);
-    setMuxerCmdExNames(fcgCXMPGCmdEx, MUXER_MPG);
-
     setAudioEncoderNames();
 
     setPriorityList(fcgCXffmpegOutPriority);
@@ -886,12 +881,11 @@ System::Void frmConfig::SetTXMaxLenAll() {
     //MaxLengthに最大文字数をセットし、それをもとにバイト数計算を行うイベントをセットする。
     SetTXMaxLen(fcgTXCmdEx,                sizeof(conf->vid.cmdex) - 1);
     SetTXMaxLen(fcgTXInCmd,                sizeof(conf->vid.incmd) - 1);
-    SetTXMaxLen(fcgTXVideoEncoderPath,        sizeof(sys_dat->exstg->s_local.ffmpeg_path) - 1);
+    SetTXMaxLen(fcgTXVideoEncoderPath,     sizeof(sys_dat->exstg->s_enc.fullpath) - 1);
     SetTXMaxLen(fcgTXAudioEncoderPath,     sizeof(sys_dat->exstg->s_aud_ext[0].fullpath) - 1);
     SetTXMaxLen(fcgTXMP4MuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MP4].fullpath) - 1);
     SetTXMaxLen(fcgTXMKVMuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MKV].fullpath) - 1);
     SetTXMaxLen(fcgTXTC2MP4Path,           sizeof(sys_dat->exstg->s_mux[MUXER_TC2MP4].fullpath) - 1);
-    SetTXMaxLen(fcgTXMPGMuxerPath,         sizeof(sys_dat->exstg->s_mux[MUXER_MPG].fullpath) - 1);
     SetTXMaxLen(fcgTXMP4RawPath,           sizeof(sys_dat->exstg->s_mux[MUXER_MP4_RAW].fullpath) - 1);
     SetTXMaxLen(fcgTXCustomTempDir,        sizeof(sys_dat->exstg->s_local.custom_tmp_dir) - 1);
     SetTXMaxLen(fcgTXCustomAudioTempDir,   sizeof(sys_dat->exstg->s_local.custom_audio_tmp_dir) - 1);
@@ -1239,7 +1233,6 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     */
     cnf->mux.disable_mp4ext         = TRUE;
     cnf->mux.disable_mkvext         = TRUE;
-    cnf->mux.mpg_mode               = TRUE;
 
     GetfcgTSLSettingsNotes(cnf->oth.notes, sizeof(cnf->oth.notes));
 

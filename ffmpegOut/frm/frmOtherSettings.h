@@ -561,31 +561,40 @@ namespace AUO_NAME_R {
             stgDir = fosTXStgDir->Text;
             fos_ex_stg->load_encode_stg();
             fos_ex_stg->load_log_win();
-            fos_ex_stg->s_local.disable_tooltip_help     = fosCBDisableToolTip->Checked;
-            fos_ex_stg->s_local.disable_visual_styles    = fosCBDisableVisualStyles->Checked;
-            fos_ex_stg->s_local.enable_stg_esc_key       = fosCBStgEscKey->Checked;
-            fos_ex_stg->s_log.minimized                  = fosCBLogStartMinimized->Checked;
-            fos_ex_stg->s_log.transparent                = !fosCBLogDisableTransparency->Checked;
-            fos_ex_stg->s_log.log_level                  =(fosCBOutputMoreLog->Checked) ? LOG_MORE : LOG_INFO;
-            fos_ex_stg->s_local.get_relative_path        = fosCBGetRelativePath->Checked;
-            fos_ex_stg->s_local.run_bat_minimized        = fosCBRunBatMinimized->Checked;
-            fos_ex_stg->s_local.default_audio_encoder_ext= fosCXDefaultAudioEncoder->SelectedIndex;
+            fos_ex_stg->s_local.disable_tooltip_help      = fosCBDisableToolTip->Checked;
+            fos_ex_stg->s_local.disable_visual_styles     = fosCBDisableVisualStyles->Checked;
+            fos_ex_stg->s_local.enable_stg_esc_key        = fosCBStgEscKey->Checked;
+            fos_ex_stg->s_log.minimized                   = fosCBLogStartMinimized->Checked;
+            fos_ex_stg->s_log.transparent                 = !fosCBLogDisableTransparency->Checked;
+            fos_ex_stg->s_log.log_level                   =(fosCBOutputMoreLog->Checked) ? LOG_MORE : LOG_INFO;
+            fos_ex_stg->s_local.get_relative_path         = fosCBGetRelativePath->Checked;
+            fos_ex_stg->s_local.run_bat_minimized         = fosCBRunBatMinimized->Checked;
+            const int default_encoder = fosCXDefaultAudioEncoder->SelectedIndex;
+            if (default_encoder >= fos_ex_stg->s_aud_int_count) {
+                fos_ex_stg->s_local.default_audio_encoder_ext = default_encoder - fos_ex_stg->s_aud_int_count;
+                fos_ex_stg->s_local.default_audenc_use_in = FALSE;
+            } else {
+                fos_ex_stg->s_local.default_audio_encoder_in = default_encoder;
+                fos_ex_stg->s_local.default_audenc_use_in = TRUE;
+            }
             fos_ex_stg->s_local.thread_pthrottling_mode   = (int)RGY_THREAD_POWER_THROTTOLING_MODE_STR[fosCXPowerThrottling->SelectedIndex].first;
             fos_ex_stg->save_local();
             fos_ex_stg->save_log_win();
             this->Close();
         }
-    private: 
+    private:
         System::Void fosSetComboBox() {
             fosCXDefaultAudioEncoder->SuspendLayout();
             fosCXDefaultAudioEncoder->Items->Clear();
+            for (int i = 0; i < fos_ex_stg->s_aud_int_count; i++)
+                fosCXDefaultAudioEncoder->Items->Add(String(fos_ex_stg->s_aud_int[i].dispname).ToString());
             for (int i = 0; i < fos_ex_stg->s_aud_ext_count; i++)
                 fosCXDefaultAudioEncoder->Items->Add(LOAD_CLI_STRING(AUO_OTHER_SETTINGS_AUDIO_ENCODER_EXTERNAL) + L": " + String(fos_ex_stg->s_aud_ext[i].dispname).ToString());
             fosCXDefaultAudioEncoder->ResumeLayout();
 
             fosCXPowerThrottling->SuspendLayout();
             fosCXPowerThrottling->Items->Clear();
-            for (int i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++)
+            for (size_t i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++)
                 fosCXPowerThrottling->Items->Add(String(RGY_THREAD_POWER_THROTTOLING_MODE_STR[i].second).ToString());
             fosCXPowerThrottling->ResumeLayout();
         }
@@ -598,16 +607,20 @@ namespace AUO_NAME_R {
 
             LoadLangText();
             fosSetComboBox();
-            fosCBDisableToolTip->Checked         = fos_ex_stg->s_local.disable_tooltip_help != 0;
-            fosCBDisableVisualStyles->Checked    = fos_ex_stg->s_local.disable_visual_styles != 0;
-            fosCBStgEscKey->Checked              = fos_ex_stg->s_local.enable_stg_esc_key != 0;
-            fosCBLogStartMinimized->Checked      = fos_ex_stg->s_log.minimized != 0;
-            fosCBLogDisableTransparency->Checked = fos_ex_stg->s_log.transparent == 0;
-            fosCBOutputMoreLog->Checked          = fos_ex_stg->s_log.log_level != LOG_INFO;
-            fosCBGetRelativePath->Checked        = fos_ex_stg->s_local.get_relative_path != 0;
-            fosCBRunBatMinimized->Checked        = fos_ex_stg->s_local.run_bat_minimized != 0;
-            fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder_ext, 0, fosCXDefaultAudioEncoder->Items->Count);
-            for (int i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++) {
+            fosCBDisableToolTip->Checked            = fos_ex_stg->s_local.disable_tooltip_help != 0;
+            fosCBDisableVisualStyles->Checked       = fos_ex_stg->s_local.disable_visual_styles != 0;
+            fosCBStgEscKey->Checked                 = fos_ex_stg->s_local.enable_stg_esc_key != 0;
+            fosCBLogStartMinimized->Checked         = fos_ex_stg->s_log.minimized != 0;
+            fosCBLogDisableTransparency->Checked    = fos_ex_stg->s_log.transparent == 0;
+            fosCBOutputMoreLog->Checked             = fos_ex_stg->s_log.log_level != LOG_INFO;
+            fosCBGetRelativePath->Checked           = fos_ex_stg->s_local.get_relative_path != 0;
+            fosCBRunBatMinimized->Checked           = fos_ex_stg->s_local.run_bat_minimized != 0;
+            if (fos_ex_stg->s_local.default_audenc_use_in) {
+                fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder_in, 0, fos_ex_stg->s_aud_int_count-1);
+            } else {
+                fosCXDefaultAudioEncoder->SelectedIndex = clamp(fos_ex_stg->s_local.default_audio_encoder_ext, 0, fos_ex_stg->s_aud_ext_count-1) + fos_ex_stg->s_aud_int_count;
+            }
+            for (size_t i = 0; i < RGY_THREAD_POWER_THROTTOLING_MODE_STR.size(); i++) {
                 if ((int)RGY_THREAD_POWER_THROTTOLING_MODE_STR[i].first == fos_ex_stg->s_local.thread_pthrottling_mode) {
                     fosCXPowerThrottling->SelectedIndex = i;
                     break;
