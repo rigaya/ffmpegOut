@@ -660,7 +660,7 @@ ToolStripMenuItem^ frmConfig::fcgTSSettingsSearchItem(String^ stgPath) {
 System::Void frmConfig::SaveToStgFile(String^ stgName) {
     size_t nameLen = CountStringBytes(stgName) + 1;
     TCHAR *stg_name = (TCHAR *)malloc(nameLen * sizeof(stg_name[0]));
-    GetWCHARfromString(stg_name, nameLen, stgName);
+    GetWCHARfromString(stg_name, (DWORD)nameLen, stgName);
     init_CONF_GUIEX(cnf_stgSelected, FALSE);
     FrmToConf(cnf_stgSelected);
     String^ stgDir = Path::GetDirectoryName(stgName);
