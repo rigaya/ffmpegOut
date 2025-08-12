@@ -1887,20 +1887,20 @@ void convert_pa64_to_yuv444_avx2(void *frame, CONVERT_CF_DATA *pixel_data, const
             y7 = _mm256_packus_epi32(_mm256_srli_epi32(y67_0, 16), _mm256_srli_epi32(y67_1, 16));
 
             __m256i r_32_0 = _mm256_and_si256(y0, _mm256_set1_epi32(0xFFFF));
-            __m256i g_32_0 = _mm256_srli_epi32(y0, 16);
+            __m256i b_32_0 = _mm256_srli_epi32(y0, 16);
             __m256i r_32_1 = _mm256_and_si256(y2, _mm256_set1_epi32(0xFFFF));
-            __m256i g_32_1 = _mm256_srli_epi32(y2, 16);
-            __m256i b_32_0 = _mm256_and_si256(y1, _mm256_set1_epi32(0xFFFF));
+            __m256i b_32_1 = _mm256_srli_epi32(y2, 16);
+            __m256i g_32_0 = _mm256_and_si256(y1, _mm256_set1_epi32(0xFFFF));
             __m256i a_32_0 = _mm256_srli_epi32(y1, 16);
-            __m256i b_32_1 = _mm256_and_si256(y3, _mm256_set1_epi32(0xFFFF));
+            __m256i g_32_1 = _mm256_and_si256(y3, _mm256_set1_epi32(0xFFFF));
             __m256i a_32_1 = _mm256_srli_epi32(y3, 16);
             __m256i r_32_2 = _mm256_and_si256(y4, _mm256_set1_epi32(0xFFFF));
-            __m256i g_32_2 = _mm256_srli_epi32(y4, 16);
+            __m256i b_32_2 = _mm256_srli_epi32(y4, 16);
             __m256i r_32_3 = _mm256_and_si256(y6, _mm256_set1_epi32(0xFFFF));
-            __m256i g_32_3 = _mm256_srli_epi32(y6, 16);
-            __m256i b_32_2 = _mm256_and_si256(y5, _mm256_set1_epi32(0xFFFF));
+            __m256i b_32_3 = _mm256_srli_epi32(y6, 16);
+            __m256i g_32_2 = _mm256_and_si256(y5, _mm256_set1_epi32(0xFFFF));
             __m256i a_32_2 = _mm256_srli_epi32(y5, 16);
-            __m256i b_32_3 = _mm256_and_si256(y7, _mm256_set1_epi32(0xFFFF));
+            __m256i g_32_3 = _mm256_and_si256(y7, _mm256_set1_epi32(0xFFFF));
             __m256i a_32_3 = _mm256_srli_epi32(y7, 16);
 
             // グループ1: ピクセル0-7
@@ -1970,6 +1970,14 @@ void convert_pa64_to_yuv444_avx2(void *frame, CONVERT_CF_DATA *pixel_data, const
             __m256i y_8 = _mm256_packus_epi16(y_16_0, y_16_1);  // 32ピクセル
             __m256i u_8 = _mm256_packus_epi16(u_16_0, u_16_1);
             __m256i v_8 = _mm256_packus_epi16(v_16_0, v_16_1);
+
+            y_8 = _mm256_permute4x64_epi64(y_8, _MM_SHUFFLE(3,1,2,0));
+            u_8 = _mm256_permute4x64_epi64(u_8, _MM_SHUFFLE(3,1,2,0));
+            v_8 = _mm256_permute4x64_epi64(v_8, _MM_SHUFFLE(3,1,2,0));
+
+            y_8 = _mm256_shuffle_epi32(y_8, _MM_SHUFFLE(3,1,2,0));
+            u_8 = _mm256_shuffle_epi32(u_8, _MM_SHUFFLE(3,1,2,0));
+            v_8 = _mm256_shuffle_epi32(v_8, _MM_SHUFFLE(3,1,2,0));
             
             // 結果を256ビットレジスタで格納（32ピクセル = 32バイト）
             _mm256_storeu_si256((__m256i*)(dstY + x), y_8);
