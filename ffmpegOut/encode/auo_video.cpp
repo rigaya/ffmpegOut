@@ -288,6 +288,10 @@ static void set_pixel_data(CONVERT_CF_DATA *pixel_data, const CONF_GUIEX *conf, 
             pixel_data->count = 1;
             pixel_data->size[0] = w * h * 4 * sizeof(BYTE); //8bit only
             break;
+        case OUT_CSP_RGBA_16: //RGBA packed 16bit
+            pixel_data->count = 1;
+            pixel_data->size[0] = w * h * 4 * sizeof(short);
+            break;
         case OUT_CSP_NV12: //nv12 (YUV420)
         case OUT_CSP_P010:
         default:
@@ -477,7 +481,7 @@ static void error_videnc_failed(const PRM_ENC *pe) {
 
 static BOOL get_exedit_file_mapping(ExeditFileMapping* efm) {
     TCHAR name[256];
-    _stprintf_s(name, _countof(name), _T("exedit_%d_%d"), _T("01"), GetCurrentProcessId());
+    _stprintf_s(name, _countof(name), _T("exedit_%d_%d"), '01', GetCurrentProcessId());
     HANDLE hfmo = OpenFileMapping(FILE_MAP_WRITE, FALSE, name);
     if (hfmo == nullptr)
         return FALSE;
@@ -523,8 +527,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     }
     PathGetDirectory(enc_dir, _countof(enc_dir), enc_path);
 
-    if (is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA) {
-        conf->enc.output_csp = OUT_CSP_RGB;
+    if (!is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA_16) {
+        conf->enc.output_csp = OUT_CSP_RGBA;
     }
     const int color_format = get_aviutl_color_format(conf->enc.use_highbit_depth, conf->enc.output_csp);
     const DWORD aviutl_fourcc = COLORFORMATS[color_format].FOURCC;
@@ -550,7 +554,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
     //拡張編集のファイルマッピングを取得
     ExeditFileMapping efm = { nullptr };
     ExeditData ed = { 0 };
-    if(conf->enc.output_csp == OUT_CSP_RGBA) {
+    if (!is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA) {
         if (get_exedit_file_mapping(&efm) == FALSE) {
             ret |= AUO_RESULT_ERROR; error_get_exedit_file_mapping();
             return ret;
@@ -614,7 +618,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         enable_enc_control(&set_priority, &enc_pause, FALSE, FALSE, tm_vid_enc_start, oip->n);
 
         //------------メインループ------------
-        for (framen = ed.frame_start, i = 0, next_jitter = jitter + 1, pe->drop_count = 0; (conf->enc.output_csp == OUT_CSP_RGBA ? (framen <= ed.frame_end) : (i < oip->n)); i++, framen++, next_jitter++) {
+        for (framen = ed.frame_start, i = 0, next_jitter = jitter + 1, pe->drop_count = 0; ((!is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA) ? (framen <= ed.frame_end) : (i < oip->n)); i++, framen++, next_jitter++) {
             //中断を確認
             ret |= (oip->func_is_abort()) ? AUO_RESULT_ABORT : AUO_RESULT_SUCCESS;
 
@@ -675,7 +679,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
                 break;
 
 
-            if(conf->enc.output_csp == OUT_CSP_RGBA) {
+            if (!is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA) {
                 //拡張編集からフレームをもらう
                 if ((frame = efm.get_image(framen)) == NULL) {
                     ret |= AUO_RESULT_ERROR; error_afs_get_frame();
@@ -727,7 +731,7 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         //パイプを閉じる
         CloseStdIn(&pipes);
         
-        if(conf->enc.output_csp == OUT_CSP_RGBA)
+        if (!is_aviutl2() && conf->enc.output_csp == OUT_CSP_RGBA)
             efm.output_end();
 
         if (!ret) oip->func_rest_time_disp(oip->n * pe->current_pass, oip->n * pe->total_pass);

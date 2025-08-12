@@ -77,10 +77,10 @@ enum {
     OUT_CSP_YUV444_16,
     OUT_CSP_RGB,
     OUT_CSP_RGBA,
+    OUT_CSP_RGBA_16,
     OUT_CSP_NV16,
     OUT_CSP_YUV422,
     OUT_CSP_YUV400,
-    OUT_CSP_RGBA_16,
 };
 
 enum {
@@ -98,7 +98,8 @@ static const TCHAR * const specify_csp[] = {
     _T("p010le"),
     _T("yuv444p16le"),
     _T("bgr24"),   //OUT_CSP_RGB
-    _T("bgra")     //OUT_CSP_RGBA
+    _T("bgra"),    //OUT_CSP_RGBA
+    _T("rgba16le") //OUT_CSP_RGBA_16
 };
 //文字列を引数にとるオプションの引数リスト
 //OUT_CSP_NV12, OUT_CSP_YUV444, OUT_CSP_RGB に合わせる
@@ -110,6 +111,7 @@ const ENC_OPTION_STR list_output_csp[] = {
     { _T("yuv444p16le"), AUO_MES_UNKNOWN, L"yuv444(16bit)" },
     { _T("bgr24"),       AUO_MES_UNKNOWN, L"rgb"  },
     { _T("bgra"),        AUO_MES_UNKNOWN, L"rgba"  },
+    { _T("rgba16le"),    AUO_MES_UNKNOWN, L"rgba(16bit)" },
     { NULL,          AUO_MES_UNKNOWN, NULL }
 };
 
@@ -117,6 +119,7 @@ static bool csp_highbit_depth(int output_csp) {
     static const bool list[] = {
         false, false, false,
         true, true,
+        false,
         false,
         false,
         false /*dummy*/
