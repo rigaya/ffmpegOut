@@ -28,19 +28,26 @@
 #ifndef _AUO_VERSION_H_
 #define _AUO_VERSION_H_
 
-#define AUO_VERSION         0,1,15,0
-#define AUO_VERSION_STR      "1.15"
-#define AUO_VERSION_STR_W   L"1.15"
+#define AUO_VERSION         0,2,0,0
+#define AUO_VERSION_STR      "2.00"
+#define AUO_VERSION_STR_W   L"2.00"
 #define AUO_NAME_R            ffmpegOut
 #define AUO_NAME_WITHOUT_EXT "ffmpegOut"
 #define AUO_NAME_WITHOUT_EXT_W L"ffmpegOut"
+#if _M_X64
+#define AUO_NAME             "ffmpegOut.auo2"
+#define AUO_NAME_W          L"ffmpegOut.auo2"
+#else
 #define AUO_NAME             "ffmpegOut.auo"
 #define AUO_NAME_W          L"ffmpegOut.auo"
+#endif
 #define AUO_FULL_NAME        "ffmpeg 出力 "
 #define AUO_FULL_NAME_W     L"ffmpeg 出力 "
 #define AUO_VERSION_NAME     "ffmpeg 出力 " AUO_VERSION_STR
 #define AUO_VERSION_INFO     "ffmpeg 出力 " AUO_VERSION_STR " by rigaya"
+#define AUO_VERSION_INFO_W   L"ffmpeg 出力 " AUO_VERSION_STR_W " by rigaya"
 #define AUO_EXT_FILTER       "All Support Formats (*.*)\0*\0"
+#define AUO_EXT_FILTER_W     L"All Support Formats (*.*)\0*\0"
 
 
 #define ENCODER_X264 0

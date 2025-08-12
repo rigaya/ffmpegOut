@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "xmemory": "cpp"
+        "xmemory": "cpp",
+        "xstring": "cpp"
     }
 }

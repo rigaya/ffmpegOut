@@ -200,7 +200,7 @@ namespace ffmpegOut {
     {
         String^ Name;
         String^ Path;
-        const char* args;
+        const TCHAR* args;
     };
 
     const int fcgTBQualityTimerLatency = 600;

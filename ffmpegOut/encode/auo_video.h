@@ -28,16 +28,11 @@
 #ifndef _AUO_VIDEO_H_
 #define _AUO_VIDEO_H_
 
-#include "output.h"
+#include "auo.h"
 #include "convert.h"
 #include "auo_conf.h"
 #include "auo_system.h"
-
-#ifndef MAKEFOURCC
-#define MAKEFOURCC(ch0, ch1, ch2, ch3)  ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) | ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24))
-#endif
-
-static const int DROP_FRAME_FLAG = INT_MAX;
+#include "rgy_tchar.h"
 
 typedef struct {
     DWORD FOURCC;   //FOURCC
@@ -67,17 +62,30 @@ enum {
     CF_YUY2 = 0,
     CF_YC48 = 1,
     CF_RGB  = 2,
-    CF_RGBA = 3,
-    CF_LW48 = 4,
+    CF_LW48 = 3,
+    CF_PA64 = 4,
+    CF_HF64 = 5,
+    CF_RGBA = 6,
 };
-static const char * const CF_NAME[] = { "YUY2", "YC48", "RGB", "RGBA", "LW48" };
+static const TCHAR * const CF_NAME[] = { _T("YUY2"), _T("YC48"), _T("RGB"), _T("LW48"), _T("PA64"), _T("HF64"), _T("RGBA") };
+
+#ifndef MAKEFOURCC
+#define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
+                ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |   \
+                ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
+#endif
+
 static const COLORFORMAT_DATA COLORFORMATS[] = {
     { MAKEFOURCC('Y', 'U', 'Y', '2'), 2 }, //YUY2
     { MAKEFOURCC('Y', 'C', '4', '8'), 6 }, //YC48
     { NULL,                           3 }, //RGB
+    { MAKEFOURCC('L', 'W', '4', '8'), 6 }, //LW48
+    { MAKEFOURCC('P', 'A', '6', '4'), 8 }, //PA64
+    { MAKEFOURCC('H', 'F', '6', '4'), 8 }, //HF64
     { NULL,                           4 }, //RGBA(Unused)
-    { MAKEFOURCC('L', 'W', '4', '8'), 6 }  //LW48
 };
+
+static const int DROP_FRAME_FLAG = INT_MAX;
 
 BOOL setup_afsvideo(const OUTPUT_INFO *oip, const SYSTEM_DATA *sys_dat, CONF_GUIEX *conf, PRM_ENC *pe);
 void close_afsvideo(PRM_ENC *pe);
