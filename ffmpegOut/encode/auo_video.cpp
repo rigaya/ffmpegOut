@@ -91,6 +91,7 @@ int get_aviutl_color_format(int use_highbit, int output_csp) {
         case OUT_CSP_RGB:
             return CF_RGB;
         case OUT_CSP_RGBA:
+        case OUT_CSP_RGBA_16:
             return (is_aviutl2()) ? CF_PA64 : CF_RGBA;
         case OUT_CSP_NV12:
         case OUT_CSP_NV16:
@@ -539,6 +540,8 @@ static AUO_RESULT ffmpeg_out(CONF_GUIEX *conf, const OUTPUT_INFO *oip, PRM_ENC *
         convert_func_output_csp = OUT_CSP_NV12;
     } else if (convert_func_output_csp == OUT_CSP_YUV444_16) {
         convert_func_output_csp = OUT_CSP_YUV444;
+    } else if (convert_func_output_csp == OUT_CSP_RGBA_16) {
+        convert_func_output_csp = OUT_CSP_RGBA;
     }
     const func_convert_frame convert_frame = get_convert_func(oip->w, color_format, conf->enc.use_highbit_depth ? 16 : 8, conf->enc.interlaced, convert_func_output_csp);
     if (convert_frame == NULL) {

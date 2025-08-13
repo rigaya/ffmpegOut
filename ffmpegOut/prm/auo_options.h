@@ -99,7 +99,7 @@ static const TCHAR * const specify_csp[] = {
     _T("yuv444p16le"),
     _T("bgr24"),   //OUT_CSP_RGB
     _T("bgra"),    //OUT_CSP_RGBA
-    _T("rgba16le") //OUT_CSP_RGBA_16
+    _T("bgra64le ") //OUT_CSP_RGBA_16
 };
 //文字列を引数にとるオプションの引数リスト
 //OUT_CSP_NV12, OUT_CSP_YUV444, OUT_CSP_RGB に合わせる
@@ -111,17 +111,20 @@ const ENC_OPTION_STR list_output_csp[] = {
     { _T("yuv444p16le"), AUO_MES_UNKNOWN, L"yuv444(16bit)" },
     { _T("bgr24"),       AUO_MES_UNKNOWN, L"rgb"  },
     { _T("bgra"),        AUO_MES_UNKNOWN, L"rgba"  },
-    { _T("rgba16le"),    AUO_MES_UNKNOWN, L"rgba(16bit)" },
+    { _T("bgra64le"),    AUO_MES_UNKNOWN, L"rgba(16bit)" },
     { NULL,          AUO_MES_UNKNOWN, NULL }
 };
 
 static bool csp_highbit_depth(int output_csp) {
     static const bool list[] = {
-        false, false, false,
-        true, true,
-        false,
-        false,
-        false,
+        false, //OUT_CSP_NV12
+        false, //OUT_CSP_YUY2
+        false, //OUT_CSP_YUV444
+        true,  //OUT_CSP_P010
+        true,  //OUT_CSP_YUV444_16
+        false, //OUT_CSP_RGB
+        false, //OUT_CSP_RGBA
+        true,  //OUT_CSP_RGBA_16
         false /*dummy*/
     };
     static_assert(_countof(list) == _countof(list_output_csp), "list size does not match.");

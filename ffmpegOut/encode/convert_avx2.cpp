@@ -2130,7 +2130,7 @@ void convert_pa64_to_rgba_avx2(void *frame, CONVERT_CF_DATA *pixel_data, const i
         
         int x = 0;
         // AVX2で32ピクセルずつ処理
-        for (; x <= width - 32; x += 32) {
+        for (; x <= width - 8; x += 8) {
             __m256i y0 = _mm256_loadu_si256((__m256i *)(src + x*4 +  0));
             __m256i y1 = _mm256_loadu_si256((__m256i *)(src + x*4 + 16));
             
@@ -2158,19 +2158,17 @@ void convert_pa64_to_rgba_avx2(void *frame, CONVERT_CF_DATA *pixel_data, const i
             __m256i b_i0 = _mm256_cvttps_epi32(_mm256_fmadd_ps(b_f0, mul256, round_offset));
             __m256i a_i0 = _mm256_cvttps_epi32(_mm256_fmadd_ps(a_f0, mul256, round_offset));
 
-            // 32bit -> 16bit変換
-            y0 = _mm256_packus_epi32(r_i0, g_i0);  // 0-15
-            y1 = _mm256_packus_epi32(b_i0, a_i0);
-            
-            // 16bit -> 8bit変換
-            __m256i y2 = _mm256_packus_epi16(y0, y1);  // 32ピクセル
+            r_i0 = _mm256_min_epi32(_mm256_max_epi32(r_i0, _mm256_setzero_si256()), _mm256_set1_epi32(255));
+            g_i0 = _mm256_min_epi32(_mm256_max_epi32(g_i0, _mm256_setzero_si256()), _mm256_set1_epi32(255));
+            b_i0 = _mm256_min_epi32(_mm256_max_epi32(b_i0, _mm256_setzero_si256()), _mm256_set1_epi32(255));
+            a_i0 = _mm256_min_epi32(_mm256_max_epi32(a_i0, _mm256_setzero_si256()), _mm256_set1_epi32(255));
 
-            y0 = _mm256_packus_epi16(_mm256_and_si256(y0, _mm256_set1_epi16(0xFF)), _mm256_setzero_si256());
-            y1 = _mm256_packus_epi16(_mm256_srli_epi16(y0, 8), _mm256_setzero_si256());
-            y0 = _mm256_or_si256(y0, _mm256_shuffle_epi32(y1, _MM_SHUFFLE(1,0,3,2)));
+            y0 = _mm256_or_si256(b_i0, _mm256_slli_epi32(g_i0, 8));
+            y1 = _mm256_or_si256(r_i0, _mm256_slli_epi32(a_i0, 8));
+            y0 = _mm256_or_si256(y0, _mm256_slli_epi32(y1, 16));
             
             // 結果を256ビットレジスタで格納（32ピクセル = 32バイト）
-            _mm256_storeu_si256((__m256i*)(dst + x), y0);
+            _mm256_storeu_si256((__m256i*)(dst + x*4), y0);
         }
         
         // 残りのピクセルを従来の方法で処理
@@ -2181,9 +2179,9 @@ void convert_pa64_to_rgba_avx2(void *frame, CONVERT_CF_DATA *pixel_data, const i
             float a = (float)src[x*4 + 3];
             float a_inv = 65535.0f * mul / a;
             b *= a_inv, g *= a_inv, r *= a_inv, a *= mul;
-            dst[x*4 + 0] = (BYTE)clamp((int)(r + 0.5f), 0, (1 << out_bit_depth) - 1);
+            dst[x*4 + 0] = (BYTE)clamp((int)(b + 0.5f), 0, (1 << out_bit_depth) - 1);
             dst[x*4 + 1] = (BYTE)clamp((int)(g + 0.5f), 0, (1 << out_bit_depth) - 1);
-            dst[x*4 + 2] = (BYTE)clamp((int)(b + 0.5f), 0, (1 << out_bit_depth) - 1);
+            dst[x*4 + 2] = (BYTE)clamp((int)(r + 0.5f), 0, (1 << out_bit_depth) - 1);
             dst[x*4 + 3] = (BYTE)clamp((int)(a + 0.5f), 0, (1 << out_bit_depth) - 1);
         }
     }
@@ -2201,7 +2199,7 @@ void convert_pa64_to_rgba_16bit_avx2(void *frame, CONVERT_CF_DATA *pixel_data, c
         
         int x = 0;
         // AVX2で32ピクセルずつ処理
-        for (; x <= width - 32; x += 32) {
+        for (; x <= width - 8; x += 8) {
             __m256i y0 = _mm256_loadu_si256((__m256i *)(src + x*4 +  0));
             __m256i y1 = _mm256_loadu_si256((__m256i *)(src + x*4 + 16));
             
@@ -2230,20 +2228,26 @@ void convert_pa64_to_rgba_16bit_avx2(void *frame, CONVERT_CF_DATA *pixel_data, c
             __m256i a_i0 = _mm256_cvttps_epi32(_mm256_add_ps(a_f0, round_offset));
 
             // 32bit -> 16bit変換
-            y0 = _mm256_packus_epi32(r_i0, g_i0);  // 0-15
-            y1 = _mm256_packus_epi32(b_i0, a_i0);
+            y0 = _mm256_packus_epi32(b_i0, r_i0);  // 0-15
+            y1 = _mm256_packus_epi32(g_i0, a_i0);
 
-            __m256i y0_0 = _mm256_packus_epi32(_mm256_and_si256(y0, _mm256_set1_epi32(0xFFFF)), _mm256_setzero_si256());
-            __m256i y0_1 = _mm256_packus_epi16(_mm256_srli_epi32(y0, 16), _mm256_setzero_si256());
-            __m256i y1_0 = _mm256_packus_epi32(_mm256_and_si256(y1, _mm256_set1_epi32(0xFFFF)), _mm256_setzero_si256());
-            __m256i y1_1 = _mm256_packus_epi16(_mm256_srli_epi32(y1, 16), _mm256_setzero_si256());
+            __m256i y01 = _mm256_blend_epi16(y0, _mm256_slli_epi64(y1, 32), 0xCC);
+            __m256i y23 = _mm256_blend_epi16(_mm256_srli_epi64(y0, 32), y1, 0xCC);
+            
+            alignas(32) static const char Array_Y_16_TO_8[32] = {
+                0, 1, 4, 5, 8, 9, 12, 13, 2, 3, 6, 7, 10, 11, 14, 15,
+                0, 1, 4, 5, 8, 9, 12, 13, 2, 3, 6, 7, 10, 11, 14, 15
+            };
 
-            y0 = _mm256_or_si256(y0_0, _mm256_shuffle_epi32(y0_1, _MM_SHUFFLE(1,0,3,2)));
-            y1 = _mm256_or_si256(y1_0, _mm256_shuffle_epi32(y1_1, _MM_SHUFFLE(1,0,3,2)));
+            y01 = _mm256_shuffle_epi8(y01, _mm256_load_si256((__m256i *)Array_Y_16_TO_8));
+            y23 = _mm256_shuffle_epi8(y23, _mm256_load_si256((__m256i *)Array_Y_16_TO_8));
+            
+            y0 = _mm256_permute2x128_si256(y01, y23, (2 << 4) | 0);
+            y1 = _mm256_permute2x128_si256(y01, y23, (3 << 4) | 1);
             
             // 結果を256ビットレジスタで格納（32ピクセル = 32バイト）
-            _mm256_storeu_si256((__m256i*)(dst + x +  0), y0);
-            _mm256_storeu_si256((__m256i*)(dst + x + 16), y1);
+            _mm256_storeu_si256((__m256i*)(dst + x*4 +  0), y0);
+            _mm256_storeu_si256((__m256i*)(dst + x*4 + 16), y1);
         }
         
         // 残りのピクセルを従来の方法で処理
@@ -2254,9 +2258,9 @@ void convert_pa64_to_rgba_16bit_avx2(void *frame, CONVERT_CF_DATA *pixel_data, c
             float a = (float)src[x*4 + 3];
             float a_inv = 65535.0f / a;
             b *= a_inv, g *= a_inv, r *= a_inv;
-            dst[x*4 + 0] = (USHORT)clamp((int)(r + 0.5f), 0, (1 << out_bit_depth) - 1);
+            dst[x*4 + 0] = (USHORT)clamp((int)(b + 0.5f), 0, (1 << out_bit_depth) - 1);
             dst[x*4 + 1] = (USHORT)clamp((int)(g + 0.5f), 0, (1 << out_bit_depth) - 1);
-            dst[x*4 + 2] = (USHORT)clamp((int)(b + 0.5f), 0, (1 << out_bit_depth) - 1);
+            dst[x*4 + 2] = (USHORT)clamp((int)(r + 0.5f), 0, (1 << out_bit_depth) - 1);
             dst[x*4 + 3] = (USHORT)clamp((int)(a + 0.5f), 0, (1 << out_bit_depth) - 1);
         }
     }
