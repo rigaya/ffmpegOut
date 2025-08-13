@@ -72,7 +72,7 @@ std::string guiEx_config::old_conf_to_json(const CONF_GUIEX_OLD *old_conf) {
     build_cmd_from_conf(cmd_buffer, _countof(cmd_buffer), &old_conf->enc, NULL, FALSE);
 #endif
     j["enc"] = {
-#if ENABLE_AMP
+#if ENABLE_AMP || ENCODER_FFMPEG
         {"use_auto_npass", old_conf->enc.use_auto_npass },
         {"auto_npass", old_conf->enc.auto_npass },
 #endif
