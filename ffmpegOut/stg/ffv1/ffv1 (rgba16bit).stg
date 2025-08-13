@@ -3,7 +3,7 @@
     "ext": {
       "aud_temp_dir": 0,
       "audio_encode_timing": 1,
-      "bitrate": 128,
+      "bitrate": 256,
       "delay_cut": 0,
       "enc_mode": 0,
       "encoder": 0,
@@ -36,11 +36,11 @@
     "cmd": "",
     "incmd": "",
     "interlaced": 0,
-    "outext": ".mp4",
-    "output_csp": 0,
+    "outext": ".mkv",
+    "output_csp": 7,
     "pass": 0,
     "use_auto_npass": 0,
-    "use_highbit_depth": 0
+    "use_highbit_depth": 1
   },
   "mux": {
     "apple_mode": 0,
@@ -63,7 +63,7 @@
     },
     "disable_guicmd": 0,
     "dont_wait_bat_fin": 0,
-    "notes": "さんぷるとして無駄に指定しまくる",
+    "notes": "",
     "out_audio_only": 0,
     "run_bat": 0,
     "temp_dir": 0
@@ -79,7 +79,7 @@
     "analysis_file": "",
     "auo_tcfile_out": 0,
     "check_keyframe": 0,
-    "cmdex": "-c:v libx264 -preset slow -vprofile high -level 50\r\n-crf 21\r\n-x264opts\r\n  colormatrix=bt709:colorprim=bt709:transfer=bt709:videoformat=ntsc:nal-hrd=vbr:dct-decimate=0\r\n-maxrate 17500k -bufsize 17500k\r\n-mbtree 1 -rc-lookahead 50 -qcomp 0.7 -qdiff 12 -chromaoffset 0\r\n-aq-mode 1 -aq-strength 0.4 -psy-rd 1.0:0.2\r\n-bf 4 -b_strategy 2 -b-pyramid 2 -weightb 1 -weightp 2 -keyint_min 4 -g 300\r\n-subq 9 -me_method umh -me_range 16 -refs 4 -mixed-refs 1 -direct-pred 3\r\n-partitions p8x8,b8x8,i8x8,i4x4 -8x8dct 1 -deblock 0:0 -trellis 2 -fast-pskip 0",
+    "cmdex": "-c:v ffv1 -slices 16",
     "cqmfile": "",
     "input_as_lw48": 0,
     "parallel_div_info": "",
