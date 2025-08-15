@@ -315,7 +315,7 @@ typedef struct CONF_VIDEO_OLD {
 #endif
 } CONF_VIDEO_OLD; //動画用設定(x264以外)
 
-#if ENCODER_X264 || ENCODER_FFMPEG
+#if ENCODER_X264
 typedef struct CONF_GUIEX_OLD {
     CONF_GUIEX_HEADER header;
     CONF_ENC    enc;                             //エンコーダについての設定
@@ -345,6 +345,15 @@ typedef struct CONF_GUIEX_OLD {
     CONF_AUDIO_BASE aud;                         //音声についての設定
     CONF_MUX     mux;                            //muxについての設定
     CONF_OTHER_OLD   oth;                            //その他の設定
+} CONF_GUIEX_OLD;
+#elif ENCODER_FFMPEG
+typedef struct CONF_GUIEX_OLD {
+    CONF_GUIEX_HEADER header;
+    CONF_ENC    enc;                             //エンコーダについての設定
+    CONF_VIDEO_OLD vid;                          //その他動画についての設定
+    CONF_AUDIO aud;                         //音声についての設定
+    CONF_MUX    mux;                             //muxについての設定
+    CONF_OTHER_OLD oth;                          //その他の設定
 } CONF_GUIEX_OLD;
 #endif
 #pragma pack(pop)
