@@ -464,6 +464,21 @@ static void make_outfilename_and_set_to_oipsavefile(OUTPUT_INFO *oip, aviutlchar
     oip->savefile = outfilename;
 }
 
+template <size_t size>
+void get_aviutl_ini_file(char(&ini_file)[size]) {
+    TCHAR ini_file_tstr[size];
+    get_aviutl_dir(ini_file_tstr, _countof(ini_file_tstr));
+    PathAddBackSlashLong(ini_file_tstr);
+    _tcscat_s(ini_file_tstr, _countof(ini_file_tstr), _T("aviutl.ini"));
+    if (!canbe_converted_to(ini_file_tstr, CP_THREAD_ACP)) {
+        // CP_THREAD_ACP = sjisに変換できない場合は、相対パスにする
+        TCHAR ini_file_relative[size];
+        GetRelativePathTo(ini_file_relative, _countof(ini_file_relative), ini_file_tstr, NULL);
+        _tcscpy_s(ini_file_tstr, ini_file_relative);
+    }
+    strcpy_s(ini_file, size, tchar_to_string(ini_file_tstr, CP_THREAD_ACP).c_str());
+}
+
 void overwrite_aviutl_ini_auo_info() {
     const auto auo_full_name = std::wstring(g_auo_mes.get(AUO_GUIEX_FULL_NAME));
     if (auo_full_name.length() > 0 && (auo_full_name != aviutlchar_to_wstring(output_plugin_table.name) || aviutlcharlen(g_auo_version_info) == 0)) {
@@ -479,9 +494,7 @@ void overwrite_aviutl_ini_auo_info() {
         output_plugin_table.information = g_auo_version_info;
 #if AVIUTL_TARGET_VER == 1
         char ini_file[1024];
-        get_aviutl_dir(ini_file, _countof(ini_file));
-        PathAddBackSlashLong(ini_file);
-        strcat_s(ini_file, _countof(ini_file), "aviutl.ini");
+        get_aviutl_ini_file(ini_file);
         WritePrivateProfileStringA(AUO_NAME, "name", output_plugin_table.name, ini_file);
         WritePrivateProfileStringA(AUO_NAME, "information", output_plugin_table.information, ini_file);
 #endif

@@ -136,10 +136,10 @@ unsigned int wstring_to_tstring(const WCHAR *wstr, tstring& tstr, uint32_t codep
     }
 #if UNICODE
     tstr = std::wstring(wstr);
-    return (unsigned int)tstr.length();
 #else
     return wstring_to_string(wstr, tstr, codepage);
 #endif
+    return (unsigned int)tstr.length();
 }
 
 tstring wstring_to_tstring(const WCHAR *wstr, uint32_t codepage) {
@@ -333,6 +333,12 @@ std::wstring str_replace(std::wstring str, const std::wstring& from, const std::
     return str;
 }
 #endif //#if defined(_WIN32) || defined(_WIN64)
+
+bool canbe_converted_to(const wchar_t *str, uint32_t codepage) {
+    auto str_codepage = wstring_to_string(str, codepage);
+    auto tstr_rev = char_to_tstring(str_codepage, codepage);
+    return tstr_rev == str;
+}
 
 #pragma warning (pop)
 #if defined(_WIN32) || defined(_WIN64)
