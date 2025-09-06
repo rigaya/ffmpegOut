@@ -1,0 +1,164 @@
+name: Build Windows Releases
+
+on:
+  push:
+    branches:
+      - master
+      - actions
+    tags:
+      - '*'
+
+jobs:
+  get_version_name:
+    name: Get version name
+    runs-on: ubuntu-latest
+    outputs:
+      rev_count: ${{ steps.rev.outputs.REVCOUNT }}
+      version_name: ${{ steps.rev.outputs.VERSION_NAME }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set version name
+      id: rev
+      run: |
+        cd ${{ github.workspace }}
+        REVCOUNT=`git rev-list --count HEAD`
+        echo "rev_count=${REVCOUNT}" >> $GITHUB_OUTPUT
+        if [[ "${{ github.ref }}" =~ "refs/tags/" ]]; then
+          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+        else
+          VERSION=r${REVCOUNT}
+        fi
+        echo "version_name=${VERSION}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Upload Release Asset
+    runs-on: windows-2022
+    needs: get_version_name
+
+    defaults:
+      run:
+        shell: cmd
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            platform: Win32
+            aviutlver: AviUtl
+            outext: auo
+          - arch: x64
+            platform: x64
+            aviutlver: AviUtl2
+            outext: auo2
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: ${{ matrix.arch }}
+
+      - name: MSBuild
+        run: |
+          msbuild ffmpegOut.sln /t:build /p:configuration=Release /p:Platform=${{ matrix.platform }} -maxcpucount
+
+      - name: Download auo_setup Win32
+        id: download_auosetup_win32
+        if: matrix.platform == 'Win32'
+        run: |
+          curl -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.02/auo_setup_2.02.zip
+
+      - name: Download auo_setup x64
+        id: download_auosetup_x64
+        if: matrix.platform == 'x64'
+        run: |
+          curl -o auo_setup.zip -L https://github.com/rigaya/auo_setup/releases/download/2.04/auo_setup_2.04_x64.zip
+
+      - name: Download ffmpeg
+        id: download_ffmpeg
+        run: |
+          curl -o ffmpeg.7z -L https://github.com/rigaya/ffmpegOut/releases/download/2.02/ffmpeg_20250830.7z
+
+      - name: Create Archieve
+        id: archieve_win32
+        if: matrix.platform == 'Win32'
+        run: |
+          mkdir ffmpegOut_release
+          7z x -offmpegOut_release\ auo_setup.zip
+          7z x -offmpegOut_release\exe_files ffmpeg.7z
+          copy /y .\Release\${{ matrix.platform }}\ffmpegOut.auo ffmpegOut_release\plugins\
+          copy /y .\ffmpegOut\ffmpegOut.ini ffmpegOut_release\plugins\
+          copy /y .\ffmpegOut\ffmpegOut.en.ini ffmpegOut_release\plugins\
+          copy /y .\ffmpegOut\ffmpegOut.zh.ini ffmpegOut_release\plugins\
+          echo D | xcopy /y /e .\ffmpegOut\stg ffmpegOut_release\plugins\ffmpegOut_stg
+          copy /y .\ffmpegOut\auo_setup.ini ffmpegOut_release\exe_files\
+          copy /y .\ffmpegOut\ffmpegOut_readme.txt ffmpegOut_release\
+          dir /b /s ffmpegOut_release\
+          7z a -mx9 AviUtl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip .\ffmpegOut_release\*
+
+      - name: Create Archieve
+        id: archieve_x64
+        if: matrix.platform == 'x64'
+        run: |
+          mkdir Aviutl_ffmpegOut_release
+          7z x -oAviutl_ffmpegOut_release\ auo_setup.zip
+          7z x -oAviutl_ffmpegOut_release\Plugin\exe_files ffmpeg.7z
+          copy /y .\Release\${{ matrix.platform }}\ffmpegOut.auo2 ffmpegOut_release\Plugin\
+          copy /y ffmpegOut\ffmpegOut.ini Aviutl_ffmpegOut_release\Plugin\
+          copy /y ffmpegOut\ffmpegOut.en.ini Aviutl_ffmpegOut_release\Plugin\
+          copy /y ffmpegOut\ffmpegOut.zh.ini Aviutl_ffmpegOut_release\Plugin\
+          copy /y ffmpegOut\auo_setup.ini Aviutl_ffmpegOut_release\Plugin\exe_files\
+          copy /y ffmpegOut\ffmpegOut_readme.txt Aviutl_ffmpegOut_release\
+          echo D | xcopy /y /e ffmpegOut\stg Aviutl_ffmpegOut_release\Plugin\ffmpegOut_stg
+          7z a -t7z -m0=lzma -mx=9 -mmt Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.7z .\Aviutl_ffmpegOut_release\*
+          copy /b ffmpegOut\7zSD.noadmin.sfx + ffmpegOut\7zInstallerConfig.txt + Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.7z Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install.exe
+
+      - name: Check Version
+        id: check_ver
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          powershell "$ver = (Get-ItemProperty .\Release\ffmpegOut.${{ matrix.outext }}).VersionInfo.FileVersion; if ($ver -eq '${{ needs.get_version_name.outputs.version_name }}') { exit 0; } exit 1;"
+
+      - name: Calc hash Win32
+        id: calc_hash_win32
+        if: matrix.platform == 'Win32'
+        run: |
+          7z h -scrc* Aviutl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+
+      - name: Calc hash x64
+        id: calc_hash_x64
+        if: matrix.platform == 'x64'
+        run: |
+          7z h -scrc* Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install.exe
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+
+      - name: Upload artifact Win32
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'Win32'
+        with:
+          name: Aviutl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}
+          path: Aviutl_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}.zip
+
+      - name: Upload artifact x64
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'x64'
+        with:
+          name: Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install
+          path: Aviutl2_ffmpegOut_${{ needs.get_version_name.outputs.version_name }}_install.exe
