@@ -1,394 +1,411 @@
 ---------------------------------------------------
 
 
-    ffmpeg �o��
+    ffmpeg 出力
      by rigaya
 
 ---------------------------------------------------
 
-ffmpeg �o�� (ffmpegOut.auo) �́A
-ffmpeg.exe���g�p���ăG���R�[�h���s��Aviutl�̏o�̓v���O�C���ł��B
+ffmpeg 出力 (ffmpegOut.auo) は、
+ffmpeg.exeを使用してエンコードを行うAviutlの出力プラグインです。
 
-ffmpeg.exe ���O���v���Z�X�Ƃ��Ď��s���A�G���R�[�h���s���܂��B
+ffmpeg.exe を外部プロセスとして実行し、エンコードを行います。
 
-�G���R�[�h�ݒ�̑唼�̓R�}���h���C������w�肵�܂��B
-ffmpeg�̃R�}���h���C���I�v�V�����������Œ��ׂĂ��������肵�Ďg�����ƂɂȂ�܂��B
+エンコード設定の大半はコマンドラインから指定します。
+ffmpegのコマンドラインオプションを自分で調べていじったりして使うことになります。
 
-x264guiEx�ɑ��݂���@�\�̑��������󂳂�Ă��܂��B
-x264�𗘗p�������ꍇ�ɂ́A���ɗ��R���Ȃ����x264guiEx���g�p�����ق����֗����Ǝv���܂��B
+x264guiExに存在する機能の多くが封印されています。
+x264を利用したい場合には、特に理由がなければx264guiExを使用したほうが便利だと思います。
 
 
-�y������z
+【動作環境】
 Windows 10/11 (x86/x64)
-Aviutl 1.00 �ȍ~
+Aviutl 1.00 以降
 
 
-�yffmpegOut.auo �g�p�ɂ������Ă̒��ӎ����z
-���ۏ؂ł��B���ȐӔC�Ŏg�p���Ă��������B
-ffmpeg �o�� (ffmpegOut.auo)���g�p�������Ƃɂ��A�����Ȃ鑹�Q�E�g���u���ɂ��Ă��ӔC�𕉂��܂���B
+【ffmpegOut.auo 使用にあたっての注意事項】
+無保証です。自己責任で使用してください。
+ffmpeg 出力 (ffmpegOut.auo)を使用したことによる、いかなる損害・トラブルについても責任を負いません。
 
-�yffmpegOut.auo �Ĕz�z(�񎟔z�z)�ɂ��āz
-���̃t�@�C��(ffmpegOut_readme.txt)�ƈꏏ�ɔz�z���Ă��������B
-�܂��ł���΃A�[�J�C�u�܂邲�ƂŁB
+【ffmpegOut.auo 再配布(二次配布)について】
+このファイル(ffmpegOut_readme.txt)と一緒に配布してください。
+まあできればアーカイブまるごとで。
 
 
-�y�������@�z
-�� ���L�����N��ł͐}���g�p���Đ������Ă��܂��̂ŁA���킩��₷����������܂���B
-  https://github.com/rigaya/ffmpegOut#ffmpegout-��-aviutl-�ւ̓����X�V
+【導入方法】
+※ 下記リンク先では図も使用して説明していますので、よりわかりやすいかもしれません。
+  https://github.com/rigaya/ffmpegOut#ffmpegout-の-aviutl-への導入更新
 
 1.
-�_�E�����[�h����ffmpegOut_1.xx.zip���J���܂��B
+ダウンロードしたffmpegOut_1.xx.zipを開きます。
 
 2.
-zip�t�@�C�����̃t�H���_���ׂĂ�Aviutl�t�H���_�ɃR�s�[���܂��B
+zipファイル内のフォルダすべてをAviutlフォルダにコピーします。
 
 3.
-Aviutl���N�����܂��B
+Aviutlを起動します。
 
 4.
-���ɂ���ẮA�E�B���h�E���\������K�v�ȃ��W���[���̃C���X�g�[�����s���܂��B
-���̍ہA���̕s���Ȕ��s���̃A�v�����f�o�C�X�ɕύX�������邱�Ƃ������܂���? �Əo�邱�Ƃ�����܂����A
-�u�͂��v��I�����Ă��������B
+環境によっては、ウィンドウが表示され必要なモジュールのインストールが行われます。
+その際、この不明な発行元のアプリがデバイスに変更を加えることを許可しますか? と出ることがありますが、
+「はい」を選択してください。
 
 5.
-�u���̑��v>�u�o�̓v���O�C�����v��ffmpegOut 1.xx�����邩�m���߂܂��B
-������ffmpegOut�̕\�����Ȃ��ꍇ�A
-- zip�t�@�C�����̃t�H���_���ׂĂ��R�s�[�ł��Ă��Ȃ�
-- �K�v�ȃ��W���[���̃C���X�g�[���Ɏ��s����
-  - ���̕s���Ȕ��s���̃A�v�����f�o�C�X�ɕύX�������邱�Ƃ������܂���? �� �u�͂��v��I�����Ȃ�����
-  - (�܂�ȃP�[�X) �E�C���X�΍�\�t�g�ɂ��A�K�v�Ȏ��s�t�@�C�����폜���ꂽ
-�Ȃǂ̌������l�����܂��B
+「その他」>「出力プラグイン情報」にffmpegOut 1.xxがあるか確かめます。
+ここでffmpegOutの表示がない場合、
+- zipファイル内のフォルダすべてをコピーできていない
+- 必要なモジュールのインストールに失敗した
+  - この不明な発行元のアプリがデバイスに変更を加えることを許可しますか? で 「はい」を選択しなかった
+  - (まれなケース) ウイルス対策ソフトにより、必要な実行ファイルが削除された
+などの原因が考えられます。
 
 6.
-ffmpeg.exe��p�ӂ��AAviutl�t�H���_�̒���exe_files�t�H���_���ɃR�s�[���܂��B
-ffmpeg.exe�͉��L�Ȃǂ���_�E�����[�h�ł��܂��B
+ffmpeg.exeを用意し、Aviutlフォルダの中のexe_filesフォルダ内にコピーします。
+ffmpeg.exeは下記などからダウンロードできます。
   https://www.gyan.dev/ffmpeg/builds/
   https://github.com/BtbN/FFmpeg-Builds/releases
 
-�y�폜���@�z
-�EAviutl��pulgins�t�H���_�����牺�L�t�H���_�ƃt�@�C�����폜���Ă��������B
-  - [�t�H���_] ffmpegOut_stg
-  - [�t�@�C��] ffmpegOut.auo
-  - [�t�@�C��] ffmpegOut.conf (���݂���ꍇ�̂�)
-  - [�t�@�C��] ffmpegOut(.ini)
-  - [�t�@�C��] auo_setup.auf
+【削除方法】
+・Aviutlのpulginsフォルダ内から下記フォルダとファイルを削除してください。
+  - [フォルダ] ffmpegOut_stg
+  - [ファイル] ffmpegOut.auo
+  - [ファイル] ffmpegOut.conf (存在する場合のみ)
+  - [ファイル] ffmpegOut(.ini)
+  - [ファイル] auo_setup.auf
 
 
 
-�y�����T�v�z
+【処理概要】
    
-  [�ʏ�]
-   1) �����o��
-   2) ����G���R + �o�͂���������"-i"�œǂݍ���
+  [通常]
+   1) 音声出力
+   2) 動画エンコ + 出力した音声を"-i"で読み込み
 
-  [����2pass��]
-   1) 1pass�ڂ̓���G���R + �����o�� (�����o��)
-   2) 2pass�ڂ̓���G���R + �o�͂���������"-i"�œǂݍ���
+  [自動2pass時]
+   1) 1pass目の動画エンコ + 音声出力 (同時出力)
+   2) 2pass目の動画エンコ + 出力した音声を"-i"で読み込み
   
 
-�y����ݒ�z
+【動画設定】
 
-  �E����2pass�G���R�[�h �c 2��G���R�[�h���񂵁A�����I��2pass�G���R�[�h���s���܂��B
-  �E�]���F��� �c ffmpeg�ɂǂ̐F��Ԃŉf���f�[�^��n���������肵�܂��B
-  �E�C���^���ێ� �c ffmpegOut.auo�ł�YUY2->NV12�ϊ��ŃC���^���p���g�p���邩�ǂ����ł��B
-                    �C���^���ێ��G���R���s�����߂ɂ́A���̐ݒ肾���łȂ��A
-                    ffmpeg���̃R�}���h�ɂ��C���^���ێ��̃R�}���h���L�q����K�v������܂��B
-  �E�o�͊g���q �c �o�̓t�@�C���̊g���q���A�����Őݒ肵���g���q�ɏ㏑���E�ǉ��ł��܂��B
-                  ffmpeg�ɂ��G���R�[�h�ł́A���܂��܂ȓ�����G���R�[�h�ł��邽�߁A
-                  �ݒ��ʂ���g���q��ύX�ł���悤�ɂ��܂����B
-  �E�G���R�[�_�D��x �c ffmpeg��CPU�D��x�̐ݒ�ł��B
-  �E�ꎞ�t�H���_ �c �G���R���̓���t�@�C���̏o�͈ʒu��ύX�ł��܂��B
+  ・自動2passエンコード … 2回エンコードを回し、自動的に2passエンコードを行います。
+  ・転送色空間 … ffmpegにどの色空間で映像データを渡すかを決定します。
+  ・インタレ保持 … ffmpegOut.auoでのYUY2->NV12変換でインタレ用を使用するかどうかです。
+                    インタレ保持エンコを行うためには、この設定だけでなく、
+                    ffmpeg側のコマンドにもインタレ保持のコマンドを記述する必要があります。
+  ・出力拡張子 … 出力ファイルの拡張子を、ここで設定した拡張子に上書き・追加できます。
+                  ffmpegによるエンコードでは、さまざまな動画をエンコードできるため、
+                  設定画面から拡張子を変更できるようにしました。
+  ・エンコーダ優先度 … ffmpegのCPU優先度の設定です。
+  ・一時フォルダ … エンコ中の動画ファイルの出力位置を変更できます。
 
   
-�y�ŏI�I�ɓn�����R�}���h���C���z
- part-A�`G�����Ԃɑg�ݍ��킳���č\������܂��B
+【最終的に渡されるコマンドライン】
+ part-A～Gが順番に組み合わさって構成されます。
    
-  [part-A ���̓I�v�V����]
-   ���̓I�v�V�����w�藓 �ɐݒ肵�����̂����̂܂ܒǉ�����܂��B
+  [part-A 入力オプション]
+   入力オプション指定欄 に設定したものがそのまま追加されます。
 
-  [part-B �f�����͏��]
-   �p�C�v�ŉf���f�[�^��]��
+  [part-B 映像入力情報]
+   パイプで映像データを転送
    -f rawvideo
    -s <width>x<height>
-   -pix_fmt <�u�]���F��ԁv�Őݒ肳�ꂽ����>
+   -pix_fmt <「転送色空間」で設定されたもの>
    -r <fps>
    
-  [part-C �f������(�p�C�v�n��)]
+  [part-C 映像入力(パイプ渡し)]
    -i "-"
 
-  [part-D ��������] (�����o�͂��s���A�u������L���v�Ƀ`�F�b�N�������Ă���ꍇ)
+  [part-D 音声入力] (音声出力が行われ、「音声を有効」にチェックが入っている場合)
    -i "%{audpath}"
  
-  [part-E �R�}���h���͗�]
-   ���s���폜���ꂽ��A���̂܂ܒǉ�����܂��B
-   ������-vcodec��-acodec�A
-   �����-b:v(�f���r�b�g���[�g)�A-b:a(�����r�b�g���[�g)���w�肵�Ă��Ă��������B
+  [part-E コマンド入力欄]
+   改行が削除された後、そのまま追加されます。
+   ここで-vcodecや-acodec、
+   さらに-b:v(映像ビットレート)、-b:a(音声ビットレート)を指定してしてください。
  
-  [part-F ����2pass�G���R�[�h] (����2pass���ݒ肳�ꂽ���̂�)
+  [part-F 自動2passエンコード] (自動2passが設定された時のみ)
    -pass x
  
-  [part-G �㏑���̋���(-y)�Əo�̓t�@�C����]
+  [part-G 上書きの強制(-y)と出力ファイル名]
    -y
    "%{savpath}"
 
    
-�y�t���̃v���t�@�C���z
+【付属のプロファイル】
 
-�e��R�[�f�b�N�փG���R�[�h����ۂ̐ݒ��ł����A
-ffmpeg�̃o�[�W�����ɂ���Ă͓����Ȃ������ł��B
+各種コーデックへエンコードする際の設定例ですが、
+ffmpegのバージョンによっては動かないかもです。
 
-�Ex264    �c �v libx264
-�Ex265    �c �v libx265
-�Evp8/vp9 �c �v libvpx
-             �v libvorbis
-�Exvid    �c �v libxvid
-�Eav1     �c �v libsvtav1
-�Evvc     �c �v libvvenc
-
-
-�y���p����ffmpeg�ɂ��āz
-�p�C�v�����̂��߁A�����̕��̃r���h���Ă���ffmpeg���g�p�ł��܂��B
-64bitOS�ł�x64�ł��g�p�\�ł��B
-64bitOS���ǂ����̓}�C�R���s���[�^�E�N���b�N����m�F�ł��܂��B
-
-ffmpeg�͍X�V�p�x�������A�܂����܂��܂ȍ\���Ńr���h�\�Ȃ��߁A
-�r���h���Ă������o�[�W�����ɂ����
-�R�}���h���C���I�v�V�������傫���قȂ邱�Ƃ�����A���ӂ��K�v�ł��B
-
-�撣���l��ffmpeg�����r���h����Ɨǂ������ł��B
+・x264    … 要 libx264
+・x265    … 要 libx265
+・vp8/vp9 … 要 libvpx
+             要 libvorbis
+・xvid    … 要 libxvid
+・av1     … 要 libsvtav1
+・vvc     … 要 libvvenc
 
 
-�yini�t�@�C���ɂ��g���z
-ffmpegOut.ini�����������邱�Ƃɂ��A
-�����G���R�[�_�̃R�}���h���C����ύX������A�����G���R�[�_��ǉ����邱�Ƃ��ł��܂��B
+【利用するffmpegについて】
+パイプ処理のため、多くの方のビルドしているffmpegを使用できます。
+64bitOSではx64版も使用可能です。
+64bitOSかどうかはマイコンピュータ右クリックから確認できます。
 
-�f�t�H���g�̐ݒ�ł͕s�\�����Ǝv�����ꍇ�́A
-ini�t�@�C���̉����̃R�}���h���C���𒲐����Ă݂Ă��������B
+ffmpegは更新頻度も高く、またさまざまな構成でビルド可能なため、
+ビルドしている方やバージョンによって
+コマンドラインオプションが大きく異なることがあり、注意が必要です。
+
+頑張れる人はffmpegを時ビルドすると良いかもです。
 
 
-�yini�t�@�C���ɐݒ肳��Ă��鉹���G���R�[�_�z
- [neroaacenc (AAC�G���R�[�_)]
+【iniファイルによる拡張】
+ffmpegOut.iniを書き換えることにより、
+音声エンコーダのコマンドラインを変更したり、音声エンコーダを追加することもできます。
+
+デフォルトの設定では不十分だと思った場合は、
+iniファイルの音声のコマンドラインを調整してみてください。
+
+
+【iniファイルに設定されている音声エンコーダ】
+ [neroaacenc (AACエンコーダ)]
  http://www.nero.com/jpn/downloads-nerodigital-nero-aac-codec.php
 
- [FAW(fawcl) (FakeAACWave(�U��wav)����)]
+ [FAW(fawcl) (FakeAACWave(偽装wav)解除)]
  http://2sen.dip.jp/cgi-bin/friioup/upload.cgi?search=FakeAacWav&sstart=0001&send=9999
  
- [faw2aac.auo (FakeAACWave(�U��wav)����)]
+ [faw2aac.auo (FakeAACWave(偽装wav)解除)]
  http://www.rutice.net/FAW2aac
 
- [qtaacenc   (AAC�G���R�[�_, �vQuickTime)]
+ [qtaacenc   (AACエンコーダ, 要QuickTime)]
  http://tmkk.pv.land.to/qtaacenc/
  
- [ext_bs     (PV�V���[�YAAC���o)]
+ [ext_bs     (PVシリーズAAC抽出)]
  http://www.sakurachan.org/soft/mediatools/
  
- [lame       (mp3�G���R�[�_)]
+ [lame       (mp3エンコーダ)]
  http://www.rarewares.org/mp3-lame-bundle.php
  
- [ffmpeg     (AC3�G���R�[�_�Ƃ��Ďg�p)]
+ [ffmpeg     (AC3エンコーダとして使用)]
  http://blog.k-tai-douga.com/
  
- [oggenc2    (ogg Vorbis, mkv��p)]
+ [oggenc2    (ogg Vorbis, mkv専用)]
  http://www.rarewares.org/ogg-oggenc.php
  
- [qaac/refalac (AAC/ALAC�G���R�[�_)]
+ [qaac/refalac (AAC/ALACエンコーダ)]
  http://sites.google.com/site/qaacpage/
  
  [mp4alsrm23 (MPEG4 ALS (MPEG4 Audio Lossless Coding))]
  http://www.nue.tu-berlin.de/menue/forschung/projekte/beendete_projekte/mpeg-4_audio_lossless_coding_als/parameter/en/
- ��Reference Software �̂Ƃ��ɂ��� MPEG-4 ALS codec for Windows - mp4alsRM23.exe
+ ※Reference Software のとこにある MPEG-4 ALS codec for Windows - mp4alsRM23.exe
 
-�y��������Ŕ���������ւ̑΍�z
-�EUltraVNC�g�p���Ƀ��O�E�B���h�E���\������Ȃ��B
-  �� ���O�E�B���h�E�̓��߂��e�����Ă���悤�ł��B
-     �ݒ��ʂ̉E��u���̑��̐ݒ�v����u���O�E�B���h�E�̓��߂��I�t�ɂ���v��
-     �`�F�b�N�����Ďg�p���Ă݂Ă��������B
+【特定条件で発生する問題への対策】
+・UltraVNC使用時にログウィンドウが表示されない。
+  → ログウィンドウの透過が影響しているようです。
+     設定画面の右上「その他の設定」から「ログウィンドウの透過をオフにする」に
+     チェックを入れて使用してみてください。
 
 
-�y�\�[�X�R�[�h�ɂ��āz
-   �E���ۏ؂ł��B
-   �E�\�[�X�R�[�h���g�p�������Ƃɂ�邢���Ȃ鑹�Q�E�g���u���ɂ���rigaya�͐ӔC�𕉂��܂���B
-   �ȏ�ɗ������Ē�����ꍇ�A�\�[�X�R�[�h�̎g�p�A�����A���ρA�ĔЕz���s���Ē����č\���܂���B
+【ソースコードについて】
+   ・無保証です。
+   ・ソースコードを使用したことによるいかなる損害・トラブルについてrigayaは責任を負いません。
+   以上に了解して頂ける場合、ソースコードの使用、複製、改変、再頒布を行って頂いて構いません。
 
-�y�r���h�ɂ��āz
-�r���h�ɂ�VC++2022���K�v�ł��B
+【ビルドについて】
+ビルドにはVC++2022が必要です。
 
-�y�R���p�C�����z
+【コンパイル環境】
 VC++ 2022 Community
 
-�y�ǂ��ł����������z
+【どうでもいいメモ】
+2025.09.15 (2.03)
+- AviUtl2のインストーラ版でダークモード化プラグイン(al2_jd)を使用する際の挙動を改善。
+  - al2_jdのr18以降で管理者権限で一回起動するという手順を不要に。
+  - al2_jdのr17以前で管理者権限で一回起動するという手順を行わなかった際の例外が発生するのを回避。
+
+2025.08.31 (2.02)
+- AviUtl2からの32bit Float 音声転送に対応。
+  ffmpegへの転送等に可能な場合、AviUtl2の内部形式である32bit Float音声を使うことで、精度よく音声を受け渡しできるように- 
+- 同梱のffmpeg.exeを8.0ベースに更新
+- 可逆圧縮のプロファイルの見直しと追加。
+  - prores (yuva444 10bit)
+  - qtrle (rgba 8bit)
+  - ffv1 (rgb 8bit / rgba 16bit)
+  - ffv1_vulkan (rgb 8bit / rgba 16bit)
+
+2025.08.19 (2.01)
+- ffmpegOut 2.00で実行ファイルを指定しようとするとなぜかffmpegでなくx264を指定するようになっていたのを修正。
 
 2025.08.17 (2.00)
-- AviUtl2�ɐ����Ή��B
-  - �唼�̏����ɂ���Unicode�Ή������{�B
-  - �v���t�@�C���̃t�H�[�}�b�g��ύX�B
-  - ffv1�p�̃v���t�@�C����ǉ��B
-  - yuv444/rgba�o�͎��ɂ�PA64����ϊ�����悤�ɁB
-- AviUtl2�����ȈՃC���X�g�[�����X�V�B
-  - �ȈՃC���X�g�[����64bit���B
-  - VC runtime��64bit�ł��C���X�g�[������悤�ɁB
-  - �E�B���h�E�̍�dpi�Ή������{�B
-  - ���ݒ�t�@�C�������ړ������ꍇ�Ɍ����A
-    �C���X�g�[�����ύX�ł���悤�ɁB
+- AviUtl2に正式対応。
+  - 大半の処理についてUnicode対応を実施。
+  - プロファイルのフォーマットを変更。
+  - ffv1用のプロファイルを追加。
+  - yuv444/rgba出力時にはPA64から変換するように。
+- AviUtl2向け簡易インストーラを更新。
+  - 簡易インストーラも64bit化。
+  - VC runtimeの64bit版をインストールするように。
+  - ウィンドウの高dpi対応を実施。
+  - 環境設定ファイル等を移動した場合に向け、
+    インストール先を変更できるように。
 
 2025.07.15 (1.14)
-- AviUtl2�����ȈՃC���X�g�[��(AviUtl2_ffmpegOut_1.15_install.exe)��ǉ��B
-- Plugin�t�H���_����exe_files������s�t�@�C���������ł���悤�ɁB
-- AviUtl2�ŁAYUV444�o�͂�10bit�o�͂��ł��Ȃ��Ȃ��Ă��������C���B
+- AviUtl2向け簡易インストーラ(AviUtl2_ffmpegOut_1.15_install.exe)を追加。
+- Pluginフォルダ内のexe_filesから実行ファイルを検索できるように。
+- AviUtl2で、YUV444出力と10bit出力ができなくなっていた問題を修正。
 
 2025.07.08 (1.14)
-- AviUtl ExEdit2�ɑΉ��B
+- AviUtl ExEdit2に対応。
 
 2024.10.05 (1.13)
-- vvc (vvnec) �̃v���Z�b�g��ǉ��B
-- h264_hw (h264_vulkan) �̃v���Z�b�g��ǉ��B
-- hevc_hw (hevc_vulkan) �̃v���Z�b�g��ǉ��B
-- ffmpeg�𓯍��B
-- ���̓I�v�V�����̑}���ʒu��ύX�B
+- vvc (vvnec) のプリセットを追加。
+- h264_hw (h264_vulkan) のプリセットを追加。
+- hevc_hw (hevc_vulkan) のプリセットを追加。
+- ffmpegを同梱。
+- 入力オプションの挿入位置を変更。
 
 2024.09.10 (1.12)
-- 6���Ԃ𒴂��钷����wav�o�͂ɑΉ��B
-- ffmpeg�n�̉����o�͂�6���Ԃ𒴂��鉹���̏o�͂ɑΉ��B
-- VC runtime�C���X�g�[�����X�V�B
+- 6時間を超える長さのwav出力に対応。
+- ffmpeg系の音声出力で6時間を超える音声の出力に対応。
+- VC runtimeインストーラを更新。
 
 2024.06.22 (1.11)
-- �g���ҏW�g�p���ɉf���Ɖ����̒������قȂ�ꍇ�ɂ́A�x�����o���Ĉꎞ���f���A�������p�����邩���f���Ă��炤�悤�ύX�B
+- 拡張編集使用時に映像と音声の長さが異なる場合には、警告を出して一時中断し、処理を継続するか判断してもらうよう変更。
 
 2024.01.26 (1.10)
-- SSE�ł�YC48��nv12(16bit)�̖����C���B
+- SSE版のYC48→nv12(16bit)の問題を修正。
 
 2023.10.25 (1.09)
-- faw������������B
-- �d�̓X���b�g�����O�𖳌������AAviutl�̗D��x���Ⴍ�Ă�E�R�A�݂̂Ŏ��s����ɂ����悤�ύX�B
-- mux��t�@�C�����Ȃ��A�t�@�C���T�C�Y�����������铙�̃G���[���b�Z�[�W�ŁA�t�@�C������\������悤�ɁB
-- avx512��yuy2/yc48��yv12�ϊ��ŁA����[32x2pixel�قǗΐF�̐����o��ꍇ�������������C���B
-- �������m�ۂ�plane���Ƃɍs���悤�ɂ��āA�������s���G���[���o�Â炢�悤�ɁB
+- faw処理を内蔵化。
+- 電力スロットリングを無効化し、Aviutlの優先度が低くてもEコアのみで実行されにくいよう変更。
+- mux後ファイルがない、ファイルサイズが小さすぎる等のエラーメッセージで、ファイル名を表示するように。
+- avx512のyuy2/yc48→yv12変換で、左上端32x2pixelほど緑色の線が出る場合があった問題を修正。
+- メモリ確保をplaneごとに行うようにして、メモリ不足エラーが出づらいように。
 
 2023.05.09 (1.08)
-- ������|����X�V�B
+- 中国語翻訳を更新。
 
 2022.03.18 (1.07)
-- �o�͂��铮��̒������Z���ꍇ�̌x����ǉ��B
+- 出力する動画の長さが短い場合の警告を追加。
 
 2023.03.04 (1.06)
-- �I�u�W�F�N�g�G�N�X�v���[������h���b�O�h���b�v�����t�@�C��������ꍇ�̏o�͂ɑΉ��B
+- オブジェクトエクスプローラからドラッグドロップしたファイルがある場合の出力に対応。
 
 2022.12.09 (1.05)
-- �|��R����C���B
+- 翻訳漏れを修正。
 
 2022.12.07 (1.04)
-- Nsyw�l�ɒ񋟂���������������Ή���ǉ��B�|�󂠂肪�Ƃ��������܂����I
+- Nsyw様に提供いただいた中国語対応を追加。翻訳ありがとうございました！
 
 2022.12.07 (1.03)
-- �ݒ��ʂ̉p�ꉻ�Ή������{�B
-- AVX2�g�p����FAW��1/2���[�h������ɏ����ł��Ȃ������̂��C���B
-- YUY2��NV12�ϊ��̃C���^�[���[�X�g�p���̐F�������̕ϊ��~�X���C���B
+- 設定画面の英語化対応を実施。
+- AVX2使用時にFAWの1/2モードが正常に処理できなかったのを修正。
+- YUY2→NV12変換のインターレース使用時の色差成分の変換ミスを修正。
 
 2022.06.11 (1.02)
-- �����v���O�C���g�p���ɐݒ��ʂ̕`��𒲐��B
+- 黒窓プラグイン使用時に設定画面の描画を調整。
 
 2022.05.27 (1.01)
-- huffyuv(ffvhuff) �̃v���Z�b�g��ǉ��B(rgb, rgba, yuy2)
-- vp9 (rgba) (webm)�̃v���Z�b�g��ǉ��B
-- �ȈՃC���X�g�[���𒼐ڎ��s�����ꍇ�ɁA�G���[���b�Z�[�W��\������悤�ɕύX�B
-- �f�B�X�N�e�ʂ�����Ȃ����ɂǂ̃h���C�u������Ȃ����\������悤�ɁB
+- huffyuv(ffvhuff) のプリセットを追加。(rgb, rgba, yuy2)
+- vp9 (rgba) (webm)のプリセットを追加。
+- 簡易インストーラを直接実行した場合に、エラーメッセージを表示するように変更。
+- ディスク容量が足りない時にどのドライブが足りないか表示するように。
 
 2022.04.02 (1.00)
-- Visual Studio 2022�Ɉڍs�B
-- .NET Framework 4.8�Ɉڍs�B
-- �p�b�P�[�W�̃t�H���_�\����ύX�B
-- �ȈՃC���X�g�[���ɂ��C���X�g�[����p�~�B
-- �v���t�@�C����png��RGBA�o�͂�ǉ��B
-- �p�X���w�肳��Ă��Ȃ��ꍇ�Aexe_files���̎��s�t�@�C�����������Ďg�p����悤�ɁB
-- ���O�Ɏg�p�������s�t�@�C���̃p�X���o�͂���悤�ɁB
-- ���΃p�X�ł̃p�X�̕ۑ����f�t�H���g�ɁB
-- �g���ҏW�g�p���̉f���Ɖ����̒������قȂ�ꍇ�̓���̉��P�B
-  �g���ҏW�ŉ�����ǂݍ��܂������ƁA�قȂ�T���v�����O���[�g�̉�����Aviutl�{�̂ɓǂݍ��܂���ƁA
-  �����̃T���v�����͂��̂܂܂ɁA�T���v�����O���[�g�������ς���Ă��܂��A�����̎��Ԃ��ς���Ă��܂����Ƃ�����B
-  �g���ҏW�g�p���ɁA�f���Ɖ����̒����ɂ��ꂪ����ꍇ�A������^���ăT���v�����O���[�g�̂���̉\��������ꍇ��
-  �����̃T���v�������C������B
-- �G���R�[�h����t���[������0�̏ꍇ�̃G���[���b�Z�[�W��ǉ��B
-- ���O�̕ۑ��Ɏ��s����ƁA��O���������Ă����̂��C���B
-- ���O�̕ۑ��Ɏ��s�����ꍇ�ɂ��̌�����\������悤�ɁB
-- �G���[���b�Z�[�W
-  �ux264���\�������r���I�����܂����Bx264�ɕs���ȃp�����[�^�i�I�v�V�����j���n���ꂽ�\��������܂��B�v
-    �̈ꕔ�������ڂ����\������悤�ɁB
-  1. �f�B�X�N�e�ʕs���ŃG���R�[�h�Ɏ��s�����ꍇ�̃G���[���b�Z�[�W��ǉ��B
-  2. ���ˑ��������܂ރt�@�C����- �t�H���_���ŏo�͂��悤�Ƃ����ꍇ�̃G���[���b�Z�[�W��ǉ��B
-  3. Windows�ɕی삳�ꂽ�t�H���_���A�A�N�Z�X���̂Ȃ��t�H���_�ɏo�͂��悤�Ƃ����ꍇ�̃G���[���b�Z�[�W��ǉ��B
+- Visual Studio 2022に移行。
+- .NET Framework 4.8に移行。
+- パッケージのフォルダ構成を変更。
+- 簡易インストーラによるインストールを廃止。
+- プロファイルにpngのRGBA出力を追加。
+- パスが指定されていない場合、exe_files内の実行ファイルを検索して使用するように。
+- ログに使用した実行ファイルのパスを出力するように。
+- 相対パスでのパスの保存をデフォルトに。
+- 拡張編集使用時の映像と音声の長さが異なる場合の動作の改善。
+  拡張編集で音声を読み込ませたあと、異なるサンプリングレートの音声をAviutl本体に読み込ませると、
+  音声のサンプル数はそのままに、サンプリングレートだけが変わってしまい、音声の時間が変わってしまうことがある。
+  拡張編集使用時に、映像と音声の長さにずれがある場合、これを疑ってサンプリングレートのずれの可能性がある場合は
+  音声のサンプル数を修正する。
+- エンコードするフレーム数が0の場合のエラーメッセージを追加。
+- ログの保存に失敗すると、例外が発生していたのを修正。
+- ログの保存に失敗した場合にその原因を表示するように。
+- エラーメッセージ
+  「x264が予期せず途中終了しました。x264に不正なパラメータ（オプション）が渡された可能性があります。」
+    の一部原因を詳しく表示するように。
+  1. ディスク容量不足でエンコードに失敗した場合のエラーメッセージを追加。
+  2. 環境依存文字を含むファイル名- フォルダ名で出力しようとした場合のエラーメッセージを追加。
+  3. Windowsに保護されたフォルダ等、アクセス権のないフォルダに出力しようとした場合のエラーメッセージを追加。
 
 2022.03.01 (0.12)
-�E0.11�ŁA�o�͊J�n���Ƀt���[�Y���Ă��܂��ꍇ���������̂��C���B
+・0.11で、出力開始時にフリーズしてしまう場合があったのを修正。
 
 2022.02.21 (0.11)
-�EAviutl�̊J���Ă���t�@�C���ɂ��ďo�̓t�@�C���ŏ㏑�����Ȃ��悤�`�F�b�N��ǉ��B
-�E�A�ԏo�͂ŏo�̓t�@�C�����Ȃ��Ƃ����G���[���b�Z�[�W���\������Ȃ��悤�ɁB
-�E�ݒ肪�s���Ă��Ȃ��ꍇ�ɁA�O��o�͂����ݒ��ǂݍ��ނ悤�ɁB
+・Aviutlの開いているファイルについて出力ファイルで上書きしないようチェックを追加。
+・連番出力で出力ファイルがないというエラーメッセージが表示されないように。
+・設定が行われていない場合に、前回出力した設定を読み込むように。
 
 2021.10.13 (0.10)
-�EWindows11�̌��o�ɑΉ��B
+・Windows11の検出に対応。
 
 2021.09.24 (0.09)
-�Eafs�^�C���R�[�h�o�͂ɑΉ��B
-�E�����̃p�C�v�n�����������A�ꎞ�t�@�C����s�v�Ƃ���B
-  wav�n����2GB�������ɂЂ�������Ȃ��悤�ɁB
-�E�����̃p�C�v�n�����g�p����悤�A�v���Z�b�g���X�V�B
+・afsタイムコード出力に対応。
+・音声のパイプ渡しを実装し、一時ファイルを不要とする。
+  wav渡しの2GB制限等にひっかからないように。
+・音声のパイプ渡しを使用するよう、プリセットを更新。
 
 2021.09.19 (0.08)
-�ERGBA�o�͂ɑΉ��BPull request ���������� Mr-Ojii �l�Ɋ��ӂ������܂��B
-  ���肪�Ƃ��������܂����B
-�Eutvideo�̃v���Z�b�g��rgba�o�͂�ǉ��B
-�Eav1�G���R�[�h�p�̃v���Z�b�g��ǉ��B
-�E���̃v���Z�b�g���X�V�B
+・RGBA出力に対応。Pull request いただいた Mr-Ojii 様に感謝いたします。
+  ありがとうございました。
+・utvideoのプリセットにrgba出力を追加。
+・av1エンコード用のプリセットを追加。
+・他のプリセットを更新。
 
 2018.03.07 (0.07)
-�E���̓I�v�V�����w�藓��ǉ��B
-�E���r�b�g�[�x�o�͂ɑΉ��B
-�Ex264/x265��10bit�o�͌����v���Z�b�g��ǉ��B
-�Ex264/x265��yuv444�o�͌����v���Z�b�g��ǉ��B
+・入力オプション指定欄を追加。
+・高ビット深度出力に対応。
+・x264/x265の10bit出力向けプリセットを追加。
+・x264/x265のyuv444出力向けプリセットを追加。
 
 2017.04.20 (0.06)
-�E�t�@�C������"."������ƁA�o�̓t�@�C�������Ӑ}�����悤�ɐݒ肳��Ȃ��̂��C���B
+・ファイル名に"."があると、出力ファイル名が意図したように設定されないのを修正。
 
 2014.11.20 (0.05)
-�E�ݒ�t�@�C�������V�B
- - �ݒ�t�@�C����VP9�p�̐ݒ��ǉ��B
- - �ݒ�t�@�C����x265�p�̐ݒ��ǉ��B
-�Ex264guiEx 2.20�܂ł̋@�\�̎�荞��
- - ini�t�@�C����fdkaac�p�̐ݒ��ǉ��B
- - flac�̈��k����ݒ�ł���悤��
- - wine�݊����[�h��ǉ�
- - �����G���R�[�_�̃��O���o�͂ł���悤��
- - �����f�B���C���J�b�g����@�\��ǉ��B
- - �f�t�H���g�̉����G���R�[�_��ύX����@�\��ǉ� (���̑��̐ݒ肩��)
- - �F��ԕϊ���AVX2�Ή��B
- - ���O�E�B���h�E�ŏo�̓t�@�C�������E�N���b�N����
-  �u������Đ��v�u����̂���t�H���_���J���v�@�\��ǉ��B
- - ���O�������������邱�Ƃ�����̂��C���B
- - ���O��muxer/�����G���R�[�_�̃o�[�W������\������悤�ɁB
- - ���O��x265guiEx/Windows�̃o�[�W�������ACPU����\���B
+・設定ファイルを刷新。
+ - 設定ファイルにVP9用の設定を追加。
+ - 設定ファイルにx265用の設定を追加。
+・x264guiEx 2.20までの機能の取り込み
+ - iniファイルにfdkaac用の設定を追加。
+ - flacの圧縮率を設定できるように
+ - wine互換モードを追加
+ - 音声エンコーダのログも出力できるように
+ - 音声ディレイをカットする機能を追加。
+ - デフォルトの音声エンコーダを変更する機能を追加 (その他の設定から)
+ - 色空間変換でAVX2対応。
+ - ログウィンドウで出力ファイル名を右クリックから
+  「動画を再生」「動画のあるフォルダを開く」機能を追加。
+ - ログが文字化けすることがあるのを修正。
+ - ログにmuxer/音声エンコーダのバージョンを表示するように。
+ - ログにx265guiEx/Windowsのバージョン情報、CPU情報を表示。
 
 2013.04.27 (0.04)
-�E���x���g�l���A�ŐV��(?)ffmpeg�ŁA�����̍Ō�̐��b���؂��Ƃ̂��w�E�𒸂����̂ŁA
-  ffmpeg�ɃR�}���h�𔭍s����ۂ�-vframes���w�肵�Ȃ��悤�ɂ����B
+・ロベルト様より、最新の(?)ffmpegで、音声の最後の数秒が切れるとのご指摘を頂いたので、
+  ffmpegにコマンドを発行する際に-vframesを指定しないようにした。
 
 2013.04.22 (0.03)
-�Erev52233�ȂǁA�ŋ߂�ffmpeg�ŃG���[���o�ăG���R�[�h�ł��Ȃ��̂��C���B
-�Ex264guiEx 1.75�܂ł̋@�\�𔽉f�B
-   - mux���Ƀf�B�X�N�̋󂫗e�ʂ̎擾�Ɏ��s�����ꍇ�ł��A�x�����o���đ��s����悤�ɂ����B
-   - �ݒ��ʂŁu�f�t�H���g�v���N���b�N�������̋������C���B
-     �u�f�t�H���g�v���N���b�N�������ƁA�u�L�����Z���v���Ă��L�����Z������Ă��Ȃ������B
-   - ���O�E�B���h�E�̈ʒu��ۑ�����悤�ɂ����B
-   - ���O�E�B���h�E���ߗ��̎w��B���O�E�B���h�E�E�N���b�N����B
-   - �����G���R�[�h/mux�̍ۂ̃��b�Z�[�W�����O�E�B���h�E�ɕ\���B
+・rev52233など、最近のffmpegでエラーが出てエンコードできないのを修正。
+・x264guiEx 1.75までの機能を反映。
+   - mux時にディスクの空き容量の取得に失敗した場合でも、警告を出して続行するようにした。
+   - 設定画面で「デフォルト」をクリックした時の挙動を修正。
+     「デフォルト」をクリックしたあと、「キャンセル」してもキャンセルされていなかった。
+   - ログウィンドウの位置を保存するようにした。
+   - ログウィンドウ透過率の指定。ログウィンドウ右クリックから。
+   - 音声エンコード/muxの際のメッセージをログウィンドウに表示。
 
 2012.09.15 (0.02)
-�E�R�}���h���͗��փh���b�O&�h���b�v�ł���悤�ɂ����B
-�E�u������������̑}�����ȒP�ɂł���悤�ɂ����B
+・コマンド入力欄へドラッグ&ドロップできるようにした。
+・置き換え文字列の挿入を簡単にできるようにした。
 
 2012.09.01 (0.01)
-�E���������ƍ���̂ŁA�u�C���^���ێ��v�̕\�L���uyuy2��nv12�ϊ��v�ɕύX�B
+・誤解があると困るので、「インタレ保持」の表記を「yuy2→nv12変換」に変更。
 
 2012.08.31 (0.00)
-  ���J
-  x264guiEx 1.57 ���
+  公開
+  x264guiEx 1.57 より
