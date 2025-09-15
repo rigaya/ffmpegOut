@@ -112,7 +112,7 @@ jobs:
           mkdir Aviutl_ffmpegOut_release
           7z x -oAviutl_ffmpegOut_release\ auo_setup.zip
           7z x -oAviutl_ffmpegOut_release\Plugin\exe_files ffmpeg.7z
-          copy /y .\Release\${{ matrix.platform }}\ffmpegOut.auo2 ffmpegOut_release\Plugin\
+          copy /y .\Release\${{ matrix.platform }}\ffmpegOut.auo2 Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\ffmpegOut.ini Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\ffmpegOut.en.ini Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\ffmpegOut.zh.ini Aviutl_ffmpegOut_release\Plugin\
