@@ -25,6 +25,8 @@
 //
 // --------------------------------------------------------------------------------------------
 
+#if AVIUTL_TARGET_VER == 1
+
 #include "frmLog.h"
 #include "string.h"
 
@@ -134,6 +136,8 @@ bool is_log_window_closed() {
     return frmLog::Instance::get()->IsClosed();
 }
 
+#pragma warning( push )
+#pragma warning( disable: 4100 )
 ////////////////////////////////////////////////////
 //       frmSetTransparency 関連
 ////////////////////////////////////////////////////
@@ -149,16 +153,11 @@ System::Void frmSetTransparency::setTransparency(int value) {
     }
 }
 
-//以下部分的にwarning C4100を黙らせる
-//C4100 : 引数は関数の本体部で 1 度も参照されません。
-#pragma warning( push )
-#pragma warning( disable: 4100 )
 System::Void frmSetTransparency::frmSetTransparency_FormClosed(System::Object^  sender, System::Windows::Forms::FormClosedEventArgs^  e) {
     frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
     if (log != nullptr)
         log->EnableToolStripMenuItemTransparent();
 }
-#pragma warning( pop )
 
 System::Void frmSetTransparency::fstSetLastTransparency() {
     frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
@@ -168,8 +167,6 @@ System::Void frmSetTransparency::fstSetLastTransparency() {
 ////////////////////////////////////////////////////
 //       frmSetLogColor 関連
 ////////////////////////////////////////////////////
-#pragma warning( push )
-#pragma warning( disable: 4100 )
 System::Void frmSetLogColor::fscBTOK_Click(System::Object^  sender, System::EventArgs^  e) {
     frmLog^ log = dynamic_cast<frmLog^>(this->Owner);
     if (log != nullptr)
@@ -177,3 +174,5 @@ System::Void frmSetLogColor::fscBTOK_Click(System::Object^  sender, System::Even
     this->Close();
 }
 #pragma warning( pop )
+
+#endif // AVIUTL_TARGET_VER == 1

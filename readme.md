@@ -9,7 +9,8 @@ ffmpegOut は、[ffmpeg](https://ffmpeg.org/)を使用してエンコードを�
 
 ## 想定動作環境
 Windows 10/11 (x86/x64)  
-Aviutl 1.00 以降 推奨
+AviUtl 1.00/1.10
+AviUtl 2.00 beta19 以降
 
 ## ffmpegOut 使用にあたっての注意事項
 無保証です。自己責任で使用してください。  

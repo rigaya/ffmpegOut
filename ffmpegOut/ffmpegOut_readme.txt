@@ -20,7 +20,8 @@ x264を利用したい場合には、特に理由がなければx264guiExを使�
 
 【動作環境】
 Windows 10/11 (x86/x64)
-Aviutl 1.00 以降
+AviUtl 1.00/1.10
+AviUtl 2.00 beta19 以降
 
 
 【ffmpegOut.auo 使用にあたっての注意事項】
