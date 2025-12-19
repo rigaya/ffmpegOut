@@ -131,7 +131,6 @@ namespace AUO_NAME_R {
     private: System::Windows::Forms::ToolStripDropDownButton^  fcgTSSettings;
 
     private: System::Windows::Forms::ToolStripButton^  fcgTSBCMDOnly;
-    private: System::Windows::Forms::Label^  fcgLBffmpegOutPriority;
 
 
 
@@ -365,10 +364,11 @@ namespace AUO_NAME_R {
 
 
 
-    private: System::Windows::Forms::Button^  fcgBTCustomTempDir;
-    private: System::Windows::Forms::TextBox^  fcgTXCustomTempDir;
-    private: System::Windows::Forms::ComboBox^  fcgCXTempDir;
-private: System::Windows::Forms::ComboBox^  fcgCXffmpegOutPriority;
+
+
+
+
+
 
     private: System::Windows::Forms::GroupBox^  fcggroupBoxCmdEx;
 
@@ -557,7 +557,7 @@ private: System::Windows::Forms::ToolStripButton^  fcgTSBOtherSettings;
 
 
 
-private: System::Windows::Forms::Label^  fcgLBTempDir;
+
 
 
 
@@ -794,6 +794,14 @@ private: System::Windows::Forms::Panel^  fcgPNHideToolStripBorder;
 private: System::Windows::Forms::ToolStripDropDownButton^  fcgTSLanguage;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator1;
 private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
+private: System::Windows::Forms::TabPage^  fcgtabPageOtherSettings;
+private: System::Windows::Forms::CheckBox^  fcgCBBenchmarkMode;
+private: System::Windows::Forms::Label^  fcgLBTempDir;
+private: System::Windows::Forms::Button^  fcgBTCustomTempDir;
+private: System::Windows::Forms::TextBox^  fcgTXCustomTempDir;
+private: System::Windows::Forms::ComboBox^  fcgCXTempDir;
+private: System::Windows::Forms::ComboBox^  fcgCXffmpegOutPriority;
+private: System::Windows::Forms::Label^  fcgLBffmpegOutPriority;
 
 
 
@@ -864,17 +872,11 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgBTVideoEncoderPath = (gcnew System::Windows::Forms::Button());
             this->fcgTXVideoEncoderPath = (gcnew System::Windows::Forms::TextBox());
             this->fcgLBVideoEncoderPath = (gcnew System::Windows::Forms::Label());
-            this->fcgLBTempDir = (gcnew System::Windows::Forms::Label());
-            this->fcgBTCustomTempDir = (gcnew System::Windows::Forms::Button());
             this->fcggroupBoxCmdEx = (gcnew System::Windows::Forms::GroupBox());
             this->fcgLBInCmd = (gcnew System::Windows::Forms::Label());
             this->fcgTXInCmd = (gcnew System::Windows::Forms::TextBox());
             this->fcgCXCmdExInsert = (gcnew System::Windows::Forms::ComboBox());
             this->fcgTXCmdEx = (gcnew System::Windows::Forms::TextBox());
-            this->fcgTXCustomTempDir = (gcnew System::Windows::Forms::TextBox());
-            this->fcgCXTempDir = (gcnew System::Windows::Forms::ComboBox());
-            this->fcgCXffmpegOutPriority = (gcnew System::Windows::Forms::ComboBox());
-            this->fcgLBffmpegOutPriority = (gcnew System::Windows::Forms::Label());
             this->fcgCSExeFiles = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->fcgTSExeFileshelp = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->fcgtoolStripSettings = (gcnew System::Windows::Forms::ToolStrip());
@@ -987,6 +989,14 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgPNHideTabControlVideo = (gcnew System::Windows::Forms::Panel());
             this->fcgPNHideToolStripBorder = (gcnew System::Windows::Forms::Panel());
             this->fcgLBguiExBlog = (gcnew System::Windows::Forms::LinkLabel());
+            this->fcgtabPageOtherSettings = (gcnew System::Windows::Forms::TabPage());
+            this->fcgCBBenchmarkMode = (gcnew System::Windows::Forms::CheckBox());
+            this->fcgLBTempDir = (gcnew System::Windows::Forms::Label());
+            this->fcgBTCustomTempDir = (gcnew System::Windows::Forms::Button());
+            this->fcgTXCustomTempDir = (gcnew System::Windows::Forms::TextBox());
+            this->fcgCXTempDir = (gcnew System::Windows::Forms::ComboBox());
+            this->fcgCXffmpegOutPriority = (gcnew System::Windows::Forms::ComboBox());
+            this->fcgLBffmpegOutPriority = (gcnew System::Windows::Forms::Label());
             this->fcgtabControlVideo->SuspendLayout();
             this->fcgtabPageExSettings->SuspendLayout();
             this->fcggroupBoxCmdEx->SuspendLayout();
@@ -1004,11 +1014,13 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgtabPageMux->SuspendLayout();
             this->fcgtabPageBat->SuspendLayout();
             this->fcgPNHideTabControlVideo->SuspendLayout();
+            this->fcgtabPageOtherSettings->SuspendLayout();
             this->SuspendLayout();
             // 
             // fcgtabControlVideo
             // 
             this->fcgtabControlVideo->Controls->Add(this->fcgtabPageExSettings);
+            this->fcgtabControlVideo->Controls->Add(this->fcgtabPageOtherSettings);
             this->fcgtabControlVideo->Font = (gcnew System::Drawing::Font(L"Meiryo UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
                 static_cast<System::Byte>(128)));
             this->fcgtabControlVideo->Location = System::Drawing::Point(2, 2);
@@ -1031,13 +1043,7 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgtabPageExSettings->Controls->Add(this->fcgBTVideoEncoderPath);
             this->fcgtabPageExSettings->Controls->Add(this->fcgTXVideoEncoderPath);
             this->fcgtabPageExSettings->Controls->Add(this->fcgLBVideoEncoderPath);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgLBTempDir);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgBTCustomTempDir);
             this->fcgtabPageExSettings->Controls->Add(this->fcggroupBoxCmdEx);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgTXCustomTempDir);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgCXTempDir);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgCXffmpegOutPriority);
-            this->fcgtabPageExSettings->Controls->Add(this->fcgLBffmpegOutPriority);
             this->fcgtabPageExSettings->Location = System::Drawing::Point(4, 23);
             this->fcgtabPageExSettings->Name = L"fcgtabPageExSettings";
             this->fcgtabPageExSettings->Size = System::Drawing::Size(608, 440);
@@ -1165,25 +1171,6 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgLBVideoEncoderPath->TabIndex = 5;
             this->fcgLBVideoEncoderPath->Text = L"～の指定";
             // 
-            // fcgLBTempDir
-            // 
-            this->fcgLBTempDir->AutoSize = true;
-            this->fcgLBTempDir->Location = System::Drawing::Point(366, 101);
-            this->fcgLBTempDir->Name = L"fcgLBTempDir";
-            this->fcgLBTempDir->Size = System::Drawing::Size(60, 14);
-            this->fcgLBTempDir->TabIndex = 4;
-            this->fcgLBTempDir->Text = L"一時フォルダ";
-            // 
-            // fcgBTCustomTempDir
-            // 
-            this->fcgBTCustomTempDir->Location = System::Drawing::Point(572, 156);
-            this->fcgBTCustomTempDir->Name = L"fcgBTCustomTempDir";
-            this->fcgBTCustomTempDir->Size = System::Drawing::Size(29, 23);
-            this->fcgBTCustomTempDir->TabIndex = 6;
-            this->fcgBTCustomTempDir->Text = L"...";
-            this->fcgBTCustomTempDir->UseVisualStyleBackColor = true;
-            this->fcgBTCustomTempDir->Click += gcnew System::EventHandler(this, &frmConfig::fcgBTCustomTempDir_Click);
-            // 
             // fcggroupBoxCmdEx
             // 
             this->fcggroupBoxCmdEx->Controls->Add(this->fcgLBInCmd);
@@ -1239,44 +1226,6 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgTXCmdEx->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgInsertDragDropFilename_DragDrop);
             this->fcgTXCmdEx->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgInsertDragDropFilename_Enter);
             this->fcgTXCmdEx->DragOver += gcnew System::Windows::Forms::DragEventHandler(this, &frmConfig::fcgInsertDragDropFilename_DragOver);
-            // 
-            // fcgTXCustomTempDir
-            // 
-            this->fcgTXCustomTempDir->Location = System::Drawing::Point(387, 157);
-            this->fcgTXCustomTempDir->Name = L"fcgTXCustomTempDir";
-            this->fcgTXCustomTempDir->Size = System::Drawing::Size(182, 21);
-            this->fcgTXCustomTempDir->TabIndex = 5;
-            this->fcgTXCustomTempDir->Tag = L"";
-            this->fcgTXCustomTempDir->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXCustomTempDir_TextChanged);
-            // 
-            // fcgCXTempDir
-            // 
-            this->fcgCXTempDir->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->fcgCXTempDir->FormattingEnabled = true;
-            this->fcgCXTempDir->Location = System::Drawing::Point(375, 129);
-            this->fcgCXTempDir->Name = L"fcgCXTempDir";
-            this->fcgCXTempDir->Size = System::Drawing::Size(209, 22);
-            this->fcgCXTempDir->TabIndex = 4;
-            this->fcgCXTempDir->Tag = L"chValue";
-            // 
-            // fcgCXffmpegOutPriority
-            // 
-            this->fcgCXffmpegOutPriority->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->fcgCXffmpegOutPriority->FormattingEnabled = true;
-            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(478, 42);
-            this->fcgCXffmpegOutPriority->Name = L"fcgCXffmpegOutPriority";
-            this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(125, 22);
-            this->fcgCXffmpegOutPriority->TabIndex = 3;
-            this->fcgCXffmpegOutPriority->Tag = L"chValue";
-            // 
-            // fcgLBffmpegOutPriority
-            // 
-            this->fcgLBffmpegOutPriority->AutoSize = true;
-            this->fcgLBffmpegOutPriority->Location = System::Drawing::Point(362, 45);
-            this->fcgLBffmpegOutPriority->Name = L"fcgLBffmpegOutPriority";
-            this->fcgLBffmpegOutPriority->Size = System::Drawing::Size(81, 14);
-            this->fcgLBffmpegOutPriority->TabIndex = 1;
-            this->fcgLBffmpegOutPriority->Text = L"エンコーダ優先度";
             // 
             // fcgCSExeFiles
             // 
@@ -2465,6 +2414,90 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgLBguiExBlog->VisitedLinkColor = System::Drawing::Color::Gray;
             this->fcgLBguiExBlog->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &frmConfig::fcgLBguiExBlog_LinkClicked);
             // 
+            // fcgtabPageOtherSettings
+            // 
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgCXffmpegOutPriority);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgLBffmpegOutPriority);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgLBTempDir);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgBTCustomTempDir);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgTXCustomTempDir);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgCXTempDir);
+            this->fcgtabPageOtherSettings->Controls->Add(this->fcgCBBenchmarkMode);
+            this->fcgtabPageOtherSettings->Location = System::Drawing::Point(4, 23);
+            this->fcgtabPageOtherSettings->Name = L"fcgtabPageOtherSettings";
+            this->fcgtabPageOtherSettings->Size = System::Drawing::Size(608, 440);
+            this->fcgtabPageOtherSettings->TabIndex = 4;
+            this->fcgtabPageOtherSettings->Text = L"拡張";
+            this->fcgtabPageOtherSettings->UseVisualStyleBackColor = true;
+            // 
+            // fcgCBBenchmarkMode
+            // 
+            this->fcgCBBenchmarkMode->AutoSize = true;
+            this->fcgCBBenchmarkMode->Location = System::Drawing::Point(482, 16);
+            this->fcgCBBenchmarkMode->Name = L"fcgCBBenchmarkMode";
+            this->fcgCBBenchmarkMode->Size = System::Drawing::Size(102, 18);
+            this->fcgCBBenchmarkMode->TabIndex = 7;
+            this->fcgCBBenchmarkMode->Tag = L"chValue";
+            this->fcgCBBenchmarkMode->Text = L"ベンチマークモード";
+            this->fcgCBBenchmarkMode->UseVisualStyleBackColor = true;
+            // 
+            // fcgLBTempDir
+            // 
+            this->fcgLBTempDir->AutoSize = true;
+            this->fcgLBTempDir->Location = System::Drawing::Point(7, 51);
+            this->fcgLBTempDir->Name = L"fcgLBTempDir";
+            this->fcgLBTempDir->Size = System::Drawing::Size(60, 14);
+            this->fcgLBTempDir->TabIndex = 8;
+            this->fcgLBTempDir->Text = L"一時フォルダ";
+            // 
+            // fcgBTCustomTempDir
+            // 
+            this->fcgBTCustomTempDir->Location = System::Drawing::Point(213, 106);
+            this->fcgBTCustomTempDir->Name = L"fcgBTCustomTempDir";
+            this->fcgBTCustomTempDir->Size = System::Drawing::Size(29, 23);
+            this->fcgBTCustomTempDir->TabIndex = 11;
+            this->fcgBTCustomTempDir->Text = L"...";
+            this->fcgBTCustomTempDir->UseVisualStyleBackColor = true;
+            this->fcgBTCustomTempDir->Click += gcnew System::EventHandler(this, &frmConfig::fcgBTCustomTempDir_Click);
+            // 
+            // fcgTXCustomTempDir
+            // 
+            this->fcgTXCustomTempDir->Location = System::Drawing::Point(28, 107);
+            this->fcgTXCustomTempDir->Name = L"fcgTXCustomTempDir";
+            this->fcgTXCustomTempDir->Size = System::Drawing::Size(182, 21);
+            this->fcgTXCustomTempDir->TabIndex = 10;
+            this->fcgTXCustomTempDir->Tag = L"";
+            this->fcgTXCustomTempDir->TextChanged += gcnew System::EventHandler(this, &frmConfig::fcgTXCustomTempDir_TextChanged);
+            // 
+            // fcgCXTempDir
+            // 
+            this->fcgCXTempDir->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->fcgCXTempDir->FormattingEnabled = true;
+            this->fcgCXTempDir->Location = System::Drawing::Point(16, 79);
+            this->fcgCXTempDir->Name = L"fcgCXTempDir";
+            this->fcgCXTempDir->Size = System::Drawing::Size(209, 22);
+            this->fcgCXTempDir->TabIndex = 9;
+            this->fcgCXTempDir->Tag = L"chValue";
+            // 
+            // fcgCXffmpegOutPriority
+            // 
+            this->fcgCXffmpegOutPriority->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->fcgCXffmpegOutPriority->FormattingEnabled = true;
+            this->fcgCXffmpegOutPriority->Location = System::Drawing::Point(129, 20);
+            this->fcgCXffmpegOutPriority->Name = L"fcgCXffmpegOutPriority";
+            this->fcgCXffmpegOutPriority->Size = System::Drawing::Size(125, 22);
+            this->fcgCXffmpegOutPriority->TabIndex = 13;
+            this->fcgCXffmpegOutPriority->Tag = L"chValue";
+            // 
+            // fcgLBffmpegOutPriority
+            // 
+            this->fcgLBffmpegOutPriority->AutoSize = true;
+            this->fcgLBffmpegOutPriority->Location = System::Drawing::Point(13, 23);
+            this->fcgLBffmpegOutPriority->Name = L"fcgLBffmpegOutPriority";
+            this->fcgLBffmpegOutPriority->Size = System::Drawing::Size(81, 14);
+            this->fcgLBffmpegOutPriority->TabIndex = 12;
+            this->fcgLBffmpegOutPriority->Text = L"エンコーダ優先度";
+            // 
             // frmConfig
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(96, 96);
@@ -2517,6 +2550,8 @@ private: System::Windows::Forms::LinkLabel^  fcgLBguiExBlog;
             this->fcgtabPageBat->ResumeLayout(false);
             this->fcgtabPageBat->PerformLayout();
             this->fcgPNHideTabControlVideo->ResumeLayout(false);
+            this->fcgtabPageOtherSettings->ResumeLayout(false);
+            this->fcgtabPageOtherSettings->PerformLayout();
             this->ResumeLayout(false);
             this->PerformLayout();
 

@@ -1168,6 +1168,7 @@ System::Void frmConfig::ConfToFrm(CONF_GUIEX *cnf) {
     */
 
     SetfcgTSLSettingsNotes(cnf->oth.notes);
+    fcgCBBenchmarkMode->Checked = cnf->oth.benchmark_mode != 0;
 
     //cli mode
     fcgTSBCMDOnly->Checked             = cnf->oth.disable_guicmd != 0;
@@ -1236,6 +1237,7 @@ System::Void frmConfig::FrmToConf(CONF_GUIEX *cnf) {
     cnf->mux.disable_mkvext         = TRUE;
 
     GetfcgTSLSettingsNotes(cnf->oth.notes, _countof(cnf->oth.notes));
+    cnf->oth.benchmark_mode         = fcgCBBenchmarkMode->Checked;
 
     GetWCHARfromString(cnf->enc.outext, _countof(cnf->enc.outext), fcgTXOutputExt->Text);
 
