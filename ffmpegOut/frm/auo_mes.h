@@ -499,6 +499,7 @@ enum AuoMes {
     AUO_CONFIG_FCG_SECTION_START = AUO_CONFIG_SECTION_FIN,
         AuofcgtabPageExSettings,
         AuofcgCBAuoTcfileout,
+        AuofcgCBBenchmarkMode,
         AuofcgCBAudioInput,
         AuofcgCB2passEnc,
         AuofcgLBOutputExt,

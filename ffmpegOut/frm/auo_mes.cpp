@@ -416,6 +416,7 @@ static const char * AUO_MES_ID_NAME_STR[] = {
 "AUO_CONFIG_FCG_SECTION_START",
 "AuofcgtabPageExSettings",
 "AuofcgCBAuoTcfileout",
+"AuofcgCBBenchmarkMode",
 "AuofcgCBAudioInput",
 "AuofcgCB2passEnc",
 "AuofcgLBOutputExt",

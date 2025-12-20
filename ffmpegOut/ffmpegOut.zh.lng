@@ -363,6 +363,7 @@ AUO_CONFIG_BITRATE_AUTO=自动
 [AUO_CONFIG_FCG]
 AuofcgtabPageExSettings=视频
 AuofcgCBAuoTcfileout=导出时间码
+AuofcgCBBenchmarkMode=benchmark mode
 AuofcgCBAudioInput=启用音频
 AuofcgCB2passEnc=自动2pass编码
 AuofcgLBOutputExt=导出扩展名

@@ -1008,6 +1008,7 @@ System::Void frmConfig::LoadLangText() {
     //言語更新開始
     LOAD_CLI_TEXT(fcgtabPageExSettings);
     LOAD_CLI_TEXT(fcgCBAuoTcfileout);
+    LOAD_CLI_TEXT(fcgCBBenchmarkMode);
     LOAD_CLI_TEXT(fcgCBAudioInput);
     LOAD_CLI_TEXT(fcgCB2passEnc);
     LOAD_CLI_TEXT(fcgLBOutputExt);

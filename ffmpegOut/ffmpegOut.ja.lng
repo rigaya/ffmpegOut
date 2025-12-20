@@ -365,6 +365,7 @@ AUO_CONFIG_BITRATE_AUTO=自動
 [AUO_CONFIG_FCG]
 AuofcgtabPageExSettings=映像
 AuofcgCBAuoTcfileout=afsタイムコード出力
+AuofcgCBBenchmarkMode=ベンチマークモード
 AuofcgCBAudioInput=音声を有効
 AuofcgCB2passEnc=自動2passエンコード
 AuofcgLBOutputExt=出力拡張子

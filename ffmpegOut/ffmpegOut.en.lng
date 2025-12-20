@@ -366,6 +366,7 @@ AUO_CONFIG_BITRATE_AUTO=auto
 [AUO_CONFIG_FCG]
 AuofcgtabPageExSettings=Video
 AuofcgCBAuoTcfileout=Output timecode
+AuofcgCBBenchmarkMode=benchmark mode
 AuofcgCBAudioInput=Enable Audio
 AuofcgCB2passEnc=2pass encode
 AuofcgLBOutputExt=Output Extention
