@@ -145,17 +145,11 @@ ffmpegOut.iniを書き換えることにより、音声エンコーダやmuxer�
 
 ## ffmpegOut の Aviutl からの削除
 
-ffmpegOut の Aviutl から削除するには、"plugins" フォルダ内の下記ファイルとフォルダを削除してください。
+ffmpegOut を Aviutl/AviUtl2 から削除するには、プラグインフォルダの ```ffmpegOut_uninstall.bat``` をダブルクリックして実行します。
 
-- [フォルダ] ffmpegOut_stg
-- [ファイル] ffmpegOut.auo
-- [ファイル] ffmpegOut.conf (存在する場合のみ)
-- [ファイル] ffmpegOut(.ini)
-- [ファイル] ffmpegOut.en.(.ini)
-- [ファイル] ffmpegOut.zh.(.ini)
-- [ファイル] auo_setup.auf
+![削除](./data/ffmpegOut_2_05_uninstall_20251228.webp)
 
-![削除](./data/ffmpegOut_1_00_uninstall_01.png)
+上記画面が表示されたら、```y``` と入力し、削除を実行してください。
 
 
 ## 処理概要
