@@ -99,6 +99,7 @@ jobs:
           copy /y .\ffmpegOut\ffmpegOut.ini ffmpegOut_release\plugins\
           copy /y .\ffmpegOut\ffmpegOut.en.ini ffmpegOut_release\plugins\
           copy /y .\ffmpegOut\ffmpegOut.zh.ini ffmpegOut_release\plugins\
+          copy /y .\ffmpegOut\ffmpegOut_uninstall.bat ffmpegOut_release\plugins\
           echo D | xcopy /y /e .\ffmpegOut\stg ffmpegOut_release\plugins\ffmpegOut_stg
           copy /y .\ffmpegOut\auo_setup.ini ffmpegOut_release\exe_files\
           copy /y .\ffmpegOut\ffmpegOut_readme.txt ffmpegOut_release\
@@ -116,6 +117,7 @@ jobs:
           copy /y ffmpegOut\ffmpegOut.ini Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\ffmpegOut.en.ini Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\ffmpegOut.zh.ini Aviutl_ffmpegOut_release\Plugin\
+          copy /y ffmpegOut\ffmpegOut_uninstall.bat Aviutl_ffmpegOut_release\Plugin\
           copy /y ffmpegOut\auo_setup.ini Aviutl_ffmpegOut_release\Plugin\exe_files\
           copy /y ffmpegOut\ffmpegOut_readme.txt Aviutl_ffmpegOut_release\
           echo D | xcopy /y /e ffmpegOut\stg Aviutl_ffmpegOut_release\Plugin\ffmpegOut_stg
