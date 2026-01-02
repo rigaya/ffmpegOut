@@ -538,11 +538,11 @@ void get_default_conf(CONF_GUIEX *conf) {
     conf->enc.audio_input = TRUE;
     _tcscpy_s(conf->enc.outext, _countof(conf->enc.outext), _T(".mp4"));
 #endif
-    if (conf->aud.in.encoder < g_sys_dat.exstg->s_aud_int_count) {
+    if (g_sys_dat.exstg->s_aud_int_count > 0 && conf->aud.in.encoder < g_sys_dat.exstg->s_aud_int_count) {
         const AUDIO_SETTINGS *aud_stg_in = &g_sys_dat.exstg->s_aud_int[conf->aud.in.encoder];
         conf->aud.in.bitrate = aud_stg_in->mode[conf->aud.in.enc_mode].bitrate_default;
     }
-    if (conf->aud.ext.encoder < g_sys_dat.exstg->s_aud_ext_count) {
+    if (g_sys_dat.exstg->s_aud_ext_count > 0 && conf->aud.ext.encoder < g_sys_dat.exstg->s_aud_ext_count) {
         const AUDIO_SETTINGS *aud_stg_ext = &g_sys_dat.exstg->s_aud_ext[conf->aud.ext.encoder];
         conf->aud.ext.bitrate = aud_stg_ext->mode[conf->aud.ext.enc_mode].bitrate_default;
     }

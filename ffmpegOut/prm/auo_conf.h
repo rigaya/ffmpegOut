@@ -115,6 +115,11 @@ static const char *const CONF_NAME_OLD_1 = "VCEEnc ConfigFile v3";
 static const char *const CONF_NAME_OLD_2 = "VCEEnc ConfigFile v4";
 static const char *const CONF_NAME_JSON  = "VCEEnc ConfigFile v4 json";
 static const char *const CONF_NAME       = CONF_NAME_OLD_2;
+#elif ENCODER_VVENC
+static const char* const CONF_NAME_OLD_1 = "VVenCguiEx ConfigFile v1";
+static const char* const CONF_NAME_OLD_2 = "VVenCguiEx ConfigFile v2";
+static const char* const CONF_NAME_JSON  = "VVenCguiEx ConfigFile v2 json";
+static const char* const CONF_NAME       = CONF_NAME_OLD_2;
 #else
 static_assert(false);
 #endif
@@ -182,7 +187,7 @@ static const ENC_OPTION_STR AUDIO_DELAY_CUT_MODE[] = {
     { NULL, AUO_MES_UNKNOWN,                NULL          },
 };
 
-#if ENCODER_SVTAV1
+#if ENCODER_SVTAV1 || ENCODER_VVENC
 typedef struct CONF_ENC_PRM {
     TCHAR cmd[MAX_CMD_LEN];
     int sar_x;
@@ -200,6 +205,14 @@ typedef struct CONF_ENC {
     BOOL    audio_input;
     TCHAR   outext[MAX_APPENDIX_LEN];   //出力拡張子
     TCHAR   incmd[256];                 //入力オプション
+} CONF_ENC;
+#elif ENCODER_QSV || ENCODER_NVENC || ENCODER_VCEENC
+typedef struct CONF_ENC {
+    TCHAR cmd[MAX_CMD_LEN];
+    RGY_CODEC codec_rgy;
+    BOOL resize_enable;
+    int resize_width;
+    int resize_height;
 } CONF_ENC;
 #endif
 
