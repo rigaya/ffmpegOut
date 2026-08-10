@@ -86,7 +86,7 @@ jobs:
       - name: Download ffmpeg
         id: download_ffmpeg
         run: |
-          curl -o ffmpeg.7z -L https://github.com/rigaya/ffmpegOut/releases/download/2.02/ffmpeg_20250830.7z
+          curl -o ffmpeg.7z -L https://github.com/rigaya/ffmpegOut/releases/download/2.06/ffmpeg_20260810.7z
 
       - name: Create Archieve
         id: archieve_win32
