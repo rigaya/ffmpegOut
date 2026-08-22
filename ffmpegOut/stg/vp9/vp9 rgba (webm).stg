@@ -79,7 +79,7 @@
     "analysis_file": "",
     "auo_tcfile_out": 0,
     "check_keyframe": 0,
-    "cmdex": "-c:v libvpx-vp9 -b:v 6M -crf 30 -cpu-used 2 -frame-parallel 1 -row-mt 1 -tile-columns 5 -tile-rows 2",
+    "cmdex": "-strict -2 -c:v libvpx-vp9 -b:v 6M -crf 30 -cpu-used 2 -frame-parallel 1 -row-mt 1 -tile-columns 5 -tile-rows 2",
     "cqmfile": "",
     "input_as_lw48": 0,
     "parallel_div_info": "",
